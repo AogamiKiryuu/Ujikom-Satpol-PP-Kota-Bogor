@@ -1,0 +1,14 @@
+const formSchema = z
+  .object({
+    name: z.string().min(1, "Nama wajib diisi"),
+    email: z.string().email("Email tidak valid"),
+    password: z.string().min(6, "Minimal 6 karakter"),
+    confirmPassword: z.string().min(6, "Minimal 6 karakter"),
+    gender: z.enum(["LAKI_LAKI", "PEREMPUAN"], "Pilih jenis kelamin"),
+    birthPlace: z.string().min(1, "Tempat lahir wajib diisi"),
+    birthDate: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password tidak cocok",
+    path: ["confirmPassword"],
+  });
