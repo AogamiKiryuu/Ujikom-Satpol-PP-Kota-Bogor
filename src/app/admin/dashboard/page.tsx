@@ -49,15 +49,25 @@ export default function AdminDashboard() {
     try {
       const res = await fetch('/api/auth/logout', {
         method: 'POST',
+        credentials: 'include',
       });
 
       if (res.ok) {
+        // Clear localStorage as well if used
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        
         toast.success('Berhasil logout');
-        router.push('/');
+        
+        // Small delay to show toast, then redirect
+        setTimeout(() => {
+          window.location.replace('/'); // Hard redirect to clear all state
+        }, 1000);
       } else {
         toast.error('Gagal logout');
       }
-    } catch {
+    } catch (error) {
+      console.error('Logout error:', error);
       toast.error('Terjadi kesalahan saat logout');
     }
   };

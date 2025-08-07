@@ -1,10 +1,13 @@
 'use client';
 
+'use client';
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoginSchema, LoginSchemaType } from '@/lib/schemas/loginSchema';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
 import InputField from './InputField';
 import PasswordField from './PasswordField';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -70,30 +73,72 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
-      <InputField<LoginSchemaType>
-        label="Email"
-        type="email"
-        id="email"
-        placeholder="contoh@email.com"
-        register={register}
-        error={errors.email?.message}
-      />
-
-      <PasswordField<LoginSchemaType>
-        label="Password"
-        id="password"
-        register={register}
-        error={errors.password?.message}
-      />
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md flex justify-center items-center"
+    <motion.form 
+      onSubmit={handleSubmit(onSubmit)} 
+      className="space-y-6 w-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, delay: 0.2 }}
+    >
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
-        {isLoading ? <LoadingSpinner /> : 'Masuk'}
-      </button>
-    </form>
+        <InputField<LoginSchemaType>
+          label="Email"
+          type="email"
+          id="email"
+          placeholder="contoh@email.com"
+          register={register}
+          error={errors.email?.message}
+        />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <PasswordField<LoginSchemaType>
+          label="Password"
+          id="password"
+          register={register}
+          error={errors.password?.message}
+        />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+      >
+        <motion.button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl flex justify-center items-center font-medium transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          whileHover={{ scale: isLoading ? 1 : 1.02 }}
+          whileTap={{ scale: isLoading ? 1 : 0.98 }}
+        >
+          {isLoading ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center space-x-2"
+            >
+              <LoadingSpinner />
+              <span>Memverifikasi...</span>
+            </motion.div>
+          ) : (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              Masuk
+            </motion.span>
+          )}
+        </motion.button>
+      </motion.div>
+    </motion.form>
   );
 }

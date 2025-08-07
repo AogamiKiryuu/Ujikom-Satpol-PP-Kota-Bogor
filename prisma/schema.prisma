@@ -34,4 +34,80 @@ model User {
   role        Role     @default(PESERTA)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  // Relations
+  examResults ExamResult[]
+}
+
+model Exam {
+  id          String   @id @default(uuid())
+  title       String
+  subject     String
+  description String?
+  duration    Int      // in minutes
+  totalQuestions Int
+  passingScore   Int   // minimum score to pass
+  isActive    Boolean  @default(true)
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  questions   Question[]
+  examResults ExamResult[]
+}
+
+model Question {
+  id          String   @id @default(uuid())
+  examId      String
+  questionText String
+  optionA     String
+  optionB     String
+  optionC     String
+  optionD     String
+  correctAnswer String // A, B, C, or D
+  points      Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  exam        Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+}
+
+model ExamResult {
+  id          String   @id @default(uuid())
+  userId      String
+  examId      String
+  score       Int
+  totalQuestions Int
+  correctAnswers Int
+  startTime   DateTime
+  endTime     DateTime?
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam        Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+  
+  @@unique([userId, examId])
+}
+
+model Answer {
+  id            String   @id @default(uuid())
+  examResultId  String
+  questionId    String
+  selectedAnswer String? // A, B, C, D, or null if not answered
+  isCorrect     Boolean?
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  examResult    ExamResult @relation(fields: [examResultId], references: [id], onDelete: Cascade)
+  question      Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  @@unique([examResultId, questionId])
 }

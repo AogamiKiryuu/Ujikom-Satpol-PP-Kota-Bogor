@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
 import { BookOpen, Clock, CheckCircle, AlertCircle, LogOut, Calendar, Trophy } from 'lucide-react';
@@ -25,7 +24,6 @@ interface ExamItem {
 }
 
 export default function PesertaDashboard() {
-  const router = useRouter();
   const [stats, setStats] = useState<PesertaStats>({
     availableExams: 0,
     completedExams: 0,
@@ -37,63 +35,29 @@ export default function PesertaDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching dashboard data
     const fetchData = async () => {
       try {
-        // In real app, this would be API calls
-        setTimeout(() => {
-          setStats({
-            availableExams: 3,
-            completedExams: 5,
-            ongoingExams: 1,
-            totalScore: 420,
-            averageScore: 84,
-          });
+        setLoading(true);
+        
+        // Fetch stats and exams in parallel
+        const [statsRes, examsRes] = await Promise.all([
+          fetch('/api/peserta/stats', { credentials: 'include' }),
+          fetch('/api/exams', { credentials: 'include' })
+        ]);
 
-          setExams([
-            {
-              id: '1',
-              title: 'Ujian Matematika Dasar',
-              subject: 'Matematika',
-              duration: 90,
-              questions: 40,
-              status: 'available',
-              deadline: '2025-08-10',
-            },
-            {
-              id: '2',
-              title: 'Ujian Bahasa Indonesia',
-              subject: 'Bahasa Indonesia',
-              duration: 60,
-              questions: 30,
-              status: 'ongoing',
-              deadline: '2025-08-08',
-            },
-            {
-              id: '3',
-              title: 'Ujian Fisika',
-              subject: 'Fisika',
-              duration: 120,
-              questions: 50,
-              status: 'completed',
-              score: 88,
-              deadline: '2025-08-05',
-            },
-            {
-              id: '4',
-              title: 'Ujian Kimia',
-              subject: 'Kimia',
-              duration: 100,
-              questions: 45,
-              status: 'completed',
-              score: 92,
-              deadline: '2025-08-03',
-            },
-          ]);
-          setLoading(false);
-        }, 1000);
+        if (statsRes.ok && examsRes.ok) {
+          const statsData = await statsRes.json();
+          const examsData = await examsRes.json();
+          
+          setStats(statsData);
+          setExams(examsData);
+        } else {
+          toast.error('Gagal memuat data dashboard');
+        }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching dashboard data:', error);
+        toast.error('Terjadi kesalahan saat memuat data');
+      } finally {
         setLoading(false);
       }
     };
@@ -105,15 +69,25 @@ export default function PesertaDashboard() {
     try {
       const res = await fetch('/api/auth/logout', {
         method: 'POST',
+        credentials: 'include',
       });
 
       if (res.ok) {
+        // Clear localStorage as well if used
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+        
         toast.success('Berhasil logout');
-        router.push('/');
+        
+        // Small delay to show toast, then redirect
+        setTimeout(() => {
+          window.location.replace('/'); // Hard redirect to clear all state
+        }, 1000);
       } else {
         toast.error('Gagal logout');
       }
-    } catch {
+    } catch (error) {
+      console.error('Logout error:', error);
       toast.error('Terjadi kesalahan saat logout');
     }
   };
