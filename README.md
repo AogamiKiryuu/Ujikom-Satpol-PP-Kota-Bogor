@@ -10,10 +10,12 @@
 ## ✨ Features
 
 ### 👥 **Multi-Role System**
+
 - **Admin**: Kelola ujian, soal, peserta, dan laporan
 - **Peserta**: Ikuti ujian dengan interface yang user-friendly
 
 ### 🎯 **Exam Management**
+
 - ✅ CRUD ujian dengan pengaturan waktu fleksibel
 - ✅ Bank soal dengan multiple choice (A, B, C, D)
 - ✅ Auto-grading system dengan skor real-time
@@ -21,12 +23,14 @@
 - ✅ Randomisasi soal (opsional)
 
 ### 📊 **Analytics & Reporting**
+
 - ✅ Dashboard admin dengan statistik lengkap
 - ✅ Laporan hasil ujian per peserta
 - ✅ Export hasil dalam berbagai format
 - ✅ Grafik performa ujian
 
 ### 🔐 **Security Features**
+
 - ✅ JWT Authentication
 - ✅ Role-based access control
 - ✅ Password hashing dengan bcrypt
@@ -36,6 +40,7 @@
 ## 🛠️ Tech Stack
 
 ### **Frontend**
+
 - **Next.js 15.4.5** - React framework dengan App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Modern styling
@@ -43,6 +48,7 @@
 - **React Hook Form** - Form management
 
 ### **Backend**
+
 - **Next.js API Routes** - Server-side endpoints
 - **Prisma ORM** - Database management
 - **PostgreSQL** - Primary database
@@ -50,6 +56,7 @@
 - **bcryptjs** - Password hashing
 
 ### **DevOps & Tools**
+
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 - **Husky** - Git hooks
@@ -58,17 +65,20 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - PostgreSQL database
 - npm/yarn/pnpm
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/AogamiKiryuu/Ujikom-Satpol-PP-Kota-Bogor.git
 cd cbt-exam
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 # or
@@ -78,11 +88,13 @@ pnpm install
 ```
 
 ### 3. Environment Setup
+
 ```bash
 cp .env.example .env
 ```
 
 Configure your `.env` file:
+
 ```env
 # Database
 DATABASE_URL="postgresql://username:password@localhost:5432/cbt_exam"
@@ -96,6 +108,7 @@ NEXTAUTH_URL="http://localhost:3000"
 ```
 
 ### 4. Database Setup
+
 ```bash
 # Generate Prisma client
 npx prisma generate
@@ -108,6 +121,7 @@ npx prisma db seed
 ```
 
 ### 5. Run Development Server
+
 ```bash
 npm run dev
 # or
@@ -118,37 +132,10 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📂 Project Structure
-
-```
-cbt-exam/
-├── prisma/                 # Database schema & migrations
-│   ├── schema.prisma      # Prisma schema
-│   └── migrations/        # Database migrations
-├── src/
-│   ├── app/               # Next.js App Router
-│   │   ├── admin/         # Admin dashboard pages
-│   │   ├── api/           # API routes
-│   │   ├── auth/          # Authentication pages
-│   │   ├── peserta/       # Student pages
-│   │   └── layout.tsx     # Root layout
-│   ├── components/        # Reusable components
-│   │   ├── admin/         # Admin components
-│   │   ├── ui/            # UI components
-│   │   └── forms/         # Form components
-│   ├── lib/               # Utility libraries
-│   │   ├── prisma.ts      # Prisma client
-│   │   ├── auth.ts        # Auth utilities
-│   │   └── utils.ts       # Helper functions
-│   └── types/             # TypeScript definitions
-├── public/                # Static assets
-├── docs/                  # Documentation
-└── README.md
-```
-
 ## 🎯 Usage Guide
 
 ### **Admin Dashboard**
+
 1. Login sebagai admin
 2. Akses dashboard di `/admin/dashboard`
 3. Kelola ujian di menu "Ujian"
@@ -157,6 +144,7 @@ cbt-exam/
 6. Lihat laporan di menu "Laporan"
 
 ### **Peserta (Student)**
+
 1. Register/login sebagai peserta
 2. Lihat ujian tersedia di dashboard
 3. Klik "Mulai Ujian" untuk memulai
@@ -166,12 +154,14 @@ cbt-exam/
 ## 🧪 API Endpoints
 
 ### **Authentication**
+
 - `POST /api/auth/login` - User login
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/logout` - User logout
 - `GET /api/auth/verify` - Verify token
 
 ### **Admin API**
+
 - `GET /api/admin/dashboard/stats` - Dashboard statistics
 - `GET /api/admin/exams` - List all exams
 - `POST /api/admin/exams` - Create new exam
@@ -180,42 +170,16 @@ cbt-exam/
 - `DELETE /api/admin/exams/[id]` - Delete exam
 
 ### **Questions API**
+
 - `GET /api/admin/questions` - List questions
 - `POST /api/admin/questions` - Create question
 - `PUT /api/admin/questions/[id]` - Update question
 - `DELETE /api/admin/questions/[id]` - Delete question
 
 ### **Students API**
+
 - `GET /api/peserta/stats` - Student statistics
 - `GET /api/exams` - Available exams for students
-
-## 🚀 Deployment
-
-### **Vercel (Recommended)**
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-```
-
-### **Manual Deployment**
-```bash
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## 📝 License
 
@@ -229,6 +193,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 Jika mengalami masalah atau butuh bantuan:
+
 - 🐛 [Report Bug](https://github.com/AogamiKiryuu/Ujikom-Satpol-PP-Kota-Bogor/issues)
 - 💡 [Request Feature](https://github.com/AogamiKiryuu/Ujikom-Satpol-PP-Kota-Bogor/issues)
 - 📧 Email: support@satpolpp-bogor.go.id
@@ -236,7 +201,7 @@ Jika mengalami masalah atau butuh bantuan:
 ---
 
 <div align="center">
-  <strong>Dibuat dengan ❤️ untuk Satpol PP Kota Bogor</strong>
+  <strong>Dibuat untuk memenuhi Praktik Lapang UNPAK</strong>
   <br>
   <sub>Computer-Based Test System v1.0.0</sub>
 </div>
