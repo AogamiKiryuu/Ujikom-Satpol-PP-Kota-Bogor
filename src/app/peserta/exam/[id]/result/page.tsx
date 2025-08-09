@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { 
@@ -65,11 +65,7 @@ export default function ExamResultPage() {
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
 
-  useEffect(() => {
-    fetchExamResult();
-  }, [examId]);
-
-  const fetchExamResult = async () => {
+  const fetchExamResult = useCallback(async () => {
     try {
       const response = await fetch(`/api/peserta/exam/${examId}/result`, {
         credentials: 'include',
@@ -90,7 +86,11 @@ export default function ExamResultPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [examId, router]);
+
+  useEffect(() => {
+    fetchExamResult();
+  }, [fetchExamResult]);
 
   const getOptionText = (question: Question, option: string) => {
     switch (option) {
@@ -100,15 +100,6 @@ export default function ExamResultPage() {
       case 'D': return question.optionD;
       default: return '';
     }
-  };
-
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return `${hours} jam ${mins} menit`;
-    }
-    return `${mins} menit`;
   };
 
   if (loading) {

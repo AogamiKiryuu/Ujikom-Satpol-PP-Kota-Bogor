@@ -1,30 +1,37 @@
 import { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify, SignJWT } from 'jose';
 import { prisma } from '@/lib/prisma';
 
 interface JWTPayload {
-  userId: string;
+  id: string;
   email: string;
   role: string;
+  iat?: number;
+  exp?: number;
+  [key: string]: unknown;
 }
 
 export async function verifyJWT(request: NextRequest): Promise<JWTPayload | null> {
   try {
-    // Get token from cookie
-    const token = request.cookies.get('authToken')?.value;
+    // Get token from cookie - same as middleware
+    const token = request.cookies.get('token')?.value || request.cookies.get('token_debug')?.value;
 
     if (!token) {
+      console.log('verifyJWT - No token found');
       return null;
     }
 
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
+    // Verify token using jose (same as middleware)
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+    const { payload } = await jwtVerify(token, secret);
+
+    console.log('verifyJWT - Token verified, payload:', payload);
 
     // Verify user still exists and is active
     const user = await prisma.user.findUnique({
       where: {
-        id: decoded.userId,
-        email: decoded.email,
+        id: payload.id as string,
+        email: payload.email as string,
       },
       select: {
         id: true,
@@ -35,11 +42,12 @@ export async function verifyJWT(request: NextRequest): Promise<JWTPayload | null
     });
 
     if (!user) {
+      console.log('verifyJWT - User not found in database');
       return null;
     }
 
     return {
-      userId: user.id,
+      id: user.id,
       email: user.email,
       role: user.role,
     };
@@ -49,8 +57,7 @@ export async function verifyJWT(request: NextRequest): Promise<JWTPayload | null
   }
 }
 
-export function generateJWT(payload: JWTPayload): string {
-  return jwt.sign(payload, process.env.JWT_SECRET!, {
-    expiresIn: '7d',
-  });
+export async function generateJWT(payload: JWTPayload): Promise<string> {
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+  return await new SignJWT(payload).setProtectedHeader({ alg: 'HS256' }).setExpirationTime('7d').sign(secret);
 }

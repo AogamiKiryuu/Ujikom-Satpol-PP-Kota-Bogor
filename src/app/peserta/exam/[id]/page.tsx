@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Clock, AlertCircle, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -43,27 +43,7 @@ export default function ExamPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchExamData();
-  }, [examId]);
-
-  useEffect(() => {
-    if (examData && timeRemaining > 0) {
-      const timer = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            handleAutoSubmit();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }
-  }, [examData, timeRemaining]);
-
-  const fetchExamData = async () => {
+  const fetchExamData = useCallback(async () => {
     try {
       const response = await fetch(`/api/peserta/exam/${examId}`, {
         credentials: 'include',
@@ -73,10 +53,10 @@ export default function ExamPage() {
         const data: ExamData = await response.json();
         setExamData(data);
         setTimeRemaining(data.examResult.remainingMinutes * 60);
-
+        
         // Initialize answers from existing user answers
         const initialAnswers: { [questionId: string]: string } = {};
-        data.questions.forEach((question) => {
+        data.questions.forEach(question => {
           if (question.userAnswer) {
             initialAnswers[question.id] = question.userAnswer;
           }
@@ -94,42 +74,9 @@ export default function ExamPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [examId, router]);
 
-  const saveAnswer = async (questionId: string, selectedOption: string) => {
-    try {
-      await fetch(`/api/peserta/exam/${examId}/answer`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          questionId,
-          selectedOption,
-        }),
-      });
-    } catch (error) {
-      console.error('Error saving answer:', error);
-    }
-  };
-
-  const handleAnswerChange = (questionId: string, selectedOption: string) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: selectedOption,
-    }));
-
-    // Auto-save answer
-    saveAnswer(questionId, selectedOption);
-  };
-
-  const handleAutoSubmit = async () => {
-    toast.warning('Waktu ujian telah habis. Ujian akan diselesaikan otomatis.');
-    await handleSubmitExam();
-  };
-
-  const handleSubmitExam = async () => {
+  const handleSubmitExam = useCallback(async () => {
     if (submitting) return;
 
     const unansweredQuestions = examData?.questions.filter((q) => !answers[q.id]).length || 0;
@@ -164,6 +111,59 @@ export default function ExamPage() {
     } finally {
       setSubmitting(false);
     }
+  }, [submitting, examData?.questions, answers, examId, router]);
+
+  const handleAutoSubmit = useCallback(async () => {
+    toast.warning('Waktu ujian telah habis. Ujian akan diselesaikan otomatis.');
+    await handleSubmitExam();
+  }, [handleSubmitExam]);
+
+  useEffect(() => {
+    fetchExamData();
+  }, [fetchExamData]);
+
+  useEffect(() => {
+    if (examData && timeRemaining > 0) {
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            handleAutoSubmit();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [examData, timeRemaining, handleAutoSubmit]);
+
+  const saveAnswer = async (questionId: string, selectedOption: string) => {
+    try {
+      await fetch(`/api/peserta/exam/${examId}/answer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          questionId,
+          selectedOption,
+        }),
+      });
+    } catch (error) {
+      console.error('Error saving answer:', error);
+    }
+  };
+
+  const handleAnswerChange = (questionId: string, selectedOption: string) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: selectedOption,
+    }));
+
+    // Auto-save answer
+    saveAnswer(questionId, selectedOption);
   };
 
   const formatTime = (seconds: number) => {
