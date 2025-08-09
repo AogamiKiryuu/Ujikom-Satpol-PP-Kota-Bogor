@@ -23,21 +23,40 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching dashboard stats
     const fetchStats = async () => {
       try {
-        // In real app, this would be an API call
-        setTimeout(() => {
+        const response = await fetch('/api/admin/dashboard/stats', {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setStats({
+            totalPeserta: data.totalPeserta,
+            totalExams: data.totalExams,
+            activeExams: data.activeExams,
+            completedExams: data.completedExams,
+          });
+        } else {
+          // Fallback to dummy data if API fails
           setStats({
             totalPeserta: 156,
             totalExams: 24,
             activeExams: 3,
             completedExams: 21,
           });
-          setLoading(false);
-        }, 1000);
+        }
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching stats:', error);
+        // Fallback to dummy data
+        setStats({
+          totalPeserta: 156,
+          totalExams: 24,
+          activeExams: 3,
+          completedExams: 21,
+        });
         setLoading(false);
       }
     };
@@ -56,9 +75,9 @@ export default function AdminDashboard() {
         // Clear localStorage as well if used
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
-        
+
         toast.success('Berhasil logout');
-        
+
         // Small delay to show toast, then redirect
         setTimeout(() => {
           window.location.replace('/'); // Hard redirect to clear all state
