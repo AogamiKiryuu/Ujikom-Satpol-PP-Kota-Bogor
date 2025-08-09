@@ -10,8 +10,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get current date for filtering
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
     // Get dashboard statistics
-    const [totalPeserta, totalExams, activeExams, completedExams, recentResults, todayRegistrations] = await Promise.all([
+    const [
+      totalPeserta,
+      totalExams,
+      activeExams,
+      completedExams,
+      todayRegistrations,
+      recentResults,
+      averageScore
+    ] = await Promise.all([
       // Total peserta (users with PESERTA role)
       prisma.user.count({
         where: { role: 'PESERTA' },
@@ -24,24 +36,13 @@ export async function GET(request: NextRequest) {
       prisma.exam.count({
         where: {
           isActive: true,
-          startDate: { lte: new Date() },
-          endDate: { gte: new Date() },
+          startDate: { lte: now },
+          endDate: { gte: now },
         },
       }),
 
-      // Completed exams
+      // Completed exam results
       prisma.examResult.count({
-        where: { isCompleted: true },
-      }),
-
-      // Recent exam results (last 5)
-      prisma.examResult.findMany({
-        take: 5,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: { select: { name: true } },
-          exam: { select: { title: true } },
-        },
         where: { isCompleted: true },
       }),
 
@@ -49,29 +50,27 @@ export async function GET(request: NextRequest) {
       prisma.user.count({
         where: {
           role: 'PESERTA',
-          createdAt: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
+          createdAt: { gte: today },
         },
       }),
+
+      // Recent exam results for activity feed
+      prisma.examResult.findMany({
+        where: { isCompleted: true },
+        include: {
+          user: { select: { name: true } },
+          exam: { select: { title: true, subject: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+      }),
+
+      // Average score calculation
+      prisma.examResult.aggregate({
+        where: { isCompleted: true },
+        _avg: { score: true },
+      }),
     ]);
-
-    // Calculate average score from recent results
-    const totalScores = recentResults.reduce((sum, result) => sum + result.score, 0);
-    const averageScore = recentResults.length > 0 ? Math.round(totalScores / recentResults.length) : 0;
-
-    // Get monthly registration trend (last 6 months)
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-    const monthlyRegistrations = await prisma.user.groupBy({
-      by: ['createdAt'],
-      where: {
-        role: 'PESERTA',
-        createdAt: { gte: sixMonthsAgo },
-      },
-      _count: { id: true },
-    });
 
     const stats = {
       totalPeserta,
@@ -79,15 +78,15 @@ export async function GET(request: NextRequest) {
       activeExams,
       completedExams,
       todayRegistrations,
-      averageScore,
+      averageScore: Math.round(averageScore._avg.score || 0),
       recentActivity: recentResults.map((result) => ({
         id: result.id,
         userName: result.user.name,
         examTitle: result.exam.title,
+        subject: result.exam.subject,
         score: result.score,
         completedAt: result.endTime || result.createdAt,
       })),
-      monthlyTrend: monthlyRegistrations,
     };
 
     return NextResponse.json(stats);

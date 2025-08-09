@@ -122,6 +122,8 @@ npx prisma db seed
 
 ### 5. Run Development Server
 
+#### **Local Development (Default)**
+
 ```bash
 npm run dev
 # or
@@ -131,6 +133,53 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+#### **Network Access (Device Lain di WiFi Sama)**
+
+```bash
+npm run dev:network
+# or
+yarn dev:network
+# or
+pnpm dev:network
+```
+
+Setelah server jalan, cek IP address komputer kamu:
+
+```bash
+# Windows
+ipconfig | findstr IPv4
+
+# Output contoh: IPv4 Address. . . . . . . . . . . : 192.168.1.100
+```
+
+Kemudian device lain bisa akses via:
+
+- **http://192.168.1.100:3000** (ganti dengan IP address kamu)
+
+#### **Tips Network Access:**
+
+- ✅ Pastikan semua device terhubung ke WiFi yang sama
+- ✅ Disable firewall sementara jika ada masalah koneksi
+- ✅ Cek Windows Defender/antivirus settings
+- ✅ Pastikan port 3000 tidak diblokir
+
+## 🌐 Network Troubleshooting
+
+### **Windows Firewall Settings**
+
+1. Buka Windows Defender Firewall
+2. Klik "Allow an app or feature through Windows Defender Firewall"
+3. Klik "Change Settings" → "Allow another app"
+4. Browse ke `C:\Program Files\nodejs\node.exe`
+5. Centang "Private" dan "Public"
+
+### **Alternative IP Check**
+
+```powershell
+# PowerShell
+Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -like "192.168.*"}
+```
 
 ## 🎯 Usage Guide
 

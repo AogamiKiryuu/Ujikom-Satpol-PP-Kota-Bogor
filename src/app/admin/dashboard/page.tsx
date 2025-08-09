@@ -1,15 +1,25 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
+import { LogOut, Users, FileText, Clock, BarChart3, BookOpen, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Users, BookOpen, FileText, Settings, LogOut, BarChart3, Clock } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 interface DashboardStats {
   totalPeserta: number;
   totalExams: number;
   activeExams: number;
   completedExams: number;
+  todayRegistrations: number;
+  averageScore: number;
+  recentActivity: Array<{
+    id: string;
+    userName: string;
+    examTitle: string;
+    subject: string;
+    score: number;
+    completedAt: string;
+  }>;
 }
 
 export default function AdminDashboard() {
@@ -19,12 +29,19 @@ export default function AdminDashboard() {
     totalExams: 0,
     activeExams: 0,
     completedExams: 0,
+    todayRegistrations: 0,
+    averageScore: 0,
+    recentActivity: [],
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const response = await fetch('/api/admin/dashboard/stats', {
           method: 'GET',
           credentials: 'include',
@@ -32,37 +49,24 @@ export default function AdminDashboard() {
 
         if (response.ok) {
           const data = await response.json();
-          setStats({
-            totalPeserta: data.totalPeserta,
-            totalExams: data.totalExams,
-            activeExams: data.activeExams,
-            completedExams: data.completedExams,
-          });
+          setStats(data);
+        } else if (response.status === 401) {
+          toast.error('Session expired. Please login again.');
+          router.push('/login');
         } else {
-          // Fallback to dummy data if API fails
-          setStats({
-            totalPeserta: 156,
-            totalExams: 24,
-            activeExams: 3,
-            completedExams: 21,
-          });
+          throw new Error('Failed to fetch dashboard data');
         }
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching stats:', error);
-        // Fallback to dummy data
-        setStats({
-          totalPeserta: 156,
-          totalExams: 24,
-          activeExams: 3,
-          completedExams: 21,
-        });
+        setError('Failed to load dashboard data');
+        toast.error('Gagal memuat data dashboard');
+      } finally {
         setLoading(false);
       }
     };
 
     fetchStats();
-  }, []);
+  }, [router]);
 
   const handleLogout = async () => {
     try {
@@ -72,15 +76,11 @@ export default function AdminDashboard() {
       });
 
       if (res.ok) {
-        // Clear localStorage as well if used
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
-
         toast.success('Berhasil logout');
-
-        // Small delay to show toast, then redirect
         setTimeout(() => {
-          window.location.replace('/'); // Hard redirect to clear all state
+          window.location.replace('/');
         }, 1000);
       } else {
         toast.error('Gagal logout');
@@ -105,6 +105,29 @@ export default function AdminDashboard() {
     { title: 'Ujian Aktif', value: stats.activeExams, icon: Clock, color: 'text-orange-600', bgColor: 'bg-orange-50' },
     { title: 'Ujian Selesai', value: stats.completedExams, icon: BarChart3, color: 'text-purple-600', bgColor: 'bg-purple-50' },
   ];
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Error loading dashboard</div>
+          <button onClick={() => window.location.reload()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -131,7 +154,6 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Stats Cards */}
@@ -148,7 +170,9 @@ export default function AdminDashboard() {
                     <div className="ml-5 w-0 flex-1">
                       <dl>
                         <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{stat.title}</dt>
-                        <dd className="text-2xl font-semibold text-gray-900 dark:text-white">{loading ? '...' : stat.value}</dd>
+                        <dd className="text-2xl font-semibold text-gray-900 dark:text-white">
+                          {loading ? <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-16 rounded"></div> : stat.value}
+                        </dd>
                       </dl>
                     </div>
                   </div>
@@ -157,60 +181,103 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          {/* Quick Actions */}
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Menu Utama</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {menuItems.map((item, index) => (
-                  <button
-                    key={index}
-                    onClick={() => router.push(item.href)}
-                    className="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors group"
-                  >
-                    <div className={`p-2 rounded-lg ${item.color} mr-4`}>
-                      <item.icon className="w-6 h-6 text-white" />
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Quick Actions */}
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Menu Utama</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  {menuItems.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={() => router.push(item.href)}
+                      className="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      <div className={`p-2 rounded-lg ${item.color} mr-4`}>
+                        <item.icon className="w-5 h-5 text-white" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Aktivitas Terbaru</h3>
+                <div className="space-y-4">
+                  {loading ? (
+                    <div className="space-y-3">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="bg-gray-200 dark:bg-gray-700 h-4 w-3/4 rounded mb-2"></div>
+                          <div className="bg-gray-200 dark:bg-gray-700 h-3 w-1/2 rounded"></div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-gray-700 dark:group-hover:text-gray-200">{item.label}</p>
+                  ) : stats.recentActivity.length > 0 ? (
+                    stats.recentActivity.slice(0, 5).map((activity) => (
+                      <div key={activity.id} className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex-shrink-0">
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        </div>
+                        <div className="ml-3 flex-1">
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            <strong>{activity.userName}</strong> menyelesaikan ujian &quot;{activity.examTitle}&quot;
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Nilai: {activity.score}/100 • {formatDate(activity.completedAt)}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500 dark:text-gray-400">Belum ada aktivitas terbaru</p>
                     </div>
-                  </button>
-                ))}
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Recent Activity */}
-          <div className="mt-8 bg-white dark:bg-gray-800 shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Aktivitas Terbaru</h3>
-              <div className="space-y-3">
-                <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-900 dark:text-white">15 peserta baru mendaftar hari ini</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">2 jam yang lalu</p>
-                  </div>
+          {/* Additional Info Cards */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900">
+                  <Users className="w-6 h-6 text-green-600 dark:text-green-300" />
                 </div>
-                <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-900 dark:text-white">Ujian &quot;Matematika Dasar&quot; telah selesai</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">5 jam yang lalu</p>
-                  </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pendaftar Hari Ini</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{loading ? '...' : stats.todayRegistrations}</p>
                 </div>
-                <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-gray-900 dark:text-white">Bank soal &quot;Fisika&quot; telah diperbarui</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">1 hari yang lalu</p>
-                  </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900">
+                  <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-300" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rata-rata Nilai</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{loading ? '...' : `${stats.averageScore}%`}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900">
+                  <Clock className="w-6 h-6 text-purple-600 dark:text-purple-300" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">System Status</p>
+                  <p className="text-sm font-bold text-green-600 dark:text-green-400">Online</p>
                 </div>
               </div>
             </div>

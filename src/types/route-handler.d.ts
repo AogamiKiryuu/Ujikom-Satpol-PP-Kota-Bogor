@@ -18,7 +18,7 @@ declare global {
       params: any;
     }
   }
-  
+
   // Global augmentation for route handlers
   interface RouteHandlerContext {
     params: Promise<any> | any;

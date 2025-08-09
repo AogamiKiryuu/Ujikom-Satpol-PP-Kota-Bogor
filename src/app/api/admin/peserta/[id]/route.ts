@@ -5,16 +5,13 @@ import bcrypt from 'bcryptjs';
 import { Gender } from '@prisma/client';
 
 // GET - Get single user
-export async function GET(
-  request: NextRequest,
-  segmentData: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, segmentData: { params: Promise<{ id: string }> }) {
   try {
     const params = await segmentData.params;
     const { id } = params;
     const user = await verifyJWT(request);
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Tidak terotorisasi' }, { status: 401 });
     }
 
     const peserta = await prisma.user.findUnique({
@@ -45,27 +42,24 @@ export async function GET(
     });
 
     if (!peserta) {
-      return NextResponse.json({ error: 'Peserta not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Peserta tidak ditemukan' }, { status: 404 });
     }
 
     return NextResponse.json(peserta);
   } catch (error) {
     console.error('Get peserta error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Kesalahan server internal' }, { status: 500 });
   }
 }
 
 // PUT - Update user
-export async function PUT(
-  request: NextRequest,
-  segmentData: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, segmentData: { params: Promise<{ id: string }> }) {
   try {
     const params = await segmentData.params;
     const { id } = params;
     const user = await verifyJWT(request);
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Tidak terotorisasi' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -75,7 +69,7 @@ export async function PUT(
     if (!name || !email || !gender || !birthDate || !birthPlace) {
       return NextResponse.json(
         {
-          error: 'Name, email, gender, birth date, and birth place are required',
+          error: 'Nama, email, jenis kelamin, tanggal lahir, dan tempat lahir harus diisi',
         },
         { status: 400 }
       );
@@ -84,13 +78,13 @@ export async function PUT(
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+      return NextResponse.json({ error: 'Format email tidak valid' }, { status: 400 });
     }
 
     // Validate gender
     const validGenders: Gender[] = ['LAKI_LAKI', 'PEREMPUAN'];
     if (!validGenders.includes(gender as Gender)) {
-      return NextResponse.json({ error: 'Invalid gender' }, { status: 400 });
+      return NextResponse.json({ error: 'Jenis kelamin tidak valid' }, { status: 400 });
     }
 
     // Check if user exists
@@ -99,7 +93,7 @@ export async function PUT(
     });
 
     if (!existingUser) {
-      return NextResponse.json({ error: 'Peserta not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Peserta tidak ditemukan' }, { status: 404 });
     }
 
     // Check if email already exists (excluding current user)
@@ -108,7 +102,7 @@ export async function PUT(
         where: { email },
       });
       if (emailExists) {
-        return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
+        return NextResponse.json({ error: 'Email sudah digunakan' }, { status: 400 });
       }
     }
 
@@ -133,7 +127,7 @@ export async function PUT(
       if (password.length < 6) {
         return NextResponse.json(
           {
-            error: 'Password must be at least 6 characters long',
+            error: 'Password minimal 6 karakter',
           },
           { status: 400 }
         );
@@ -157,45 +151,45 @@ export async function PUT(
     });
 
     return NextResponse.json({
-      message: 'Peserta updated successfully',
+      message: 'Peserta berhasil diperbarui',
       peserta: updatedUser,
     });
   } catch (error) {
     console.error('Update peserta error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Kesalahan server internal' }, { status: 500 });
   }
 }
 
 // DELETE - Delete user
-export async function DELETE(
-  request: NextRequest,
-  segmentData: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, segmentData: { params: Promise<{ id: string }> }) {
   try {
     const params = await segmentData.params;
     const { id } = params;
     const user = await verifyJWT(request);
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Tidak terotorisasi' }, { status: 401 });
     }
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { id },
+      where: {
+        id,
+        role: 'PESERTA',
+      },
       include: {
         examResults: true,
       },
     });
 
     if (!existingUser) {
-      return NextResponse.json({ error: 'Peserta not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Peserta tidak ditemukan' }, { status: 404 });
     }
 
     // Check if user has exam results
     if (existingUser.examResults.length > 0) {
       return NextResponse.json(
         {
-          error: 'Cannot delete peserta with existing exam results',
+          error: 'Tidak dapat menghapus peserta yang memiliki riwayat ujian',
         },
         { status: 400 }
       );
@@ -207,10 +201,10 @@ export async function DELETE(
     });
 
     return NextResponse.json({
-      message: 'Peserta deleted successfully',
+      message: 'Peserta berhasil dihapus',
     });
   } catch (error) {
     console.error('Delete peserta error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Kesalahan server internal' }, { status: 500 });
   }
 }

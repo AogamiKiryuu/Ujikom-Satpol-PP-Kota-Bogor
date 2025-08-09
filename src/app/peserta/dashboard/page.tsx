@@ -38,17 +38,14 @@ export default function PesertaDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch stats and exams in parallel
-        const [statsRes, examsRes] = await Promise.all([
-          fetch('/api/peserta/stats', { credentials: 'include' }),
-          fetch('/api/exams', { credentials: 'include' })
-        ]);
+        const [statsRes, examsRes] = await Promise.all([fetch('/api/peserta/stats', { credentials: 'include' }), fetch('/api/exams', { credentials: 'include' })]);
 
         if (statsRes.ok && examsRes.ok) {
           const statsData = await statsRes.json();
           const examsData = await examsRes.json();
-          
+
           setStats(statsData);
           setExams(examsData);
         } else {
@@ -76,9 +73,9 @@ export default function PesertaDashboard() {
         // Clear localStorage as well if used
         localStorage.removeItem('authToken');
         localStorage.removeItem('userRole');
-        
+
         toast.success('Berhasil logout');
-        
+
         // Small delay to show toast, then redirect
         setTimeout(() => {
           window.location.replace('/'); // Hard redirect to clear all state
@@ -92,22 +89,47 @@ export default function PesertaDashboard() {
     }
   };
 
-  const handleStartExam = (examId: string) => {
-    // In real app, this would redirect to exam page
-    toast.info(`Memulai ujian dengan ID: ${examId}`);
-    // router.push(`/peserta/exam/${examId}`);
+  const handleStartExam = async (examId: string) => {
+    const exam = exams.find((e) => e.id === examId);
+    if (!exam) return;
+
+    try {
+      // Start the exam session
+      const response = await fetch(`/api/peserta/exam/${examId}/start`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        toast.success(`Memulai ujian: ${exam.title}`);
+        // Redirect to exam page
+        window.location.href = `/peserta/exam/${examId}`;
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Gagal memulai ujian');
+      }
+    } catch (error) {
+      console.error('Error starting exam:', error);
+      toast.error('Terjadi kesalahan saat memulai ujian');
+    }
   };
 
-  const handleResumeExam = (examId: string) => {
-    // In real app, this would redirect to ongoing exam
-    toast.info(`Melanjutkan ujian dengan ID: ${examId}`);
-    // router.push(`/peserta/exam/${examId}/resume`);
+  const handleResumeExam = async (examId: string) => {
+    const exam = exams.find((e) => e.id === examId);
+    if (!exam) return;
+
+    toast.info(`Melanjutkan ujian: ${exam.title}`);
+    // Redirect to exam page
+    window.location.href = `/peserta/exam/${examId}`;
   };
 
-  const handleViewResult = (examId: string) => {
-    // In real app, this would show exam results
-    toast.info(`Melihat hasil ujian dengan ID: ${examId}`);
-    // router.push(`/peserta/results/${examId}`);
+  const handleViewResult = async (examId: string) => {
+    const exam = exams.find((e) => e.id === examId);
+    if (!exam) return;
+
+    toast.info(`Melihat hasil ujian: ${exam.title}`);
+    // Redirect to results page
+    window.location.href = `/peserta/exam/${examId}/result`;
   };
 
   const getStatusColor = (status: string) => {
