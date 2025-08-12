@@ -77,7 +77,14 @@ export async function GET(request: NextRequest) {
             activeExams,
             averageScore: Math.round(avgScoreResult._avg.score || 0),
           },
-          recentResults,
+          recentResults: recentResults.map((result) => ({
+            id: result.id,
+            userName: result.user.name,
+            examTitle: result.exam.title,
+            subject: result.exam.subject,
+            score: result.score,
+            createdAt: result.createdAt.toISOString(),
+          })),
         });
 
       case 'exam-performance':
@@ -211,7 +218,14 @@ export async function GET(request: NextRequest) {
               averageScore,
               passedExams,
               passRate,
-              lastExamDate: results[0]?.createdAt,
+              lastExamDate: results[0]?.createdAt?.toISOString(),
+              recentExams: results.slice(0, 5).map((result) => ({
+                examTitle: result.exam.title,
+                subject: result.exam.subject,
+                score: result.score,
+                passed: result.score >= result.exam.passingScore,
+                date: result.createdAt.toISOString(),
+              })),
             };
           })
           .sort((a, b) => b.averageScore - a.averageScore);
@@ -223,29 +237,51 @@ export async function GET(request: NextRequest) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const dailyStats = await prisma.examResult.groupBy({
-          by: ['createdAt'],
+        const examResults = await prisma.examResult.findMany({
           where: {
             isCompleted: true,
             createdAt: { gte: thirtyDaysAgo },
           },
-          _count: { id: true },
-          _avg: { score: true },
+          select: {
+            score: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
         });
 
         // Group by date
-        const trendsMap = new Map();
-        dailyStats.forEach((stat) => {
-          const date = stat.createdAt.toISOString().split('T')[0];
+        const trendsMap = new Map<string, { date: string; count: number; totalScore: number; avgScore: number }>();
+        
+        examResults.forEach((result) => {
+          const date = result.createdAt.toISOString().split('T')[0];
           if (!trendsMap.has(date)) {
-            trendsMap.set(date, { date, count: 0, avgScore: 0 });
+            trendsMap.set(date, { date, count: 0, totalScore: 0, avgScore: 0 });
           }
-          const existing = trendsMap.get(date);
-          existing.count += stat._count.id;
-          existing.avgScore = Math.round((existing.avgScore + (stat._avg.score || 0)) / 2);
+          const existing = trendsMap.get(date)!;
+          existing.count += 1;
+          existing.totalScore += result.score;
+          existing.avgScore = Math.round(existing.totalScore / existing.count);
         });
 
-        const trends = Array.from(trendsMap.values()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        // Fill missing dates with zero values
+        const trends = [];
+        const currentDate = new Date(thirtyDaysAgo);
+        const today = new Date();
+        
+        while (currentDate <= today) {
+          const dateStr = currentDate.toISOString().split('T')[0];
+          const data = trendsMap.get(dateStr) || { date: dateStr, count: 0, totalScore: 0, avgScore: 0 };
+          trends.push({
+            date: dateStr,
+            count: data.count,
+            avgScore: data.avgScore,
+            formattedDate: currentDate.toLocaleDateString('id-ID', { 
+              day: '2-digit', 
+              month: 'short' 
+            })
+          });
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
 
         return NextResponse.json({ timeTrends: trends });
 

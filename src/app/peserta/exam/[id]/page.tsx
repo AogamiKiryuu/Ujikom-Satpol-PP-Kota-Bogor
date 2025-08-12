@@ -53,10 +53,10 @@ export default function ExamPage() {
         const data: ExamData = await response.json();
         setExamData(data);
         setTimeRemaining(data.examResult.remainingMinutes * 60);
-        
+
         // Initialize answers from existing user answers
         const initialAnswers: { [questionId: string]: string } = {};
-        data.questions.forEach(question => {
+        data.questions.forEach((question) => {
           if (question.userAnswer) {
             initialAnswers[question.id] = question.userAnswer;
           }

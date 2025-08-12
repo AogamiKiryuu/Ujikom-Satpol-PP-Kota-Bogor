@@ -49,6 +49,20 @@ interface UserPerformance {
   passedExams: number;
   passRate: number;
   lastExamDate: string;
+  recentExams: {
+    examTitle: string;
+    subject: string;
+    score: number;
+    passed: boolean;
+    date: string;
+  }[];
+}
+
+interface TimeTrend {
+  date: string;
+  count: number;
+  avgScore: number;
+  formattedDate: string;
 }
 
 export default function AdminLaporanPage() {
@@ -70,6 +84,9 @@ export default function AdminLaporanPage() {
   } | null>(null);
   const [userPerformanceData, setUserPerformanceData] = useState<{
     userPerformance: UserPerformance[];
+  } | null>(null);
+  const [timeTrendsData, setTimeTrendsData] = useState<{
+    timeTrends: TimeTrend[];
   } | null>(null);
   const [exams, setExams] = useState<{ id: string; title: string; subject: string }[]>([]);
 
@@ -117,6 +134,9 @@ export default function AdminLaporanPage() {
           case 'user-performance':
             setUserPerformanceData(data);
             break;
+          case 'time-trends':
+            setTimeTrendsData(data);
+            break;
         }
       } else {
         toast.error('Gagal memuat data laporan');
@@ -150,17 +170,72 @@ export default function AdminLaporanPage() {
     return new Date(dateString).toLocaleString('id-ID');
   };
 
-  const exportToCSV = (data: RecentResult[] | ExamPerformance[] | UserPerformance[], filename: string) => {
+  const exportToCSV = (data: RecentResult[] | ExamPerformance[] | UserPerformance[] | TimeTrend[], filename: string) => {
     if (data.length === 0) {
       toast.error('Tidak ada data untuk diekspor');
       return;
     }
 
-    const headers = Object.keys(data[0] as unknown as Record<string, unknown>).join(',');
-    const rows = data.map((row) => Object.values(row as unknown as Record<string, unknown>).join(',')).join('\n');
-    const csv = `${headers}\n${rows}`;
+    let csvContent = '';
 
-    const blob = new Blob([csv], { type: 'text/csv' });
+    // Handle different data types differently
+    if (filename.includes('recent-results')) {
+      const recentData = data as RecentResult[];
+      csvContent = 'ID,Nama Peserta,Judul Ujian,Mata Pelajaran,Nilai,Tanggal\n';
+      csvContent += recentData.map(item => 
+        `${item.id},"${item.userName}","${item.examTitle}","${item.subject}",${item.score},"${formatDateTime(item.createdAt)}"`
+      ).join('\n');
+    } else if (filename.includes('performa-ujian')) {
+      const examData = data as ExamPerformance[];
+      csvContent = 'ID Ujian,Judul Ujian,Mata Pelajaran,Total Peserta,Rata-rata Nilai,Tingkat Kelulusan (%)\n';
+      csvContent += examData.map(item => 
+        `${item.examId},"${item.examTitle}","${item.subject}",${item.totalParticipants},${item.averageScore},${item.passRate}`
+      ).join('\n');
+    } else if (filename.includes('performa-peserta')) {
+      const userData = data as UserPerformance[];
+      csvContent = 'ID Peserta,Nama Peserta,Email,Total Ujian,Rata-rata Nilai,Ujian Lulus,Tingkat Kelulusan (%),Ujian Terakhir\n';
+      csvContent += userData.map(item => 
+        `${item.userId},"${item.userName}","${item.email}",${item.totalExams},${item.averageScore},${item.passedExams},${item.passRate},"${formatDate(item.lastExamDate)}"`
+      ).join('\n');
+    } else if (filename.includes('tren-waktu')) {
+      const trendData = data as TimeTrend[];
+      csvContent = 'Tanggal,Jumlah Ujian,Rata-rata Nilai,Tanggal Format\n';
+      csvContent += trendData.map(item => 
+        `"${item.date}",${item.count},${item.avgScore},"${item.formattedDate}"`
+      ).join('\n');
+    } else {
+      // Fallback to generic CSV export
+      const flattenData = (items: Record<string, unknown>[]) => {
+        return items.map(item => {
+          const flattened: Record<string, unknown> = {};
+          
+          Object.entries(item).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+              flattened[key] = `${value.length} items`;
+            } else if (value && typeof value === 'object' && value.constructor === Object) {
+              Object.entries(value as Record<string, unknown>).forEach(([nestedKey, nestedValue]) => {
+                flattened[`${key}_${nestedKey}`] = nestedValue;
+              });
+            } else {
+              flattened[key] = value;
+            }
+          });
+          
+          return flattened;
+        });
+      };
+
+      const flatData = flattenData(data as unknown as Record<string, unknown>[]);
+      const headers = Object.keys(flatData[0]).join(',');
+      const rows = flatData.map((row) => 
+        Object.values(row).map(value => 
+          typeof value === 'string' && value.includes(',') ? `"${value}"` : value
+        ).join(',')
+      ).join('\n');
+      csvContent = `${headers}\n${rows}`;
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -491,6 +566,105 @@ export default function AdminLaporanPage() {
                       </tbody>
                     </table>
                   </div>
+                </div>
+              )}
+
+              {/* Time Trends Report */}
+              {reportType === 'time-trends' && timeTrendsData && (
+                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Tren Waktu (30 Hari Terakhir)</h3>
+                    <button
+                      onClick={() => exportToCSV(timeTrendsData.timeTrends, 'tren-waktu')}
+                      className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Ekspor CSV
+                    </button>
+                  </div>
+
+                  {timeTrendsData.timeTrends.length > 0 ? (
+                    <>
+                      {/* Summary Stats */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">
+                            {timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0)}
+                          </div>
+                          <div className="text-sm text-blue-600 dark:text-blue-300">Total Ujian Selesai</div>
+                        </div>
+                        <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600 dark:text-green-300">
+                            {Math.round(timeTrendsData.timeTrends.filter(day => day.count > 0).reduce((sum, day) => sum + day.avgScore, 0) / timeTrendsData.timeTrends.filter(day => day.count > 0).length) || 0}
+                          </div>
+                          <div className="text-sm text-green-600 dark:text-green-300">Rata-rata Nilai</div>
+                        </div>
+                        <div className="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">
+                            {Math.round(timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0) / 30 * 10) / 10}
+                          </div>
+                          <div className="text-sm text-yellow-600 dark:text-yellow-300">Rata-rata Harian</div>
+                        </div>
+                      </div>
+
+                      {/* Trends Table */}
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                          <thead className="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jumlah Ujian</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rata-rata Nilai</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {timeTrendsData.timeTrends.slice(-14).map((day) => (
+                              <tr key={day.date}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-white">{day.formattedDate}</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">{formatDate(day.date)}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    {day.count}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {day.count > 0 ? (
+                                    <span
+                                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                        day.avgScore >= 70 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                      }`}
+                                    >
+                                      {day.avgScore}
+                                    </span>
+                                  ) : (
+                                    <span className="text-sm text-gray-400">-</span>
+                                  )}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span
+                                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                      day.count === 0 ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' :
+                                      day.count >= 5 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
+                                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                    }`}
+                                  >
+                                    {day.count === 0 ? 'Tidak Ada' : day.count >= 5 ? 'Aktif' : 'Normal'}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="text-gray-500 dark:text-gray-400">Belum ada data ujian dalam 30 hari terakhir</div>
+                    </div>
+                  )}
                 </div>
               )}
             </>

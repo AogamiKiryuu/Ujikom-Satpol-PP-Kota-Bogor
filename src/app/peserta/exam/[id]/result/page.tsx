@@ -3,16 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  Award, 
-  BookOpen, 
-  ArrowLeft,
-  Trophy,
-  AlertCircle 
-} from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Award, BookOpen, ArrowLeft, Trophy, AlertCircle } from 'lucide-react';
 
 interface Question {
   id: string;
@@ -94,11 +85,16 @@ export default function ExamResultPage() {
 
   const getOptionText = (question: Question, option: string) => {
     switch (option) {
-      case 'A': return question.optionA;
-      case 'B': return question.optionB;
-      case 'C': return question.optionC;
-      case 'D': return question.optionD;
-      default: return '';
+      case 'A':
+        return question.optionA;
+      case 'B':
+        return question.optionB;
+      case 'C':
+        return question.optionC;
+      case 'D':
+        return question.optionD;
+      default:
+        return '';
     }
   };
 
@@ -133,10 +129,7 @@ export default function ExamResultPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.push('/peserta/dashboard')}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
-              >
+              <button onClick={() => router.push('/peserta/dashboard')} className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
                 <ArrowLeft className="w-5 h-5" />
                 <span>Kembali ke Dashboard</span>
               </button>
@@ -150,16 +143,12 @@ export default function ExamResultPage() {
         {/* Result Summary */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
           <div className="text-center mb-8">
-            <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${
-              result.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-            }`}>
+            <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${result.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
               {result.passed ? <Trophy className="w-10 h-10" /> : <XCircle className="w-10 h-10" />}
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{exam.title}</h2>
             <p className="text-gray-600">{exam.subject}</p>
-            <div className={`inline-block px-4 py-2 rounded-full text-lg font-semibold mt-4 ${
-              result.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <div className={`inline-block px-4 py-2 rounded-full text-lg font-semibold mt-4 ${result.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
               {result.passed ? '✅ LULUS' : '❌ TIDAK LULUS'}
             </div>
           </div>
@@ -215,10 +204,7 @@ export default function ExamResultPage() {
 
         {/* Toggle Details */}
         <div className="text-center mb-8">
-          <button
-            onClick={() => setShowDetails(!showDetails)}
-            className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
+          <button onClick={() => setShowDetails(!showDetails)} className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             <BookOpen className="w-5 h-5" />
             <span>{showDetails ? 'Sembunyikan' : 'Tampilkan'} Detail Jawaban</span>
           </button>
@@ -230,53 +216,34 @@ export default function ExamResultPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Detail Jawaban</h3>
             <div className="space-y-6">
               {questions.map((q) => (
-                <div key={q.number} className={`border rounded-lg p-4 ${
-                  q.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
-                }`}>
+                <div key={q.number} className={`border rounded-lg p-4 ${q.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
                   <div className="flex items-start justify-between mb-3">
                     <h4 className="font-medium text-gray-900">Soal {q.number}</h4>
-                    <div className={`flex items-center space-x-1 text-sm font-medium ${
-                      q.isCorrect ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <div className={`flex items-center space-x-1 text-sm font-medium ${q.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
                       {q.isCorrect ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                       <span>{q.isCorrect ? 'Benar' : 'Salah'}</span>
                     </div>
                   </div>
-                  
-                  <div 
-                    className="text-gray-700 mb-4"
-                    dangerouslySetInnerHTML={{ __html: q.question.questionText }}
-                  />
-                  
+
+                  <div className="text-gray-700 mb-4" dangerouslySetInnerHTML={{ __html: q.question.questionText }} />
+
                   <div className="space-y-2">
                     {['A', 'B', 'C', 'D'].map((option) => (
                       <div
                         key={option}
                         className={`p-2 rounded ${
-                          option === q.correctAnswer
-                            ? 'bg-green-100 border border-green-300'
-                            : option === q.selectedAnswer && !q.isCorrect
-                            ? 'bg-red-100 border border-red-300'
-                            : 'bg-gray-50'
+                          option === q.correctAnswer ? 'bg-green-100 border border-green-300' : option === q.selectedAnswer && !q.isCorrect ? 'bg-red-100 border border-red-300' : 'bg-gray-50'
                         }`}
                       >
                         <span className="font-medium">{option}. </span>
                         <span>{getOptionText(q.question, option)}</span>
-                        {option === q.correctAnswer && (
-                          <span className="ml-2 text-green-600 font-medium">(Jawaban Benar)</span>
-                        )}
-                        {option === q.selectedAnswer && option !== q.correctAnswer && (
-                          <span className="ml-2 text-red-600 font-medium">(Jawaban Anda)</span>
-                        )}
+                        {option === q.correctAnswer && <span className="ml-2 text-green-600 font-medium">(Jawaban Benar)</span>}
+                        {option === q.selectedAnswer && option !== q.correctAnswer && <span className="ml-2 text-red-600 font-medium">(Jawaban Anda)</span>}
                       </div>
                     ))}
                   </div>
-                  
-                  {!q.selectedAnswer && (
-                    <div className="mt-2 text-orange-600 font-medium">
-                      Tidak dijawab
-                    </div>
-                  )}
+
+                  {!q.selectedAnswer && <div className="mt-2 text-orange-600 font-medium">Tidak dijawab</div>}
                 </div>
               ))}
             </div>

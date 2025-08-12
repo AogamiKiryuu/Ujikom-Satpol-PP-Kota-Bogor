@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, Plus, Search, Edit, Trash2, BookOpen, FileText, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import QuestionImport from '@/components/admin/QuestionImport';
 
 interface Question {
   id: string;
@@ -220,10 +221,13 @@ export default function AdminSoalPage() {
               </Link>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Manajemen Soal</h1>
             </div>
-            <button onClick={handleCreate} className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah Soal
-            </button>
+            <div className="flex items-center gap-3">
+              <QuestionImport onImportSuccess={() => fetchQuestions(currentPage, searchQuery, selectedExam)} />
+              <button onClick={handleCreate} className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah Soal
+              </button>
+            </div>
           </div>
         </div>
       </header>

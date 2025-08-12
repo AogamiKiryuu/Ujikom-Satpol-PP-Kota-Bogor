@@ -9,7 +9,7 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: examId } = await params;
-    
+
     // Verify user authentication
     const token = request.cookies.get('token')?.value;
     if (!token) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
     const { payload } = await jwtVerify(token, secret);
-    
+
     if (payload.role !== 'PESERTA') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -100,15 +100,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         passed,
         startTime: examResult.startTime,
         endTime: examResult.endTime,
-        duration: examResult.endTime 
-          ? Math.round((new Date(examResult.endTime).getTime() - new Date(examResult.startTime).getTime()) / (1000 * 60))
-          : 0,
+        duration: examResult.endTime ? Math.round((new Date(examResult.endTime).getTime() - new Date(examResult.startTime).getTime()) / (1000 * 60)) : 0,
       },
       questions,
     };
 
     return NextResponse.json(result);
-
   } catch (error) {
     console.error('Error fetching exam result:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
