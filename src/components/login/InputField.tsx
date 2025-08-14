@@ -22,18 +22,17 @@ export default function InputField<T extends FieldValues>({ label, id, type, pla
           placeholder={placeholder}
           {...register(id)}
           className={`w-full px-4 py-3 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm text-white
-            ${error 
-              ? 'border-red-400 bg-red-900/20 focus:border-red-500 text-white' 
-              : 'border-gray-600 bg-gray-800/70 focus:border-blue-500 hover:border-gray-500 text-white'
-            }
+            ${error ? 'border-red-400 bg-red-900/20 focus:border-red-500 text-white' : 'border-gray-600 bg-gray-800/70 focus:border-blue-500 hover:border-gray-500 text-white'}
             placeholder:text-gray-400
             focus:bg-gray-800/90
           `}
         />
         {/* Focus ring */}
-        <div className={`absolute inset-0 rounded-xl transition-all duration-300 pointer-events-none
+        <div
+          className={`absolute inset-0 rounded-xl transition-all duration-300 pointer-events-none
           ${error ? '' : 'group-focus-within:ring-2 group-focus-within:ring-blue-500/20'}
-        `}></div>
+        `}
+        ></div>
       </div>
       {error && (
         <span className="text-sm text-red-500 flex items-center space-x-1">

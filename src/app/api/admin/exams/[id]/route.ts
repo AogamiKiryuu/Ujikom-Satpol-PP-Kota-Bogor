@@ -3,18 +3,16 @@ import { prisma } from '@/lib/prisma';
 import { verifyJWT } from '@/lib/middlewares/auth';
 
 interface RouteParams {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 // GET - Get single exam with detailed info
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const user = await verifyJWT(request);
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Tidak diizinkan' }, { status: 401 });
     }
 
     const exam = await prisma.exam.findUnique({
@@ -40,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!exam) {
-      return NextResponse.json({ error: 'Exam not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Ujian tidak ditemukan' }, { status: 404 });
     }
 
     // Calculate statistics
@@ -78,10 +76,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT - Update exam
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const user = await verifyJWT(request);
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Tidak diizinkan' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -137,22 +135,22 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
 
     return NextResponse.json({
-      message: 'Exam updated successfully',
+      message: 'Ujian berhasil diperbarui',
       exam: updatedExam,
     });
   } catch (error) {
     console.error('Update exam error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
   }
 }
 
 // DELETE - Delete exam
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const user = await verifyJWT(request);
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Tidak diizinkan' }, { status: 401 });
     }
 
     // Check if exam exists
@@ -164,14 +162,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!exam) {
-      return NextResponse.json({ error: 'Exam not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Ujian tidak ditemukan' }, { status: 404 });
     }
 
     // Check if exam has results
     if (exam.examResults.length > 0) {
       return NextResponse.json(
         {
-          error: 'Cannot delete exam with existing results',
+          error: 'Tidak dapat menghapus ujian yang sudah memiliki hasil',
         },
         { status: 400 }
       );
@@ -183,10 +181,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     });
 
     return NextResponse.json({
-      message: 'Exam deleted successfully',
+      message: 'Ujian berhasil dihapus',
     });
   } catch (error) {
     console.error('Delete exam error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
   }
 }

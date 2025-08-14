@@ -1,5 +1,5 @@
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 
 type PasswordFieldProps = {
   label: string;
@@ -15,13 +15,10 @@ export default function PasswordField({ label, error, ...props }: PasswordFieldP
       <div className="relative">
         <input
           {...props}
-          type={show ? "text" : "password"}
+          type={show ? 'text' : 'password'}
           className="w-full px-4 py-3 pr-12 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm text-white bg-gray-800/70 border-gray-600 focus:border-blue-500 hover:border-gray-500 placeholder:text-gray-400 focus:bg-gray-800/90"
         />
-        <span
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-200 transition-colors"
-          onClick={() => setShow(!show)}
-        >
+        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-200 transition-colors" onClick={() => setShow(!show)}>
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </span>
       </div>

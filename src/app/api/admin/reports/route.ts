@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await verifyJWT(request);
     if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Tidak diizinkan' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -117,7 +117,6 @@ export async function GET(request: NextRequest) {
                     },
                   },
                   select: {
-                    isCorrect: true,
                     selectedAnswer: true,
                   },
                 },
@@ -149,13 +148,22 @@ export async function GET(request: NextRequest) {
 
           // Question-wise analysis
           const questionAnalysis = exam.questions.map((question) => {
-            const totalAnswers = question.answers.length;
-            const correctAnswers = question.answers.filter((answer) => answer.isCorrect).length;
+            // Get all answers for this specific question from completed exam results
+            const questionAnswers = question.answers;
+            
+            const totalAnswers = questionAnswers.length;
+            const correctAnswers = questionAnswers.filter((answer) => {
+              // Check if the selected answer matches the correct answer
+              return answer.selectedAnswer === question.correctAnswer;
+            }).length;
+            
             const difficultyRate = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
 
             return {
               questionId: question.id,
-              questionText: question.questionText.substring(0, 100) + '...',
+              questionText: question.questionText.length > 100 
+                ? question.questionText.substring(0, 100) + '...' 
+                : question.questionText,
               correctAnswer: question.correctAnswer,
               totalAnswers,
               correctAnswers,
@@ -286,10 +294,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ timeTrends: trends });
 
       default:
-        return NextResponse.json({ error: 'Invalid report type' }, { status: 400 });
+        return NextResponse.json({ error: 'Jenis laporan tidak valid' }, { status: 400 });
     }
   } catch (error) {
     console.error('Get reports error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
   }
 }

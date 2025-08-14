@@ -12,7 +12,9 @@ export default function SelectField({ label, error, options, ...props }: SelectF
         {...props}
         className="w-full px-4 py-3 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm text-white bg-gray-800/70 border-gray-600 focus:border-blue-500 hover:border-gray-500"
       >
-        <option value="" className="bg-gray-800 text-white">-- Pilih --</option>
+        <option value="" className="bg-gray-800 text-white">
+          -- Pilih --
+        </option>
         {options.map((opt, idx) => (
           <option key={idx} value={opt.value} className="bg-gray-800 text-white">
             {opt.label}
