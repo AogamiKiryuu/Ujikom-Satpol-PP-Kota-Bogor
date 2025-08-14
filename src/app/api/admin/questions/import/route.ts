@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
@@ -33,54 +33,64 @@ export async function POST(request: NextRequest) {
     // Check file type
     const fileName = file.name.toLowerCase();
     if (!fileName.endsWith('.csv') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
-      return NextResponse.json({ 
-        error: 'Format file tidak didukung. Gunakan CSV atau Excel.' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Format file tidak didukung. Gunakan CSV atau Excel.',
+        },
+        { status: 400 }
+      );
     }
 
     const fileContent = await file.text();
-    
+
     // Parse CSV
     const parseResult = Papa.parse<ImportedQuestion>(fileContent, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (header) => header.trim()
+      transformHeader: (header) => header.trim(),
     });
 
     if (parseResult.errors.length > 0) {
-      return NextResponse.json({ 
-        error: 'Error parsing CSV: ' + parseResult.errors[0].message 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Error parsing CSV: ' + parseResult.errors[0].message,
+        },
+        { status: 400 }
+      );
     }
 
     const questions = parseResult.data;
-    
+
     if (questions.length === 0) {
-      return NextResponse.json({ 
-        error: 'File CSV kosong atau format tidak valid' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'File CSV kosong atau format tidak valid',
+        },
+        { status: 400 }
+      );
     }
 
     // Validate required columns
     const requiredColumns = ['examTitle', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer'];
     const firstRow = questions[0];
-    const missingColumns = requiredColumns.filter(col => !(col in firstRow));
-    
+    const missingColumns = requiredColumns.filter((col) => !(col in firstRow));
+
     if (missingColumns.length > 0) {
-      return NextResponse.json({ 
-        error: `Kolom yang hilang: ${missingColumns.join(', ')}` 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: `Kolom yang hilang: ${missingColumns.join(', ')}`,
+        },
+        { status: 400 }
+      );
     }
 
     // Group questions by exam
     const examGroups = new Map<string, ImportedQuestion[]>();
-    
+
     for (const question of questions) {
       // Create exam key (title + subject if available)
-      const examKey = question.examSubject 
-        ? `${question.examTitle}|${question.examSubject}`
-        : question.examTitle;
-      
+      const examKey = question.examSubject ? `${question.examTitle}|${question.examSubject}` : question.examTitle;
+
       if (!examGroups.has(examKey)) {
         examGroups.set(examKey, []);
       }
@@ -94,19 +104,19 @@ export async function POST(request: NextRequest) {
 
     for (const [examKey, examQuestions] of examGroups) {
       const [title, subject] = examKey.includes('|') ? examKey.split('|') : [examKey, null];
-      
+
       // Find exam by title and subject (if provided)
       let exam;
       if (subject) {
         exam = await prisma.exam.findFirst({
-          where: { 
+          where: {
             title: { equals: title, mode: 'insensitive' },
-            subject: { equals: subject, mode: 'insensitive' }
-          }
+            subject: { equals: subject, mode: 'insensitive' },
+          },
         });
       } else {
         exam = await prisma.exam.findFirst({
-          where: { title: { equals: title, mode: 'insensitive' } }
+          where: { title: { equals: title, mode: 'insensitive' } },
         });
       }
 
@@ -127,8 +137,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate required fields
-        if (!question.questionText || !question.optionA || !question.optionB || 
-            !question.optionC || !question.optionD) {
+        if (!question.questionText || !question.optionA || !question.optionB || !question.optionC || !question.optionD) {
           errors.push(`Baris ${questionIndex}: Semua field harus diisi`);
           continue;
         }
@@ -141,7 +150,7 @@ export async function POST(request: NextRequest) {
           optionC: question.optionC.trim(),
           optionD: question.optionD.trim(),
           correctAnswer: question.correctAnswer.toUpperCase(),
-          points: parseInt(question.points) || 1
+          points: parseInt(question.points) || 1,
         });
       }
 
@@ -149,45 +158,53 @@ export async function POST(request: NextRequest) {
     }
 
     if (errors.length > 0) {
-      return NextResponse.json({ 
-        error: 'Validasi gagal',
-        details: errors 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Validasi gagal',
+          details: errors,
+        },
+        { status: 400 }
+      );
     }
 
     if (validQuestions.length === 0) {
-      return NextResponse.json({ 
-        error: 'Tidak ada soal yang valid untuk diimport' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Tidak ada soal yang valid untuk diimport',
+        },
+        { status: 400 }
+      );
     }
 
     // Insert questions
     const createdQuestions = await prisma.question.createMany({
-      data: validQuestions
+      data: validQuestions,
     });
 
     // Update exam totalQuestions count
     for (const examId of processedExams) {
       const questionCount = await prisma.question.count({
-        where: { examId }
+        where: { examId },
       });
-      
+
       await prisma.exam.update({
         where: { id: examId },
-        data: { totalQuestions: questionCount }
+        data: { totalQuestions: questionCount },
       });
     }
 
     return NextResponse.json({
       message: 'Import berhasil',
       imported: createdQuestions.count,
-      examsUpdated: processedExams.size
+      examsUpdated: processedExams.size,
     });
-
   } catch (error) {
     console.error('Error importing questions:', error);
-    return NextResponse.json({ 
-      error: 'Terjadi kesalahan saat import' 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Terjadi kesalahan saat import',
+      },
+      { status: 500 }
+    );
   }
 }

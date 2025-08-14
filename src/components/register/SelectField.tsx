@@ -7,14 +7,14 @@ type SelectFieldProps = {
 export default function SelectField({ label, error, options, ...props }: SelectFieldProps) {
   return (
     <div>
-      <label className="block mb-1 text-gray-700 dark:text-gray-300">{label}</label>
+      <label className="block mb-1 text-gray-200">{label}</label>
       <select
         {...props}
-        className="w-full px-3 py-2 rounded-lg border dark:bg-gray-700 dark:text-white dark:border-gray-600"
+        className="w-full px-4 py-3 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm text-white bg-gray-800/70 border-gray-600 focus:border-blue-500 hover:border-gray-500"
       >
-        <option value="">-- Pilih --</option>
+        <option value="" className="bg-gray-800 text-white">-- Pilih --</option>
         {options.map((opt, idx) => (
-          <option key={idx} value={opt.value}>
+          <option key={idx} value={opt.value} className="bg-gray-800 text-white">
             {opt.label}
           </option>
         ))}

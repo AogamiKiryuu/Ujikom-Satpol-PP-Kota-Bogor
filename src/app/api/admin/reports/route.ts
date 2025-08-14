@@ -251,7 +251,7 @@ export async function GET(request: NextRequest) {
 
         // Group by date
         const trendsMap = new Map<string, { date: string; count: number; totalScore: number; avgScore: number }>();
-        
+
         examResults.forEach((result) => {
           const date = result.createdAt.toISOString().split('T')[0];
           if (!trendsMap.has(date)) {
@@ -267,7 +267,7 @@ export async function GET(request: NextRequest) {
         const trends = [];
         const currentDate = new Date(thirtyDaysAgo);
         const today = new Date();
-        
+
         while (currentDate <= today) {
           const dateStr = currentDate.toISOString().split('T')[0];
           const data = trendsMap.get(dateStr) || { date: dateStr, count: 0, totalScore: 0, avgScore: 0 };
@@ -275,10 +275,10 @@ export async function GET(request: NextRequest) {
             date: dateStr,
             count: data.count,
             avgScore: data.avgScore,
-            formattedDate: currentDate.toLocaleDateString('id-ID', { 
-              day: '2-digit', 
-              month: 'short' 
-            })
+            formattedDate: currentDate.toLocaleDateString('id-ID', {
+              day: '2-digit',
+              month: 'short',
+            }),
           });
           currentDate.setDate(currentDate.getDate() + 1);
         }

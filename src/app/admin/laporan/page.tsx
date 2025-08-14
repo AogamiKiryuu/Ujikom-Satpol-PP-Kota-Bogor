@@ -182,33 +182,27 @@ export default function AdminLaporanPage() {
     if (filename.includes('recent-results')) {
       const recentData = data as RecentResult[];
       csvContent = 'ID,Nama Peserta,Judul Ujian,Mata Pelajaran,Nilai,Tanggal\n';
-      csvContent += recentData.map(item => 
-        `${item.id},"${item.userName}","${item.examTitle}","${item.subject}",${item.score},"${formatDateTime(item.createdAt)}"`
-      ).join('\n');
+      csvContent += recentData.map((item) => `${item.id},"${item.userName}","${item.examTitle}","${item.subject}",${item.score},"${formatDateTime(item.createdAt)}"`).join('\n');
     } else if (filename.includes('performa-ujian')) {
       const examData = data as ExamPerformance[];
       csvContent = 'ID Ujian,Judul Ujian,Mata Pelajaran,Total Peserta,Rata-rata Nilai,Tingkat Kelulusan (%)\n';
-      csvContent += examData.map(item => 
-        `${item.examId},"${item.examTitle}","${item.subject}",${item.totalParticipants},${item.averageScore},${item.passRate}`
-      ).join('\n');
+      csvContent += examData.map((item) => `${item.examId},"${item.examTitle}","${item.subject}",${item.totalParticipants},${item.averageScore},${item.passRate}`).join('\n');
     } else if (filename.includes('performa-peserta')) {
       const userData = data as UserPerformance[];
       csvContent = 'ID Peserta,Nama Peserta,Email,Total Ujian,Rata-rata Nilai,Ujian Lulus,Tingkat Kelulusan (%),Ujian Terakhir\n';
-      csvContent += userData.map(item => 
-        `${item.userId},"${item.userName}","${item.email}",${item.totalExams},${item.averageScore},${item.passedExams},${item.passRate},"${formatDate(item.lastExamDate)}"`
-      ).join('\n');
+      csvContent += userData
+        .map((item) => `${item.userId},"${item.userName}","${item.email}",${item.totalExams},${item.averageScore},${item.passedExams},${item.passRate},"${formatDate(item.lastExamDate)}"`)
+        .join('\n');
     } else if (filename.includes('tren-waktu')) {
       const trendData = data as TimeTrend[];
       csvContent = 'Tanggal,Jumlah Ujian,Rata-rata Nilai,Tanggal Format\n';
-      csvContent += trendData.map(item => 
-        `"${item.date}",${item.count},${item.avgScore},"${item.formattedDate}"`
-      ).join('\n');
+      csvContent += trendData.map((item) => `"${item.date}",${item.count},${item.avgScore},"${item.formattedDate}"`).join('\n');
     } else {
       // Fallback to generic CSV export
       const flattenData = (items: Record<string, unknown>[]) => {
-        return items.map(item => {
+        return items.map((item) => {
           const flattened: Record<string, unknown> = {};
-          
+
           Object.entries(item).forEach(([key, value]) => {
             if (Array.isArray(value)) {
               flattened[key] = `${value.length} items`;
@@ -220,18 +214,20 @@ export default function AdminLaporanPage() {
               flattened[key] = value;
             }
           });
-          
+
           return flattened;
         });
       };
 
       const flatData = flattenData(data as unknown as Record<string, unknown>[]);
       const headers = Object.keys(flatData[0]).join(',');
-      const rows = flatData.map((row) => 
-        Object.values(row).map(value => 
-          typeof value === 'string' && value.includes(',') ? `"${value}"` : value
-        ).join(',')
-      ).join('\n');
+      const rows = flatData
+        .map((row) =>
+          Object.values(row)
+            .map((value) => (typeof value === 'string' && value.includes(',') ? `"${value}"` : value))
+            .join(',')
+        )
+        .join('\n');
       csvContent = `${headers}\n${rows}`;
     }
 
@@ -588,20 +584,20 @@ export default function AdminLaporanPage() {
                       {/* Summary Stats */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
-                          <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">
-                            {timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0)}
-                          </div>
+                          <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">{timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0)}</div>
                           <div className="text-sm text-blue-600 dark:text-blue-300">Total Ujian Selesai</div>
                         </div>
                         <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
                           <div className="text-2xl font-bold text-green-600 dark:text-green-300">
-                            {Math.round(timeTrendsData.timeTrends.filter(day => day.count > 0).reduce((sum, day) => sum + day.avgScore, 0) / timeTrendsData.timeTrends.filter(day => day.count > 0).length) || 0}
+                            {Math.round(
+                              timeTrendsData.timeTrends.filter((day) => day.count > 0).reduce((sum, day) => sum + day.avgScore, 0) / timeTrendsData.timeTrends.filter((day) => day.count > 0).length
+                            ) || 0}
                           </div>
                           <div className="text-sm text-green-600 dark:text-green-300">Rata-rata Nilai</div>
                         </div>
                         <div className="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
                           <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">
-                            {Math.round(timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0) / 30 * 10) / 10}
+                            {Math.round((timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0) / 30) * 10) / 10}
                           </div>
                           <div className="text-sm text-yellow-600 dark:text-yellow-300">Rata-rata Harian</div>
                         </div>
@@ -626,9 +622,7 @@ export default function AdminLaporanPage() {
                                   <div className="text-sm text-gray-500 dark:text-gray-400">{formatDate(day.date)}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {day.count}
-                                  </span>
+                                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">{day.count}</span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   {day.count > 0 ? (
@@ -646,9 +640,11 @@ export default function AdminLaporanPage() {
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <span
                                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                      day.count === 0 ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' :
-                                      day.count >= 5 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
-                                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                      day.count === 0
+                                        ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                        : day.count >= 5
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                                     }`}
                                   >
                                     {day.count === 0 ? 'Tidak Ada' : day.count >= 5 ? 'Aktif' : 'Normal'}

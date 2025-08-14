@@ -15,12 +15,9 @@ export async function GET(request: NextRequest) {
         title: true,
         subject: true,
         totalQuestions: true,
-        isActive: true
+        isActive: true,
       },
-      orderBy: [
-        { title: 'asc' },
-        { subject: 'asc' }
-      ]
+      orderBy: [{ title: 'asc' }, { subject: 'asc' }],
     });
 
     return NextResponse.json({ exams });

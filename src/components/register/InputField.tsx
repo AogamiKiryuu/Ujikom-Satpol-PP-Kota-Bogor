@@ -6,10 +6,10 @@ type InputFieldProps = {
 export default function InputField({ label, error, ...props }: InputFieldProps) {
   return (
     <div>
-      <label className="block mb-1 text-gray-700 dark:text-gray-300">{label}</label>
+      <label className="block mb-1 text-gray-200">{label}</label>
       <input
         {...props}
-        className="w-full px-3 py-2 rounded-lg border dark:bg-gray-700 dark:text-white dark:border-gray-600"
+        className="w-full px-4 py-3 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm text-white bg-gray-800/70 border-gray-600 focus:border-blue-500 hover:border-gray-500 placeholder:text-gray-400 focus:bg-gray-800/90"
       />
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>

@@ -56,12 +56,6 @@ export default function RegisterPage() {
                 
                 {/* Links */}
                 <div className="mt-6 text-center space-y-2">
-                  <Link 
-                    href="/login" 
-                    className="text-blue-600 hover:text-blue-500 text-sm font-medium transition-colors"
-                  >
-                    Sudah punya akun? Masuk disini
-                  </Link>
                   <br />
                   <Link 
                     href="/" 

@@ -12,7 +12,7 @@ interface InputFieldProps<T extends FieldValues> {
 export default function InputField<T extends FieldValues>({ label, id, type, placeholder, register, error }: InputFieldProps<T>) {
   return (
     <div className="flex flex-col space-y-2">
-      <label htmlFor={String(id)} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+      <label htmlFor={String(id)} className="text-sm font-medium text-gray-200">
         {label}
       </label>
       <div className="relative">
@@ -21,13 +21,13 @@ export default function InputField<T extends FieldValues>({ label, id, type, pla
           type={type}
           placeholder={placeholder}
           {...register(id)}
-          className={`w-full px-4 py-3 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm
+          className={`w-full px-4 py-3 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm text-white
             ${error 
-              ? 'border-red-400 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500' 
-              : 'border-gray-200 dark:border-gray-600 bg-white/50 dark:bg-gray-800/50 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800'
+              ? 'border-red-400 bg-red-900/20 focus:border-red-500 text-white' 
+              : 'border-gray-600 bg-gray-800/70 focus:border-blue-500 hover:border-gray-500 text-white'
             }
-            hover:border-gray-300 dark:hover:border-gray-500
             placeholder:text-gray-400
+            focus:bg-gray-800/90
           `}
         />
         {/* Focus ring */}
