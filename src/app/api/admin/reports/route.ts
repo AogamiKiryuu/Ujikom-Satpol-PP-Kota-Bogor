@@ -150,20 +150,18 @@ export async function GET(request: NextRequest) {
           const questionAnalysis = exam.questions.map((question) => {
             // Get all answers for this specific question from completed exam results
             const questionAnswers = question.answers;
-            
+
             const totalAnswers = questionAnswers.length;
             const correctAnswers = questionAnswers.filter((answer) => {
               // Check if the selected answer matches the correct answer
               return answer.selectedAnswer === question.correctAnswer;
             }).length;
-            
+
             const difficultyRate = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
 
             return {
               questionId: question.id,
-              questionText: question.questionText.length > 100 
-                ? question.questionText.substring(0, 100) + '...' 
-                : question.questionText,
+              questionText: question.questionText.length > 100 ? question.questionText.substring(0, 100) + '...' : question.questionText,
               correctAnswer: question.correctAnswer,
               totalAnswers,
               correctAnswers,

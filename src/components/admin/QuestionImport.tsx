@@ -129,7 +129,7 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
 
     // Create template with selected exam data
     let csvContent = 'examTitle,examSubject,questionText,optionA,optionB,optionC,optionD,correctAnswer,points\n';
-    
+
     // Add example questions with selected exam data
     csvContent += `"${selectedExam.title}","${selectedExam.subject}","Contoh pertanyaan untuk ${selectedExam.title}?","Pilihan A","Pilihan B","Pilihan C","Pilihan D","A",1\n`;
     csvContent += `"${selectedExam.title}","${selectedExam.subject}","Pertanyaan kedua untuk ${selectedExam.title}?","Opsi 1","Opsi 2","Opsi 3","Opsi 4","B",1\n`;
@@ -198,38 +198,27 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                     </div>
                   </div>
 
-                  <button 
-                    onClick={downloadTemplate} 
+                  <button
+                    onClick={downloadTemplate}
                     disabled={!selectedExam}
                     className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-colors ${
-                      selectedExam 
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                        : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                      selectedExam ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                     }`}
                   >
                     <Download className="w-5 h-5" />
                     {selectedExam ? `Download Template untuk "${selectedExam.title}"` : 'Pilih Ujian Dulu untuk Download Template'}
                   </button>
 
-                  <div 
+                  <div
                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                      dragActive 
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                        : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/30'
+                      dragActive ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/30'
                     }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                   >
-                    <input 
-                      type="file" 
-                      id="file-upload" 
-                      accept=".csv,.xlsx,.xls" 
-                      onChange={handleFileInputChange} 
-                      disabled={uploading} 
-                      className="hidden" 
-                    />
+                    <input type="file" id="file-upload" accept=".csv,.xlsx,.xls" onChange={handleFileInputChange} disabled={uploading} className="hidden" />
                     <div className="space-y-4">
                       <Upload className={`w-12 h-12 mx-auto ${dragActive ? 'text-blue-500' : 'text-gray-400'}`} />
                       <div>
@@ -283,8 +272,8 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                     <div className="max-h-96 overflow-y-auto space-y-3">
                       {exams.length > 0 ? (
                         exams.map((exam) => (
-                          <div 
-                            key={exam.id} 
+                          <div
+                            key={exam.id}
                             onClick={() => setSelectedExam(exam)}
                             className={`cursor-pointer p-4 rounded-lg border transition-all hover:shadow-md ${
                               selectedExam?.id === exam.id
@@ -305,11 +294,7 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                                   >
                                     {exam.isActive ? 'Aktif' : 'Nonaktif'}
                                   </span>
-                                  {selectedExam?.id === exam.id && (
-                                    <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 font-medium">
-                                      ✓ Dipilih
-                                    </span>
-                                  )}
+                                  {selectedExam?.id === exam.id && <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 font-medium">✓ Dipilih</span>}
                                 </div>
                               </div>
                             </div>
@@ -346,11 +331,9 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                     <div className="bg-white dark:bg-gray-800 p-3 rounded border text-xs font-mono overflow-x-auto">
                       <div className="text-gray-600 dark:text-gray-400">examTitle,examSubject,questionText,optionA,optionB,optionC,optionD,correctAnswer,points</div>
                       <div className="text-gray-800 dark:text-gray-200">
-                        {selectedExam ? (
-                          `"${selectedExam.title}","${selectedExam.subject}","Apa ibukota Indonesia?","Jakarta","Bandung","Surabaya","Medan","A",1`
-                        ) : (
-                          '"Testing CBT","Umum","Apa ibukota Indonesia?","Jakarta","Bandung","Surabaya","Medan","A",1'
-                        )}
+                        {selectedExam
+                          ? `"${selectedExam.title}","${selectedExam.subject}","Apa ibukota Indonesia?","Jakarta","Bandung","Surabaya","Medan","A",1`
+                          : '"Testing CBT","Umum","Apa ibukota Indonesia?","Jakarta","Bandung","Surabaya","Medan","A",1'}
                       </div>
                     </div>
                     {selectedExam && (
