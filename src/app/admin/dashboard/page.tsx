@@ -22,6 +22,13 @@ interface DashboardStats {
   }>;
 }
 
+interface UserInfo {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>({
@@ -33,6 +40,7 @@ export default function AdminDashboard() {
     averageScore: 0,
     recentActivity: [],
   });
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,19 +50,31 @@ export default function AdminDashboard() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch('/api/admin/dashboard/stats', {
-          method: 'GET',
-          credentials: 'include',
-        });
+        // Fetch both stats and user info in parallel
+        const [statsResponse, userResponse] = await Promise.all([
+          fetch('/api/admin/dashboard/stats', {
+            method: 'GET',
+            credentials: 'include',
+          }),
+          fetch('/api/auth/me', {
+            method: 'GET',
+            credentials: 'include',
+          })
+        ]);
 
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
-        } else if (response.status === 401) {
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setStats(statsData);
+        } else if (statsResponse.status === 401) {
           toast.error('Session expired. Please login again.');
           router.push('/login');
         } else {
           throw new Error('Failed to fetch dashboard data');
+        }
+
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setUserInfo(userData.user);
         }
       } catch (error) {
         console.error('Error fetching stats:', error);
@@ -141,7 +161,9 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 dark:text-gray-300">Selamat datang, Admin</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Selamat datang, {userInfo?.name || 'Admin'}
+              </span>
               <button
                 onClick={handleLogout}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"

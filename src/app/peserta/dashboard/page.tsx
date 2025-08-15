@@ -23,6 +23,13 @@ interface ExamItem {
   deadline: string;
 }
 
+interface UserInfo {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
 export default function PesertaDashboard() {
   const [stats, setStats] = useState<PesertaStats>({
     availableExams: 0,
@@ -32,6 +39,7 @@ export default function PesertaDashboard() {
     averageScore: 0,
   });
   const [exams, setExams] = useState<ExamItem[]>([]);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,8 +47,43 @@ export default function PesertaDashboard() {
       try {
         setLoading(true);
 
-        // Fetch stats and exams in parallel
-        const [statsRes, examsRes] = await Promise.all([fetch('/api/peserta/stats', { credentials: 'include' }), fetch('/api/exams', { credentials: 'include' })]);
+        // Small delay to ensure cookies are properly set
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Fetch user info first to check authentication
+        const userRes = await fetch('/api/auth/me', { 
+          credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache',
+          }
+        });
+        
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUserInfo(userData.user);
+        } else {
+          // If user info fails, likely auth issue - but wait a bit before redirect
+          console.warn('Authentication failed, status:', userRes.status);
+          
+          // Try one more time after a short delay
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const retryRes = await fetch('/api/auth/me', { credentials: 'include' });
+          
+          if (retryRes.ok) {
+            const userData = await retryRes.json();
+            setUserInfo(userData.user);
+          } else {
+            console.warn('Authentication failed after retry, redirecting to login');
+            window.location.href = '/login';
+            return;
+          }
+        }
+
+        // Then fetch other data
+        const [statsRes, examsRes] = await Promise.all([
+          fetch('/api/peserta/stats', { credentials: 'include' }), 
+          fetch('/api/exams', { credentials: 'include' })
+        ]);
 
         if (statsRes.ok && examsRes.ok) {
           const statsData = await statsRes.json();
@@ -49,8 +92,9 @@ export default function PesertaDashboard() {
           setStats(statsData);
           setExams(examsData);
         } else {
-          toast.error('Gagal memuat data dashboard');
+          toast.error('Gagal memuat data ujian');
         }
+
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         toast.error('Terjadi kesalahan saat memuat data');
@@ -177,7 +221,9 @@ export default function PesertaDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 dark:text-gray-300">Selamat datang, Peserta</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Selamat datang, {userInfo?.name || 'Peserta'}
+              </span>
               <button
                 onClick={handleLogout}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
