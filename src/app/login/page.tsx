@@ -58,14 +58,14 @@ export default function LoginPage() {
                 <div className="mt-6 text-center space-y-2">
                   <Link 
                     href="/register" 
-                    className="text-blue-600 hover:text-blue-500 text-sm font-medium transition-colors"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm font-medium transition-colors"
                   >
                     Belum punya akun? Daftar disini
                   </Link>
                   <br />
                   <Link 
                     href="/" 
-                    className="text-gray-500 hover:text-gray-700 text-xs transition-colors"
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs transition-colors"
                   >
                     ← Kembali ke beranda
                   </Link>
@@ -79,7 +79,7 @@ export default function LoginPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className="text-center text-xs text-gray-500"
+            className="text-center text-xs text-gray-500 dark:text-gray-400"
           >
             © 2025 Satuan Polisi Pamong Praja Kota Bogor
           </motion.div>

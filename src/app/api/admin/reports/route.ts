@@ -2,6 +2,53 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyJWT } from '@/lib/middlewares/auth';
 
+// Helper function to calculate difficulty level
+const calculateDifficultyLevel = (
+  correctPercentage: number
+): {
+  level: string;
+  color: string;
+  description: string;
+} => {
+  if (correctPercentage >= 80) {
+    return {
+      level: 'Sangat Mudah',
+      color: 'green',
+      description: 'Sebagian besar peserta menjawab benar',
+    };
+  } else if (correctPercentage >= 65) {
+    return {
+      level: 'Mudah',
+      color: 'emerald',
+      description: 'Mayoritas peserta dapat menjawab',
+    };
+  } else if (correctPercentage >= 50) {
+    return {
+      level: 'Sedang',
+      color: 'blue',
+      description: 'Tingkat kesulitan seimbang',
+    };
+  } else if (correctPercentage >= 35) {
+    return {
+      level: 'Sulit',
+      color: 'orange',
+      description: 'Cukup menantang untuk peserta',
+    };
+  } else if (correctPercentage >= 20) {
+    return {
+      level: 'Sangat Sulit',
+      color: 'red',
+      description: 'Sangat sedikit peserta menjawab benar',
+    };
+  } else {
+    return {
+      level: 'Ekstrem Sulit',
+      color: 'purple',
+      description: 'Hampir tidak ada peserta yang benar',
+    };
+  }
+};
+
 // GET - Get comprehensive reports and analytics
 export async function GET(request: NextRequest) {
   try {
@@ -146,7 +193,7 @@ export async function GET(request: NextRequest) {
           const passedCount = results.filter((result) => result.score >= exam.passingScore).length;
           const passRate = Math.round((passedCount / totalParticipants) * 100);
 
-          // Question-wise analysis
+          // Question-wise analysis with difficulty assessment
           const questionAnalysis = exam.questions.map((question) => {
             // Get all answers for this specific question from completed exam results
             const questionAnswers = question.answers;
@@ -157,15 +204,37 @@ export async function GET(request: NextRequest) {
               return answer.selectedAnswer === question.correctAnswer;
             }).length;
 
-            const difficultyRate = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+            const correctPercentage = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+            const difficultyAssessment = calculateDifficultyLevel(correctPercentage);
+
+            // Calculate answer distribution
+            const answerDistribution = {
+              A: questionAnswers.filter((a) => a.selectedAnswer === 'A').length,
+              B: questionAnswers.filter((a) => a.selectedAnswer === 'B').length,
+              C: questionAnswers.filter((a) => a.selectedAnswer === 'C').length,
+              D: questionAnswers.filter((a) => a.selectedAnswer === 'D').length,
+              unanswered: questionAnswers.filter((a) => !a.selectedAnswer).length,
+            };
 
             return {
               questionId: question.id,
               questionText: question.questionText.length > 100 ? question.questionText.substring(0, 100) + '...' : question.questionText,
+              fullQuestionText: question.questionText,
               correctAnswer: question.correctAnswer,
               totalAnswers,
               correctAnswers,
-              difficultyRate,
+              correctPercentage,
+              difficultyRate: correctPercentage, // Keep for backward compatibility
+              difficultyLevel: difficultyAssessment.level,
+              difficultyColor: difficultyAssessment.color,
+              difficultyDescription: difficultyAssessment.description,
+              answerDistribution,
+              options: {
+                A: question.optionA,
+                B: question.optionB,
+                C: question.optionC,
+                D: question.optionD,
+              },
             };
           });
 

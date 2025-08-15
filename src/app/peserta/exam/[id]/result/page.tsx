@@ -100,10 +100,10 @@ export default function ExamResultPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat hasil ujian...</p>
+          <p className="text-gray-600 dark:text-gray-400">Memuat hasil ujian...</p>
         </div>
       </div>
     );
@@ -111,10 +111,10 @@ export default function ExamResultPage() {
 
   if (!resultData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-600">Hasil ujian tidak ditemukan</p>
+          <p className="text-gray-600 dark:text-gray-400">Hasil ujian tidak ditemukan</p>
         </div>
       </div>
     );
@@ -123,32 +123,40 @@ export default function ExamResultPage() {
   const { exam, result, questions } = resultData;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <button onClick={() => router.push('/peserta/dashboard')} className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+              <button onClick={() => router.push('/peserta/dashboard')} className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
                 <ArrowLeft className="w-5 h-5" />
                 <span>Kembali ke Dashboard</span>
               </button>
             </div>
-            <h1 className="text-lg font-semibold text-gray-900">Hasil Ujian</h1>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Hasil Ujian</h1>
           </div>
         </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Result Summary */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
           <div className="text-center mb-8">
-            <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${result.passed ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+            <div
+              className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${
+                result.passed ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400'
+              }`}
+            >
               {result.passed ? <Trophy className="w-10 h-10" /> : <XCircle className="w-10 h-10" />}
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">{exam.title}</h2>
-            <p className="text-gray-600">{exam.subject}</p>
-            <div className={`inline-block px-4 py-2 rounded-full text-lg font-semibold mt-4 ${result.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{exam.title}</h2>
+            <p className="text-gray-600 dark:text-gray-400">{exam.subject}</p>
+            <div
+              className={`inline-block px-4 py-2 rounded-full text-lg font-semibold mt-4 ${
+                result.passed ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+              }`}
+            >
               {result.passed ? '✅ LULUS' : '❌ TIDAK LULUS'}
             </div>
           </div>
@@ -156,37 +164,37 @@ export default function ExamResultPage() {
           {/* Score Display */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
             <div className="text-center">
-              <div className="bg-blue-50 rounded-lg p-4">
-                <Award className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-blue-600">{result.score}</div>
-                <div className="text-sm text-gray-600">Skor Akhir</div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                <Award className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{result.score}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Skor Akhir</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-green-50 rounded-lg p-4">
-                <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-green-600">{result.correctAnswers}</div>
-                <div className="text-sm text-gray-600">Jawaban Benar</div>
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400">{result.correctAnswers}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Jawaban Benar</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-red-50 rounded-lg p-4">
-                <XCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-red-600">{result.wrongAnswers}</div>
-                <div className="text-sm text-gray-600">Jawaban Salah</div>
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                <XCircle className="w-8 h-8 text-red-600 dark:text-red-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-red-600 dark:text-red-400">{result.wrongAnswers}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Jawaban Salah</div>
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-purple-50 rounded-lg p-4">
-                <Clock className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-purple-600">{result.duration}</div>
-                <div className="text-sm text-gray-600">Menit</div>
+              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                <Clock className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{result.duration}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Menit</div>
               </div>
             </div>
           </div>
 
           {/* Additional Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 dark:text-gray-400">
             <div>
               <strong>Waktu Mulai:</strong> {new Date(result.startTime).toLocaleString('id-ID')}
             </div>
@@ -212,38 +220,47 @@ export default function ExamResultPage() {
 
         {/* Question Details */}
         {showDetails && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Detail Jawaban</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Detail Jawaban</h3>
             <div className="space-y-6">
               {questions.map((q) => (
-                <div key={q.number} className={`border rounded-lg p-4 ${q.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                <div
+                  key={q.number}
+                  className={`border rounded-lg p-4 ${
+                    q.isCorrect ? 'border-green-200 dark:border-green-600 bg-green-50 dark:bg-green-900/20' : 'border-red-200 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
+                  }`}
+                >
                   <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-gray-900">Soal {q.number}</h4>
-                    <div className={`flex items-center space-x-1 text-sm font-medium ${q.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Soal {q.number}</h4>
+                    <div className={`flex items-center space-x-1 text-sm font-medium ${q.isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {q.isCorrect ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                       <span>{q.isCorrect ? 'Benar' : 'Salah'}</span>
                     </div>
                   </div>
 
-                  <div className="text-gray-700 mb-4" dangerouslySetInnerHTML={{ __html: q.question.questionText }} />
+                  <div className="text-gray-700 dark:text-gray-300 mb-4" dangerouslySetInnerHTML={{ __html: q.question.questionText }} />
 
                   <div className="space-y-2">
                     {['A', 'B', 'C', 'D'].map((option) => (
                       <div
                         key={option}
                         className={`p-2 rounded ${
-                          option === q.correctAnswer ? 'bg-green-100 border border-green-300' : option === q.selectedAnswer && !q.isCorrect ? 'bg-red-100 border border-red-300' : 'bg-gray-50'
+                          option === q.correctAnswer
+                            ? 'bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-600'
+                            : option === q.selectedAnswer && !q.isCorrect
+                            ? 'bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-600'
+                            : 'bg-gray-50 dark:bg-gray-700'
                         }`}
                       >
-                        <span className="font-medium">{option}. </span>
-                        <span>{getOptionText(q.question, option)}</span>
-                        {option === q.correctAnswer && <span className="ml-2 text-green-600 font-medium">(Jawaban Benar)</span>}
-                        {option === q.selectedAnswer && option !== q.correctAnswer && <span className="ml-2 text-red-600 font-medium">(Jawaban Anda)</span>}
+                        <span className="font-medium text-gray-900 dark:text-white">{option}. </span>
+                        <span className="text-gray-700 dark:text-gray-300">{getOptionText(q.question, option)}</span>
+                        {option === q.correctAnswer && <span className="ml-2 text-green-600 dark:text-green-400 font-medium">(Jawaban Benar)</span>}
+                        {option === q.selectedAnswer && option !== q.correctAnswer && <span className="ml-2 text-red-600 dark:text-red-400 font-medium">(Jawaban Anda)</span>}
                       </div>
                     ))}
                   </div>
 
-                  {!q.selectedAnswer && <div className="mt-2 text-orange-600 font-medium">Tidak dijawab</div>}
+                  {!q.selectedAnswer && <div className="mt-2 text-orange-600 dark:text-orange-400 font-medium">Tidak dijawab</div>}
                 </div>
               ))}
             </div>

@@ -33,10 +33,28 @@ interface ExamPerformance {
   questionAnalysis: {
     questionId: string;
     questionText: string;
+    fullQuestionText: string;
     correctAnswer: string;
     totalAnswers: number;
     correctAnswers: number;
-    difficultyRate: number;
+    correctPercentage: number;
+    difficultyRate: number; // backward compatibility
+    difficultyLevel: string;
+    difficultyColor: string;
+    difficultyDescription: string;
+    answerDistribution: {
+      A: number;
+      B: number;
+      C: number;
+      D: number;
+      unanswered: number;
+    };
+    options: {
+      A: string;
+      B: string;
+      C: string;
+      D: string;
+    };
   }[];
 }
 
@@ -185,8 +203,47 @@ export default function AdminLaporanPage() {
       csvContent += recentData.map((item) => `${item.id},"${item.userName}","${item.examTitle}","${item.subject}",${item.score},"${formatDateTime(item.createdAt)}"`).join('\n');
     } else if (filename.includes('performa-ujian')) {
       const examData = data as ExamPerformance[];
-      csvContent = 'ID Ujian,Judul Ujian,Mata Pelajaran,Total Peserta,Rata-rata Nilai,Tingkat Kelulusan (%)\n';
-      csvContent += examData.map((item) => `${item.examId},"${item.examTitle}","${item.subject}",${item.totalParticipants},${item.averageScore},${item.passRate}`).join('\n');
+
+      // Create comprehensive CSV with question analysis
+      if (examData.length > 0 && examData[0].questionAnalysis && examData[0].questionAnalysis.length > 0) {
+        // Enhanced CSV with detailed question analysis
+        csvContent = 'ID Ujian,Judul Ujian,Mata Pelajaran,Total Peserta,Rata-rata Nilai,Tingkat Kelulusan (%),Total Soal,Soal Mudah,Soal Sedang,Soal Sulit,Rata-rata Kesulitan (%)\n';
+
+        csvContent += examData
+          .map((exam) => {
+            // Calculate difficulty distribution
+            const difficultyStats = {
+              mudah: exam.questionAnalysis.filter((q) => ['Sangat Mudah', 'Mudah'].includes(q.difficultyLevel)).length,
+              sedang: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sedang').length,
+              sulit: exam.questionAnalysis.filter((q) => ['Sulit', 'Sangat Sulit', 'Ekstrem Sulit'].includes(q.difficultyLevel)).length,
+            };
+
+            const avgDifficulty = exam.questionAnalysis.length > 0 ? Math.round(exam.questionAnalysis.reduce((acc, q) => acc + q.correctPercentage, 0) / exam.questionAnalysis.length) : 0;
+
+            return `${exam.examId},"${exam.examTitle}","${exam.subject}",${exam.totalParticipants},${exam.averageScore},${exam.passRate},${exam.questionAnalysis.length},${difficultyStats.mudah},${difficultyStats.sedang},${difficultyStats.sulit},${avgDifficulty}`;
+          })
+          .join('\n');
+
+        // Add detailed question analysis section
+        csvContent += '\n\n=== ANALISIS DETAIL PER SOAL ===\n';
+        csvContent +=
+          'ID Ujian,Judul Ujian,No Soal,Pertanyaan,Jawaban Benar,Total Jawaban,Jawaban Benar Count,Persentase Benar (%),Tingkat Kesulitan,Deskripsi Kesulitan,Distribusi A,Distribusi B,Distribusi C,Distribusi D,Tidak Dijawab\n';
+
+        examData.forEach((exam) => {
+          exam.questionAnalysis.forEach((question, index) => {
+            const questionTextClean = question.questionText.replace(/"/g, '""');
+            csvContent += `${exam.examId},"${exam.examTitle}",${index + 1},"${questionTextClean}","${question.correctAnswer}",${question.totalAnswers},${question.correctAnswers},${
+              question.correctPercentage
+            },"${question.difficultyLevel}","${question.difficultyDescription}",${question.answerDistribution.A},${question.answerDistribution.B},${question.answerDistribution.C},${
+              question.answerDistribution.D
+            },${question.answerDistribution.unanswered}\n`;
+          });
+        });
+      } else {
+        // Fallback for basic data without question analysis
+        csvContent = 'ID Ujian,Judul Ujian,Mata Pelajaran,Total Peserta,Rata-rata Nilai,Tingkat Kelulusan (%)\n';
+        csvContent += examData.map((item) => `${item.examId},"${item.examTitle}","${item.subject}",${item.totalParticipants},${item.averageScore},${item.passRate}`).join('\n');
+      }
     } else if (filename.includes('performa-peserta')) {
       const userData = data as UserPerformance[];
       csvContent = 'ID Peserta,Nama Peserta,Email,Total Ujian,Rata-rata Nilai,Ujian Lulus,Tingkat Kelulusan (%),Ujian Terakhir\n';
@@ -466,35 +523,166 @@ export default function AdminLaporanPage() {
                           </div>
                         </div>
 
+                        {/* Overall Difficulty Analysis */}
+                        {exam.questionAnalysis.length > 0 &&
+                          (() => {
+                            const difficultyLevels = exam.questionAnalysis.map((q) => q.difficultyLevel);
+                            const difficultyStats = {
+                              'Sangat Mudah': difficultyLevels.filter((d) => d === 'Sangat Mudah').length,
+                              Mudah: difficultyLevels.filter((d) => d === 'Mudah').length,
+                              Sedang: difficultyLevels.filter((d) => d === 'Sedang').length,
+                              Sulit: difficultyLevels.filter((d) => d === 'Sulit').length,
+                              'Sangat Sulit': difficultyLevels.filter((d) => d === 'Sangat Sulit').length,
+                              'Ekstrem Sulit': difficultyLevels.filter((d) => d === 'Ekstrem Sulit').length,
+                            };
+                            const avgDifficulty = exam.questionAnalysis.reduce((acc, q) => acc + q.correctPercentage, 0) / exam.questionAnalysis.length;
+
+                            return (
+                              <div className="mb-6 p-4 bg-blue-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg">
+                                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">📊 Evaluasi Tingkat Kesulitan Ujian</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                                  <div className="text-center">
+                                    <p className="text-lg font-bold text-blue-600 dark:text-blue-300">{Math.round(avgDifficulty)}%</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-300">Rata-rata Jawaban Benar</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-lg font-bold text-green-600 dark:text-green-300">{difficultyStats['Sangat Mudah'] + difficultyStats['Mudah']}</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-300">Soal Mudah</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-lg font-bold text-red-600 dark:text-red-300">{difficultyStats['Sulit'] + difficultyStats['Sangat Sulit'] + difficultyStats['Ekstrem Sulit']}</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-300">Soal Sulit</p>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-xs">
+                                  {Object.entries(difficultyStats).map(([level, count]) => (
+                                    <div key={level} className="text-center p-2 bg-white dark:bg-slate-700 border dark:border-slate-600 rounded">
+                                      <div className="font-medium text-gray-900 dark:text-white">{count}</div>
+                                      <div className="text-gray-600 dark:text-gray-300">{level}</div>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <div className="mt-3 p-2 bg-white dark:bg-slate-700 border dark:border-slate-600 rounded text-xs">
+                                  <span className="font-medium text-gray-900 dark:text-white">💡 Rekomendasi: </span>
+                                  <span className="text-gray-700 dark:text-gray-300">
+                                    {avgDifficulty >= 70
+                                      ? 'Ujian terlalu mudah. Pertimbangkan menambah soal yang lebih menantang.'
+                                      : avgDifficulty >= 50
+                                      ? 'Tingkat kesulitan ujian sudah seimbang dan sesuai.'
+                                      : 'Ujian cukup sulit. Pertimbangkan review materi atau soal yang lebih mudah.'}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })()}
+
                         {exam.questionAnalysis.length > 0 && (
                           <div>
-                            <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Analisis Soal</h4>
-                            <div className="space-y-2">
-                              {exam.questionAnalysis.slice(0, 5).map((question, index) => (
-                                <div key={question.questionId} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                  <div className="flex-1">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                      Soal #{index + 1}: {question.questionText}
-                                    </p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                                      Jawaban: {question.correctAnswer} | {question.correctAnswers}/{question.totalAnswers} benar
-                                    </p>
+                            <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Analisis Soal & Tingkat Kesulitan</h4>
+                            <div className="space-y-4">
+                              {exam.questionAnalysis.slice(0, 10).map((question, index) => (
+                                <div key={question.questionId} className="bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-4">
+                                  {/* Question Header */}
+                                  <div className="flex justify-between items-start mb-3">
+                                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white">Soal #{index + 1}</h5>
+                                    <div className="flex gap-2">
+                                      <span
+                                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border
+                                          ${
+                                            question.difficultyColor === 'green'
+                                              ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700'
+                                              : question.difficultyColor === 'emerald'
+                                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-800 dark:text-emerald-100 border-emerald-200 dark:border-emerald-700'
+                                              : question.difficultyColor === 'blue'
+                                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700'
+                                              : question.difficultyColor === 'orange'
+                                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100 border-orange-200 dark:border-orange-700'
+                                              : question.difficultyColor === 'red'
+                                              ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 border-red-200 dark:border-red-700'
+                                              : 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100 border-purple-200 dark:border-purple-700'
+                                          }`}
+                                      >
+                                        {question.difficultyLevel}
+                                      </span>
+                                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-200 text-gray-800 dark:bg-slate-600 dark:text-slate-100 border border-gray-300 dark:border-slate-500">
+                                        {question.correctPercentage}% benar
+                                      </span>
+                                    </div>
                                   </div>
-                                  <div className="ml-4">
-                                    <span
-                                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                        question.difficultyRate >= 70
-                                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                          : question.difficultyRate >= 50
-                                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                      }`}
-                                    >
-                                      {question.difficultyRate}% benar
-                                    </span>
+
+                                  {/* Question Text */}
+                                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">{question.questionText}</p>
+
+                                  {/* Statistics */}
+                                  <div className="grid grid-cols-2 gap-4 mb-3">
+                                    <div className="text-xs">
+                                      <span className="text-gray-600 dark:text-gray-400">Jawaban Benar: </span>
+                                      <span className="font-medium text-gray-900 dark:text-white">
+                                        {question.correctAnswers}/{question.totalAnswers}
+                                      </span>
+                                    </div>
+                                    <div className="text-xs">
+                                      <span className="text-gray-600 dark:text-gray-400">Kunci: </span>
+                                      <span className="font-medium text-gray-900 dark:text-white">{question.correctAnswer}</span>
+                                    </div>
+                                  </div>
+
+                                  {/* Progress Bar */}
+                                  <div className="mb-3">
+                                    <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300 mb-1">
+                                      <span>Tingkat Kesulitan</span>
+                                      <span>{question.difficultyDescription}</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 dark:bg-slate-600 rounded-full h-3 border dark:border-slate-500">
+                                      <div
+                                        className={`h-3 rounded-full transition-all duration-300 shadow-sm
+                                          ${
+                                            question.difficultyColor === 'green'
+                                              ? 'bg-green-500 dark:bg-green-400'
+                                              : question.difficultyColor === 'emerald'
+                                              ? 'bg-emerald-500 dark:bg-emerald-400'
+                                              : question.difficultyColor === 'blue'
+                                              ? 'bg-blue-500 dark:bg-blue-400'
+                                              : question.difficultyColor === 'orange'
+                                              ? 'bg-orange-500 dark:bg-orange-400'
+                                              : question.difficultyColor === 'red'
+                                              ? 'bg-red-500 dark:bg-red-400'
+                                              : 'bg-purple-500 dark:bg-purple-400'
+                                          }`}
+                                        style={{ width: `${question.correctPercentage}%` }}
+                                      ></div>
+                                    </div>
+                                  </div>
+
+                                  {/* Answer Distribution */}
+                                  <div className="text-xs">
+                                    <span className="text-gray-600 dark:text-gray-300 mb-2 block">Distribusi Jawaban:</span>
+                                    <div className="grid grid-cols-4 gap-2">
+                                      {['A', 'B', 'C', 'D'].map((option) => (
+                                        <div
+                                          key={option}
+                                          className={`text-center p-2 rounded border ${
+                                            question.correctAnswer === option
+                                              ? 'bg-green-100 dark:bg-green-800 border-green-300 dark:border-green-600 text-green-800 dark:text-green-100'
+                                              : 'bg-gray-100 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200'
+                                          }`}
+                                        >
+                                          <div className="font-medium">{option}</div>
+                                          <div className="text-xs">{question.answerDistribution[option as keyof typeof question.answerDistribution]}</div>
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
                                 </div>
                               ))}
+
+                              {exam.questionAnalysis.length > 10 && (
+                                <div className="text-center">
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">Menampilkan 10 dari {exam.questionAnalysis.length} soal</p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}

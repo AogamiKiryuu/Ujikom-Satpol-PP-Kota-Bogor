@@ -24,13 +24,22 @@
 - ✅ Timer otomatis per ujian dengan auto-submit
 - ✅ Template download berdasarkan ujian terpilih
 
-### 📊 **Analytics & Comprehensive Reporting**
+### 📊 **Advanced Analytics & Comprehensive Reporting**
 
 - ✅ Dashboard admin dengan statistik lengkap dan real-time
-- ✅ **Analisis Soal Per Item** dengan tingkat kesulitan
-- ✅ Statistik peserta dan trend waktu
-- ✅ Export laporan dalam format CSV
+- ✅ **Analisis Tingkat Kesulitan Soal** dengan 6 level assessment
+  - 🟢 Sangat Mudah (≥80% benar)
+  - 🟢 Mudah (65-79% benar)
+  - 🔵 Sedang (50-64% benar)
+  - 🟠 Sulit (35-49% benar)
+  - 🔴 Sangat Sulit (20-34% benar)
+  - 🟣 Ekstrem Sulit (<20% benar)
+- ✅ **Evaluasi Ujian Keseluruhan** dengan rekomendasi perbaikan
+- ✅ **Distribusi Jawaban** per opsi untuk setiap soal
 - ✅ **Question Analysis** - persentase jawaban benar per soal
+- ✅ **Visual Progress Bar** untuk tingkat kesulitan
+- ✅ Statistik peserta dan trend waktu
+- ✅ Export laporan dalam format CSV dengan data lengkap
 
 ### 🔐 **Security & Performance Features**
 
@@ -225,10 +234,11 @@ Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -like "192.168
    - CRUD soal individual dengan validasi
    - Preview template sebelum download
 5. **Monitor Peserta** di menu "Peserta"
-6. **Analisis Mendalam** di menu "Laporan":
-   - Performa ujian per item soal
-   - Tingkat kesulitan dan analisis statistik
-   - Export data dalam format CSV
+6. **Analisis Tingkat Kesulitan** di menu "Laporan":
+   - Evaluasi kesulitan ujian secara keseluruhan
+   - Analisis per soal dengan 6 level kesulitan
+   - Distribusi jawaban dan rekomendasi perbaikan
+   - Export data analisis dalam format CSV
 
 ### **Import Soal (New Flow)**
 
@@ -299,6 +309,16 @@ Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -like "192.168
 
 ## 🔧 Recent Updates & Bug Fixes
 
+### **v1.3.0 - Advanced Analytics Update**
+
+- ✅ **Analisis Tingkat Kesulitan** - 6 level assessment untuk evaluasi soal
+- ✅ **Evaluasi Ujian Keseluruhan** - dengan rekomendasi perbaikan otomatis
+- ✅ **Distribusi Jawaban** - visualisasi per opsi untuk setiap soal
+- ✅ **Visual Progress Bar** - indikator tingkat kesulitan yang intuitif
+- ✅ **Enhanced Question Analysis** - dengan statistik yang lebih detail
+
+### **v1.2.0 - Major Feature Update**
+
 - ✅ **Fixed Question Analysis Bug** - Analisis soal yang sebelumnya menunjukkan 0%
 - ✅ **Enhanced CSV Import** - Template dinamis berdasarkan ujian terpilih
 - ✅ **Drag & Drop Upload** - UX improvement untuk import file
@@ -336,7 +356,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
   <strong>Dibuat untuk memenuhi Ujian Kompetensi - Praktik Lapang UNPAK</strong>
   <br>
-  <sub>Computer-Based Test System - Enhanced Edition</sub>
+  <sub>Computer-Based Test System v1.3.0 - Advanced Analytics Edition</sub>
   <br><br>
   <em>"Modern CBT Solution for Professional Assessment"</em>
 </div>

@@ -135,13 +135,13 @@ export default function PesertaDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'available':
-        return 'text-green-600 bg-green-100';
+        return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/20';
       case 'ongoing':
-        return 'text-orange-600 bg-orange-100';
+        return 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/20';
       case 'completed':
-        return 'text-blue-600 bg-blue-100';
+        return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20';
       default:
-        return 'text-gray-600 bg-gray-100';
+        return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700';
     }
   };
 
@@ -159,10 +159,10 @@ export default function PesertaDashboard() {
   };
 
   const statCards = [
-    { title: 'Ujian Tersedia', value: stats.availableExams, icon: BookOpen, color: 'text-green-600', bgColor: 'bg-green-50' },
-    { title: 'Ujian Selesai', value: stats.completedExams, icon: CheckCircle, color: 'text-blue-600', bgColor: 'bg-blue-50' },
-    { title: 'Ujian Berlangsung', value: stats.ongoingExams, icon: Clock, color: 'text-orange-600', bgColor: 'bg-orange-50' },
-    { title: 'Rata-rata Nilai', value: `${stats.averageScore}%`, icon: Trophy, color: 'text-purple-600', bgColor: 'bg-purple-50' },
+    { title: 'Ujian Tersedia', value: stats.availableExams, icon: BookOpen, color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/20' },
+    { title: 'Ujian Selesai', value: stats.completedExams, icon: CheckCircle, color: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/20' },
+    { title: 'Ujian Berlangsung', value: stats.ongoingExams, icon: Clock, color: 'text-orange-600 dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/20' },
+    { title: 'Rata-rata Nilai', value: `${stats.averageScore}%`, icon: Trophy, color: 'text-purple-600 dark:text-purple-400', bgColor: 'bg-purple-50 dark:bg-purple-900/20' },
   ];
 
   return (
