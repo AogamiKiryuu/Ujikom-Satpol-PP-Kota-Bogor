@@ -143,7 +143,7 @@ SESSION_TIMEOUT=3600
 
 ### 4. Database Setup
 
-```bash
+````bash
 # Generate Prisma client
 npx prisma generate
 
@@ -152,10 +152,6 @@ npx prisma db push
 
 # Optional: Seed with sample data
 npx prisma db seed
-
-# Fix existing data (if upgrading from older version)
-node scripts/fix-answer-correctness.js
-```
 
 ### 5. Run Development Server
 
@@ -167,56 +163,7 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-#### **Network Access (Device Lain di WiFi Sama)**
-
-```bash
-npm run dev:network
-# or
-yarn dev:network
-# or
-pnpm dev:network
-```
-
-Setelah server jalan, cek IP address komputer kamu:
-
-```bash
-# Windows
-ipconfig | findstr IPv4
-
-# Output contoh: IPv4 Address. . . . . . . . . . . : 192.168.1.100
-```
-
-Kemudian device lain bisa akses via:
-
-- **http://192.168.1.100:3000** (ganti dengan IP address kamu)
-
-#### **Tips Network Access:**
-
-- ✅ Pastikan semua device terhubung ke WiFi yang sama
-- ✅ Disable firewall sementara jika ada masalah koneksi
-- ✅ Cek Windows Defender/antivirus settings
-- ✅ Pastikan port 3000 tidak diblokir
-
-## 🌐 Network Troubleshooting
-
-### **Windows Firewall Settings**
-
-1. Buka Windows Defender Firewall
-2. Klik "Allow an app or feature through Windows Defender Firewall"
-3. Klik "Change Settings" → "Allow another app"
-4. Browse ke `C:\Program Files\nodejs\node.exe`
-5. Centang "Private" dan "Public"
-
-### **Alternative IP Check**
-
-```powershell
-# PowerShell
-Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -like "192.168.*"}
-```
+````
 
 ## 🎯 Usage Guide
 
@@ -301,38 +248,6 @@ Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.IPAddress -like "192.168
 - `POST /api/peserta/exam/[id]/answer` - Submit answer dengan auto-save
 - `POST /api/peserta/exam/[id]/submit` - **Final submit dengan scoring**
 - `GET /api/peserta/exam/[id]/result` - Get exam results
-
-### **Utility API**
-
-- `GET /api/test/verify-token` - Development token testing
-- `POST /api/admin/settings` - System settings management
-
-## 🔧 Recent Updates & Bug Fixes
-
-### **v1.3.0 - Advanced Analytics Update**
-
-- ✅ **Analisis Tingkat Kesulitan** - 6 level assessment untuk evaluasi soal
-- ✅ **Evaluasi Ujian Keseluruhan** - dengan rekomendasi perbaikan otomatis
-- ✅ **Distribusi Jawaban** - visualisasi per opsi untuk setiap soal
-- ✅ **Visual Progress Bar** - indikator tingkat kesulitan yang intuitif
-- ✅ **Enhanced Question Analysis** - dengan statistik yang lebih detail
-
-### **v1.2.0 - Major Feature Update**
-
-- ✅ **Fixed Question Analysis Bug** - Analisis soal yang sebelumnya menunjukkan 0%
-- ✅ **Enhanced CSV Import** - Template dinamis berdasarkan ujian terpilih
-- ✅ **Drag & Drop Upload** - UX improvement untuk import file
-- ✅ **Indonesian Localization** - Semua error messages dalam Bahasa Indonesia
-- ✅ **Data Migration Script** - Auto-fix untuk data existing
-- ✅ **Improved API Responses** - Konsisten error handling
-- ✅ **Next.js 15 Compatibility** - Updated route handlers
-
-### **Performance Optimizations**
-
-- ⚡ **Faster Database Queries** dengan optimized Prisma queries
-- ⚡ **Reduced Bundle Size** dengan selective imports
-- ⚡ **Improved Loading States** dengan skeleton UI
-- ⚡ **Better Caching Strategy** untuk static assets
 
 ## 📝 License
 
