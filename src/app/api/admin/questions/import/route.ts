@@ -85,15 +85,18 @@ export async function POST(request: NextRequest) {
 
         // Get headers from first row
         const headers = jsonData[0] as string[];
-        
+
         // Convert rows to objects
-        questions = jsonData.slice(1).map((row: unknown[]) => {
-          const obj: Record<string, unknown> = {};
-          headers.forEach((header, i) => {
-            obj[header] = row[i] || '';
-          });
-          return obj as unknown as ImportedQuestion;
-        }).filter(q => q.examTitle && q.questionText); // Filter out empty rows
+        questions = jsonData
+          .slice(1)
+          .map((row: unknown[]) => {
+            const obj: Record<string, unknown> = {};
+            headers.forEach((header, i) => {
+              obj[header] = row[i] || '';
+            });
+            return obj as unknown as ImportedQuestion;
+          })
+          .filter((q) => q.examTitle && q.questionText); // Filter out empty rows
       }
     } catch (error) {
       console.error('Error parsing file:', error);

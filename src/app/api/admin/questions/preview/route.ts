@@ -107,15 +107,18 @@ function parseExcel(buffer: Buffer): PreviewQuestion[] {
 
   // Get headers from first row
   const headers = jsonData[0] as string[];
-  
+
   // Convert rows to objects using actual headers
-  const records = jsonData.slice(1).map((row: unknown[], index: number) => {
-    const obj: Record<string, unknown> = {};
-    headers.forEach((header, i) => {
-      obj[header] = row[i] || '';
-    });
-    return validateQuestion(obj as unknown as CSVRow, index + 2);
-  }).filter(q => q.examTitle && q.questionText); // Filter out empty rows
+  const records = jsonData
+    .slice(1)
+    .map((row: unknown[], index: number) => {
+      const obj: Record<string, unknown> = {};
+      headers.forEach((header, i) => {
+        obj[header] = row[i] || '';
+      });
+      return validateQuestion(obj as unknown as CSVRow, index + 2);
+    })
+    .filter((q) => q.examTitle && q.questionText); // Filter out empty rows
 
   return records;
 }
