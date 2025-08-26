@@ -280,7 +280,9 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                   <li>Pilih ujian yang akan ditambahkan soal</li>
                   <li>Download template Excel untuk mendapatkan format yang benar</li>
                   <li>Isi data soal sesuai format template</li>
-                  <li><strong>Kolom &apos;points&apos;:</strong> Isi bobot nilai untuk setiap soal (contoh: 1, 2, 5)</li>
+                  <li>
+                    <strong>Kolom &apos;points&apos;:</strong> Isi bobot nilai untuk setiap soal (contoh: 1, 2, 5)
+                  </li>
                   <li>Upload file Excel yang sudah diisi</li>
                   <li>Review preview sebelum konfirmasi import</li>
                 </ol>

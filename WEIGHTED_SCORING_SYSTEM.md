@@ -7,9 +7,11 @@ Sistem CBT ini sekarang mendukung penilaian berbobot, di mana setiap soal dapat 
 ## 🎯 Cara Kerja Sistem Penilaian
 
 ### 1. **Bobot Soal (Question Points)**
+
 Setiap soal memiliki field `points` yang menentukan bobotnya:
+
 - **Soal Mudah**: 1-2 poin
-- **Soal Sedang**: 3-4 poin  
+- **Soal Sedang**: 3-4 poin
 - **Soal Sulit**: 5+ poin
 
 ### 2. **Formula Perhitungan**
@@ -31,6 +33,7 @@ Skor = (6/11) × 100% = 54.5% ≈ 55%
 ### 3. **Implementasi Database**
 
 #### Schema Question:
+
 ```sql
 CREATE TABLE Question (
   id VARCHAR PRIMARY KEY,
@@ -47,6 +50,7 @@ CREATE TABLE Question (
 ```
 
 #### Schema ExamResult:
+
 ```sql
 CREATE TABLE ExamResult (
   id VARCHAR PRIMARY KEY,
@@ -86,44 +90,47 @@ for (const answer of examResult.answers) {
 }
 
 // Calculate weighted score as percentage
-const score = totalPossiblePoints > 0 
-  ? Math.round((totalEarnedPoints / totalPossiblePoints) * 100) 
-  : 0;
+const score = totalPossiblePoints > 0 ? Math.round((totalEarnedPoints / totalPossiblePoints) * 100) : 0;
 ```
 
 ### 2. **Template Import Excel**
 
 Format file import dengan kolom `points`:
 
-| examTitle | examSubject | questionText | optionA | optionB | optionC | optionD | correctAnswer | points |
-|-----------|-------------|--------------|---------|---------|---------|---------|---------------|--------|
-| Ujian Matematika | Matematika | 2 + 2 = ? | 3 | 4 | 5 | 6 | B | 1 |
-| Ujian Matematika | Matematika | Integral dari x² dx = ? | x³ + C | x³/3 + C | 2x + C | x + C | B | 5 |
+| examTitle        | examSubject | questionText            | optionA | optionB  | optionC | optionD | correctAnswer | points |
+| ---------------- | ----------- | ----------------------- | ------- | -------- | ------- | ------- | ------------- | ------ |
+| Ujian Matematika | Matematika  | 2 + 2 = ?               | 3       | 4        | 5       | 6       | B             | 1      |
+| Ujian Matematika | Matematika  | Integral dari x² dx = ? | x³ + C  | x³/3 + C | 2x + C  | x + C   | B             | 5      |
 
 ## 📈 Keuntungan Sistem Berbobot
 
 ### ✅ **Fleksibilitas Penilaian**
+
 - Soal sulit diberi bobot lebih tinggi
 - Materi penting dapat diprioritaskan
 - Penilaian lebih proporsional
 
 ### ✅ **Diferensiasi Kemampuan**
+
 - Peserta yang menguasai soal sulit mendapat nilai lebih tinggi
 - Sistem lebih adil untuk mengukur pemahaman mendalam
 
 ### ✅ **Transparansi**
+
 - Peserta dapat melihat bobot setiap soal
 - Total poin diperoleh vs maksimal ditampilkan jelas
 
 ## 🎨 UI/UX Features
 
 ### 1. **Halaman Hasil Ujian**
+
 - **Skor Persentase**: Tampilan utama hasil akhir
 - **Poin Diperoleh**: Total poin yang berhasil dikumpulkan
 - **Total Poin**: Maksimal poin yang bisa diperoleh
 - **Detail per Soal**: Menampilkan bobot setiap soal
 
 ### 2. **Import Soal**
+
 - Template Excel dengan kolom `points`
 - Petunjuk penggunaan bobot soal
 - Preview dengan informasi bobot sebelum import
@@ -131,9 +138,10 @@ Format file import dengan kolom `points`:
 ## 📋 Contoh Kasus Penggunaan
 
 ### **Ujian Matematika (20 Soal)**
+
 ```
 Kategori Mudah (10 soal × 1 poin) = 10 poin
-Kategori Sedang (7 soal × 3 poin) = 21 poin  
+Kategori Sedang (7 soal × 3 poin) = 21 poin
 Kategori Sulit (3 soal × 5 poin) = 15 poin
 Total Maksimal = 46 poin
 
@@ -155,11 +163,13 @@ Skor = (27/46) × 100% = 59%
 ## 🚀 Migration dan Deployment
 
 ### 1. **Database Migration**
+
 ```bash
 npx prisma migrate dev --name add-weighted-scoring
 ```
 
 ### 2. **Backward Compatibility**
+
 - Field `points` memiliki default value 1
 - Data lama tetap kompatibel
 - Perhitungan otomatis menggunakan bobot baru
@@ -167,6 +177,7 @@ npx prisma migrate dev --name add-weighted-scoring
 ## 📚 API Documentation
 
 ### Submit Exam Response:
+
 ```json
 {
   "message": "Ujian berhasil diselesaikan",
@@ -181,6 +192,7 @@ npx prisma migrate dev --name add-weighted-scoring
 ```
 
 ### Exam Result Response:
+
 ```json
 {
   "result": {

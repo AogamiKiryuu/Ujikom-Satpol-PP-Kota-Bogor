@@ -18,11 +18,25 @@
 
 - ✅ CRUD ujian dengan pengaturan waktu fleksibel
 - ✅ Bank soal dengan multiple choice (A, B, C, D)
-- ✅ **Import Soal Massal** via CSV dengan template dinamis
+- ✅ **🆕 Weighted Scoring System** - Sistem penilaian berbobot untuk soal
+- ✅ **Import Soal Massal** via CSV/Excel dengan template dinamis
 - ✅ **Drag & Drop Upload** untuk kemudahan import
-- ✅ Auto-grading system dengan skor real-time
+- ✅ Auto-grading system dengan skor real-time berbobot
 - ✅ Timer otomatis per ujian dengan auto-submit
-- ✅ Template download berdasarkan ujian terpilih
+- ✅ Template download berdasarkan ujian terpilih dengan kolom points
+
+### ⚖️ **NEW: Weighted Scoring System**
+
+- ✅ **Bobot Soal Fleksibel** - Setiap soal bisa memiliki poin berbeda (1-10 poin)
+- ✅ **Penilaian Berdasarkan Tingkat Kesulitan**
+  - Soal Mudah: 1-2 poin
+  - Soal Sedang: 3-4 poin
+  - Soal Sulit: 5+ poin
+- ✅ **Rumus Penilaian**: `(Total Poin Diperoleh / Total Poin Maksimal) × 100%`
+- ✅ **Template Import Updated** - Kolom `points` untuk menentukan bobot
+- ✅ **Preview Bobot** - Tampilan bobot soal di import preview
+- ✅ **Hasil Detail** - Menampilkan poin diperoleh vs total poin
+- ✅ **Backward Compatible** - File lama tanpa kolom points tetap bisa diimport
 
 ### 📊 **Advanced Analytics & Comprehensive Reporting**
 
@@ -176,16 +190,55 @@ pnpm dev
    - Edit ujian existing dengan validasi
    - Hapus ujian (jika belum ada peserta)
 4. **Manajemen Soal** di menu "Soal":
-   - **Import massal** via CSV dengan template dinamis
+   - **Import massal** via CSV/Excel dengan template dinamis
+   - **🆕 Weighted Scoring** - Set bobot soal saat import
    - **Drag & drop** file upload untuk kemudahan
    - CRUD soal individual dengan validasi
-   - Preview template sebelum download
+   - Preview template dengan kolom bobot sebelum download
 5. **Monitor Peserta** di menu "Peserta"
 6. **Analisis Tingkat Kesulitan** di menu "Laporan":
    - Evaluasi kesulitan ujian secara keseluruhan
    - Analisis per soal dengan 6 level kesulitan
-   - Distribusi jawaban dan rekomendasi perbaikan
-   - Export data analisis dalam format CSV
+
+### **🆕 Weighted Scoring System Usage**
+
+#### **1. Import Soal dengan Bobot**
+
+```csv
+examTitle,examSubject,questionText,optionA,optionB,optionC,optionD,correctAnswer,points
+Matematika,Dasar,2 + 2 = ?,2,3,4,5,C,1
+Matematika,Dasar,Integral ∫x² dx = ?,x³ + C,x³/3 + C,2x + C,x + C,B,5
+Matematika,Dasar,5 × 3 = ?,13,15,18,20,B,1
+```
+
+#### **2. Strategi Pemberian Bobot**
+
+- **Soal Mudah/Dasar**: 1-2 poin (konsep dasar, hafalan)
+- **Soal Sedang/Menengah**: 3-4 poin (aplikasi, analisis)
+- **Soal Sulit/Kompleks**: 5+ poin (sintesis, evaluasi)
+
+#### **3. Contoh Perhitungan**
+
+```
+Ujian dengan 5 soal:
+- Soal 1 (1 poin): Benar → +1 poin
+- Soal 2 (5 poin): Salah → +0 poin
+- Soal 3 (1 poin): Benar → +1 poin
+- Soal 4 (3 poin): Benar → +3 poin
+- Soal 5 (2 poin): Benar → +2 poin
+
+Total Diperoleh: 7 poin
+Total Maksimal: 12 poin
+Skor Akhir: (7/12) × 100% = 58%
+```
+
+#### **4. Template Download**
+
+- Download template dari sistem dengan kolom `points`
+- Template otomatis include contoh bobot berbeda
+- Preview menampilkan bobot setiap soal sebelum import
+  - Distribusi jawaban dan rekomendasi perbaikan
+  - Export data analisis dalam format CSV
 
 ### **Import Soal (New Flow)**
 
@@ -229,7 +282,7 @@ pnpm dev
 - `GET /api/admin/questions/[id]` - Get question details
 - `PUT /api/admin/questions/[id]` - Update question
 - `DELETE /api/admin/questions/[id]` - Delete question
-- `POST /api/admin/questions/import` - **Bulk import via CSV**
+- `POST /api/admin/questions/import` - **🆕 Bulk import via CSV/Excel dengan weighted scoring**
 
 ### **Admin API - Reports & Analytics**
 
@@ -249,7 +302,57 @@ pnpm dev
 - `POST /api/peserta/exam/[id]/submit` - **Final submit dengan scoring**
 - `GET /api/peserta/exam/[id]/result` - Get exam results
 
-## 📝 License
+## � Weighted Scoring System Documentation
+
+### **🎯 Overview**
+
+Sistem penilaian berbobot yang memungkinkan setiap soal memiliki nilai/poin yang berbeda berdasarkan tingkat kesulitan atau kepentingan materi.
+
+### **⚖️ Scoring Formula**
+
+```
+Skor Akhir = (Total Poin Diperoleh / Total Poin Maksimal) × 100%
+```
+
+### **🔢 Example Calculation**
+
+```
+5 Soal dengan bobot berbeda:
+- Soal 1: 1 poin (mudah) → Benar = +1
+- Soal 2: 5 poin (sulit) → Salah = +0
+- Soal 3: 1 poin (mudah) → Benar = +1
+- Soal 4: 3 poin (sedang) → Benar = +3
+- Soal 5: 2 poin (sedang) → Benar = +2
+
+Result: 7/12 poin = 58% (vs 80% dengan equal weight)
+```
+
+### **📋 Import Template Format**
+
+```csv
+examTitle,examSubject,questionText,optionA,optionB,optionC,optionD,correctAnswer,points
+Matematika,Dasar,2+2=?,2,3,4,5,C,1
+Matematika,Lanjut,∫x²dx=?,x³+C,x³/3+C,2x+C,x+C,B,5
+```
+
+### **🎨 UI Features**
+
+- ✅ Preview table menampilkan bobot soal
+- ✅ Hasil ujian dengan breakdown poin
+- ✅ Template download otomatis include kolom points
+- ✅ Backward compatibility untuk file lama
+
+### **🔧 Technical Implementation**
+
+- Database: Field `points` di tabel `Question` (default: 1)
+- API: Kalkulasi weighted scoring di submit endpoint
+- Frontend: UI update untuk menampilkan bobot dan poin
+
+**📖 Dokumentasi Lengkap**: [WEIGHTED_SCORING_SYSTEM.md](WEIGHTED_SCORING_SYSTEM.md)
+
+---
+
+## �📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -262,8 +365,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🎯 Key Achievements
 
 - ✅ **100% Functional** CRUD operations untuk ujian dan soal
+- ✅ **🆕 Weighted Scoring System** - Penilaian berbobot untuk soal
 - ✅ **Advanced Analytics** dengan question-level analysis
-- ✅ **Bulk Import** system dengan validasi komprehensif
+- ✅ **Bulk Import** system dengan validasi komprehensif dan weighted points
 - ✅ **Real-time Performance** tracking dan reporting
 - ✅ **Mobile-Responsive** design untuk semua device
 - ✅ **Production-Ready** dengan security best practices
@@ -271,7 +375,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
   <strong>Dibuat untuk memenuhi Ujian Kompetensi - Praktik Lapang UNPAK</strong>
   <br>
-  <sub>Computer-Based Test System v1.3.0 - Advanced Analytics Edition</sub>
+  <sub>Computer-Based Test System v1.4.0 - Weighted Scoring Edition</sub>
   <br><br>
-  <em>"Modern CBT Solution for Professional Assessment"</em>
+  <em>"Modern CBT Solution with Advanced Weighted Assessment"</em>
 </div>

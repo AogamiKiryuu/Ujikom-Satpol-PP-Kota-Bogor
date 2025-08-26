@@ -92,8 +92,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Calculate weighted points from answers
     let calculatedEarnedPoints = 0;
     let calculatedPossiblePoints = 0;
-    
-    examResult.answers.forEach(answer => {
+
+    examResult.answers.forEach((answer) => {
       calculatedPossiblePoints += answer.question.points;
       if (answer.selectedAnswer === answer.question.correctAnswer) {
         calculatedEarnedPoints += answer.question.points;

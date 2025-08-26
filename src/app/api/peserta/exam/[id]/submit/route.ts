@@ -68,7 +68,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         correctAnswers++;
         totalEarnedPoints += answer.question.points; // Add weighted points
       }
-      
+
       // Update the answer with isCorrect flag
       await prisma.answer.update({
         where: { id: answer.id },
