@@ -83,6 +83,8 @@ model ExamResult {
   score       Int
   totalQuestions Int
   correctAnswers Int
+  totalEarnedPoints Int @default(0)
+  totalPossiblePoints Int @default(0)
   startTime   DateTime
   endTime     DateTime?
   isCompleted Boolean  @default(false)

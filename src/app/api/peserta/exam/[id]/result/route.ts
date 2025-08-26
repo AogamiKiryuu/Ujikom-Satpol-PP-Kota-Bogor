@@ -54,6 +54,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 optionC: true,
                 optionD: true,
                 correctAnswer: true,
+                points: true,
               },
             },
           },
@@ -88,6 +89,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const percentage = Math.round((correctAnswers / totalQuestions) * 100);
     const passed = examResult.score >= examResult.exam.passingScore;
 
+    // Calculate weighted points from answers
+    let calculatedEarnedPoints = 0;
+    let calculatedPossiblePoints = 0;
+    
+    examResult.answers.forEach(answer => {
+      calculatedPossiblePoints += answer.question.points;
+      if (answer.selectedAnswer === answer.question.correctAnswer) {
+        calculatedEarnedPoints += answer.question.points;
+      }
+    });
+
     const result = {
       exam: examResult.exam,
       result: {
@@ -96,6 +108,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         totalQuestions,
         correctAnswers,
         wrongAnswers,
+        totalEarnedPoints: calculatedEarnedPoints,
+        totalPossiblePoints: calculatedPossiblePoints,
         percentage,
         passed,
         startTime: examResult.startTime,

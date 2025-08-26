@@ -13,6 +13,7 @@ interface Question {
   optionC: string;
   optionD: string;
   correctAnswer: string;
+  points: number;
 }
 
 interface QuestionResult {
@@ -38,6 +39,8 @@ interface ExamResultData {
     totalQuestions: number;
     correctAnswers: number;
     wrongAnswers: number;
+    totalEarnedPoints: number;
+    totalPossiblePoints: number;
     percentage: number;
     passed: boolean;
     startTime: string;
@@ -162,12 +165,12 @@ export default function ExamResultPage() {
           </div>
 
           {/* Score Display */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-6">
             <div className="text-center">
               <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                 <Award className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{result.score}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Skor Akhir</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Skor Akhir (%)</div>
               </div>
             </div>
             <div className="text-center">
@@ -182,6 +185,24 @@ export default function ExamResultPage() {
                 <XCircle className="w-8 h-8 text-red-600 dark:text-red-400 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-red-600 dark:text-red-400">{result.wrongAnswers}</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Jawaban Salah</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Points Display */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+            <div className="text-center">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                <Trophy className="w-8 h-8 text-yellow-600 dark:text-yellow-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{result.totalEarnedPoints}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Poin Diperoleh</div>
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <BookOpen className="w-8 h-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{result.totalPossiblePoints}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Total Poin</div>
               </div>
             </div>
             <div className="text-center">
@@ -231,10 +252,13 @@ export default function ExamResultPage() {
                   }`}
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-gray-900 dark:text-white">Soal {q.number}</h4>
+                    <div>
+                      <h4 className="font-medium text-gray-900 dark:text-white">Soal {q.number}</h4>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Bobot: {q.question.points} poin</span>
+                    </div>
                     <div className={`flex items-center space-x-1 text-sm font-medium ${q.isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {q.isCorrect ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                      <span>{q.isCorrect ? 'Benar' : 'Salah'}</span>
+                      <span>{q.isCorrect ? `Benar (+${q.question.points})` : 'Salah (0)'}</span>
                     </div>
                   </div>
 

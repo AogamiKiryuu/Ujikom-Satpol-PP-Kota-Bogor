@@ -206,8 +206,9 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
       ['examTitle', 'examSubject', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer', 'points'],
       // Example data with selected exam info
       [selectedExam.title, selectedExam.subject, `Contoh pertanyaan untuk ${selectedExam.title}?`, 'Pilihan A', 'Pilihan B', 'Pilihan C', 'Pilihan D', 'A', 1],
-      [selectedExam.title, selectedExam.subject, `Pertanyaan kedua untuk ${selectedExam.title}?`, 'Opsi 1', 'Opsi 2', 'Opsi 3', 'Opsi 4', 'B', 1],
+      [selectedExam.title, selectedExam.subject, `Pertanyaan kedua untuk ${selectedExam.title}?`, 'Opsi 1', 'Opsi 2', 'Opsi 3', 'Opsi 4', 'B', 2],
       [selectedExam.title, selectedExam.subject, `Soal ketiga untuk ${selectedExam.title}?`, 'Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D', 'C', 1],
+      [selectedExam.title, selectedExam.subject, `Soal sulit dengan bobot tinggi?`, 'Option A', 'Option B', 'Option C', 'Option D', 'D', 5],
     ];
 
     // Create worksheet
@@ -279,9 +280,15 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                   <li>Pilih ujian yang akan ditambahkan soal</li>
                   <li>Download template Excel untuk mendapatkan format yang benar</li>
                   <li>Isi data soal sesuai format template</li>
+                  <li><strong>Kolom &apos;points&apos;:</strong> Isi bobot nilai untuk setiap soal (contoh: 1, 2, 5)</li>
                   <li>Upload file Excel yang sudah diisi</li>
                   <li>Review preview sebelum konfirmasi import</li>
                 </ol>
+                <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-700">
+                  <p className="text-xs text-yellow-800 dark:text-yellow-300">
+                    <strong>Info Bobot:</strong> Soal mudah = 1 poin, Soal sedang = 2-3 poin, Soal sulit = 4-5 poin
+                  </p>
+                </div>
               </div>
 
               {/* Exam Selection */}
@@ -391,6 +398,7 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Pertanyaan</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Pilihan</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jawaban Benar</th>
+                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Poin</th>
                       <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                     </tr>
                   </thead>
@@ -419,6 +427,9 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
                           <span className="font-medium text-green-600 dark:text-green-400">{question.correctAnswer}</span>
+                        </td>
+                        <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
+                          <span className="font-medium text-blue-600 dark:text-blue-400">{question.points || 1}</span>
                         </td>
                         <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
                           {question.errors?.length ? (
