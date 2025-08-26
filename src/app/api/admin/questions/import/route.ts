@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/middlewares/auth';
 import { prisma } from '@/lib/prisma';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 interface ImportedQuestion {
   examTitle: string;
@@ -41,25 +42,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const fileContent = await file.text();
+    let questions: ImportedQuestion[];
 
-    // Parse CSV
-    const parseResult = Papa.parse<ImportedQuestion>(fileContent, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => header.trim(),
-    });
+    try {
+      if (fileName.endsWith('.csv')) {
+        // Parse CSV
+        const fileContent = await file.text();
+        const parseResult = Papa.parse<ImportedQuestion>(fileContent, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: (header) => header.trim(),
+        });
 
-    if (parseResult.errors.length > 0) {
+        if (parseResult.errors.length > 0) {
+          return NextResponse.json(
+            {
+              error: 'Error parsing CSV: ' + parseResult.errors[0].message,
+            },
+            { status: 400 }
+          );
+        }
+
+        questions = parseResult.data;
+      } else {
+        // Parse Excel
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const workbook = XLSX.read(buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+
+        // Convert to JSON with header row as keys
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
+
+        if (jsonData.length < 2) {
+          return NextResponse.json(
+            {
+              error: 'File Excel harus memiliki minimal 2 baris (header + 1 data)',
+            },
+            { status: 400 }
+          );
+        }
+
+        // Get headers from first row
+        const headers = jsonData[0] as string[];
+        
+        // Convert rows to objects
+        questions = jsonData.slice(1).map((row: unknown[]) => {
+          const obj: Record<string, unknown> = {};
+          headers.forEach((header, i) => {
+            obj[header] = row[i] || '';
+          });
+          return obj as unknown as ImportedQuestion;
+        }).filter(q => q.examTitle && q.questionText); // Filter out empty rows
+      }
+    } catch (error) {
+      console.error('Error parsing file:', error);
       return NextResponse.json(
         {
-          error: 'Error parsing CSV: ' + parseResult.errors[0].message,
+          error: 'Error parsing file: ' + (error instanceof Error ? error.message : 'Unknown error'),
         },
         { status: 400 }
       );
     }
-
-    const questions = parseResult.data;
 
     if (questions.length === 0) {
       return NextResponse.json(

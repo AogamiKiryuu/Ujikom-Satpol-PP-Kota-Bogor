@@ -199,11 +199,11 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
 
     // Create Excel workbook
     const wb = XLSX.utils.book_new();
-    
+
     // Create worksheet data with headers
     const wsData = [
       // Headers
-      ['Judul Ujian', 'Mata Pelajaran', 'Pertanyaan', 'Pilihan A', 'Pilihan B', 'Pilihan C', 'Pilihan D', 'Jawaban Benar', 'Poin'],
+      ['examTitle', 'examSubject', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer', 'points'],
       // Example data with selected exam info
       [selectedExam.title, selectedExam.subject, `Contoh pertanyaan untuk ${selectedExam.title}?`, 'Pilihan A', 'Pilihan B', 'Pilihan C', 'Pilihan D', 'A', 1],
       [selectedExam.title, selectedExam.subject, `Pertanyaan kedua untuk ${selectedExam.title}?`, 'Opsi 1', 'Opsi 2', 'Opsi 3', 'Opsi 4', 'B', 1],
@@ -215,26 +215,26 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
 
     // Set column widths for better formatting
     ws['!cols'] = [
-      { wch: 20 }, // Judul Ujian
-      { wch: 15 }, // Mata Pelajaran
-      { wch: 50 }, // Pertanyaan
-      { wch: 15 }, // Pilihan A
-      { wch: 15 }, // Pilihan B
-      { wch: 15 }, // Pilihan C
-      { wch: 15 }, // Pilihan D
-      { wch: 12 }, // Jawaban Benar
-      { wch: 8 },  // Poin
+      { wch: 25 }, // examTitle
+      { wch: 18 }, // examSubject
+      { wch: 60 }, // questionText
+      { wch: 20 }, // optionA
+      { wch: 20 }, // optionB
+      { wch: 20 }, // optionC
+      { wch: 20 }, // optionD
+      { wch: 15 }, // correctAnswer
+      { wch: 10 }, // points
     ];
 
     // Style headers (bold and background color)
     const headerStyle = {
       font: { bold: true },
-      fill: { fgColor: { rgb: "E3F2FD" } },
-      alignment: { horizontal: "center" }
+      fill: { fgColor: { rgb: 'E3F2FD' } },
+      alignment: { horizontal: 'center' },
     };
 
     // Apply header styling
-    ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1'].forEach(cell => {
+    ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1'].forEach((cell) => {
       if (ws[cell]) {
         ws[cell].s = headerStyle;
       }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import Link from 'next/link';
@@ -195,24 +196,81 @@ export default function AdminLaporanPage() {
       return;
     }
 
-    let csvContent = '';
+    const wb = XLSX.utils.book_new();
 
     // Handle different data types differently
     if (filename.includes('recent-results')) {
       const recentData = data as RecentResult[];
-      csvContent = 'ID,Nama Peserta,Judul Ujian,Mata Pelajaran,Nilai,Tanggal\n';
-      csvContent += recentData.map((item) => `${item.id},"${item.userName}","${item.examTitle}","${item.subject}",${item.score},"${formatDateTime(item.createdAt)}"`).join('\n');
+      const headers = ['ID', 'Nama Peserta', 'Judul Ujian', 'Mata Pelajaran', 'Nilai', 'Tanggal'];
+      const wsData = [
+        headers,
+        ...recentData.map((item) => [
+          item.id,
+          item.userName,
+          item.examTitle,
+          item.subject,
+          item.score,
+          formatDateTime(item.createdAt)
+        ])
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Style the header row
+      const headerRange = XLSX.utils.decode_range(ws['!ref'] || 'A1:F1');
+      for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!ws[cellRef]) ws[cellRef] = {};
+        if (!ws[cellRef].s) ws[cellRef].s = {};
+        ws[cellRef].s = {
+          fill: { 
+            patternType: 'solid',
+            fgColor: { rgb: 'F59E0B' },
+            bgColor: { rgb: 'F59E0B' }
+          },
+          font: { 
+            bold: true, 
+            color: { rgb: 'FFFFFF' },
+            size: 11
+          },
+          alignment: { 
+            horizontal: 'center', 
+            vertical: 'center',
+            wrapText: false
+          },
+          border: {
+            top: { style: 'thin', color: { rgb: '000000' } },
+            bottom: { style: 'thin', color: { rgb: '000000' } },
+            left: { style: 'thin', color: { rgb: '000000' } },
+            right: { style: 'thin', color: { rgb: '000000' } }
+          }
+        };
+      }
+
+      // Set column widths
+      ws['!cols'] = [
+        { width: 12 },  // ID
+        { width: 25 },  // Nama Peserta
+        { width: 35 },  // Judul Ujian
+        { width: 20 },  // Mata Pelajaran
+        { width: 12 },  // Nilai
+        { width: 25 }   // Tanggal
+      ];
+
+      // Freeze header row
+      ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Hasil Ujian Terbaru');
+
     } else if (filename.includes('performa-ujian')) {
       const examData = data as ExamPerformance[];
 
-      // Create comprehensive CSV with question analysis
       if (examData.length > 0 && examData[0].questionAnalysis && examData[0].questionAnalysis.length > 0) {
-        // Enhanced CSV with detailed question analysis
-        csvContent = 'ID Ujian,Judul Ujian,Mata Pelajaran,Total Peserta,Rata-rata Nilai,Tingkat Kelulusan (%),Total Soal,Soal Mudah,Soal Sedang,Soal Sulit,Rata-rata Kesulitan (%)\n';
-
-        csvContent += examData
-          .map((exam) => {
-            // Calculate difficulty distribution
+        // Summary sheet
+        const summaryHeaders = ['ID Ujian', 'Judul Ujian', 'Mata Pelajaran', 'Total Peserta', 'Rata-rata Nilai', 'Tingkat Kelulusan (%)', 'Total Soal', 'Soal Mudah', 'Soal Sedang', 'Soal Sulit', 'Rata-rata Kesulitan (%)'];
+        const summaryData = [
+          summaryHeaders,
+          ...examData.map((exam) => {
             const difficultyStats = {
               mudah: exam.questionAnalysis.filter((q) => ['Sangat Mudah', 'Mudah'].includes(q.difficultyLevel)).length,
               sedang: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sedang').length,
@@ -221,42 +279,344 @@ export default function AdminLaporanPage() {
 
             const avgDifficulty = exam.questionAnalysis.length > 0 ? Math.round(exam.questionAnalysis.reduce((acc, q) => acc + q.correctPercentage, 0) / exam.questionAnalysis.length) : 0;
 
-            return `${exam.examId},"${exam.examTitle}","${exam.subject}",${exam.totalParticipants},${exam.averageScore},${exam.passRate},${exam.questionAnalysis.length},${difficultyStats.mudah},${difficultyStats.sedang},${difficultyStats.sulit},${avgDifficulty}`;
+            return [
+              exam.examId,
+              exam.examTitle,
+              exam.subject,
+              exam.totalParticipants,
+              exam.averageScore,
+              exam.passRate,
+              exam.questionAnalysis.length,
+              difficultyStats.mudah,
+              difficultyStats.sedang,
+              difficultyStats.sulit,
+              avgDifficulty
+            ];
           })
-          .join('\n');
+        ];
 
-        // Add detailed question analysis section
-        csvContent += '\n\n=== ANALISIS DETAIL PER SOAL ===\n';
-        csvContent +=
-          'ID Ujian,Judul Ujian,No Soal,Pertanyaan,Jawaban Benar,Total Jawaban,Jawaban Benar Count,Persentase Benar (%),Tingkat Kesulitan,Deskripsi Kesulitan,Distribusi A,Distribusi B,Distribusi C,Distribusi D,Tidak Dijawab\n';
+        const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+        
+        // Style summary header
+        const summaryRange = XLSX.utils.decode_range(summaryWs['!ref'] || 'A1:K1');
+        for (let col = summaryRange.s.c; col <= summaryRange.e.c; col++) {
+          const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+          if (!summaryWs[cellRef]) summaryWs[cellRef] = {};
+          if (!summaryWs[cellRef].s) summaryWs[cellRef].s = {};
+          summaryWs[cellRef].s = {
+            fill: { 
+              patternType: 'solid',
+              fgColor: { rgb: 'F59E0B' },
+              bgColor: { rgb: 'F59E0B' }
+            },
+            font: { 
+              bold: true, 
+              color: { rgb: 'FFFFFF' },
+              size: 11
+            },
+            alignment: { 
+              horizontal: 'center', 
+              vertical: 'center',
+              wrapText: false
+            },
+            border: {
+              top: { style: 'thin', color: { rgb: '000000' } },
+              bottom: { style: 'thin', color: { rgb: '000000' } },
+              left: { style: 'thin', color: { rgb: '000000' } },
+              right: { style: 'thin', color: { rgb: '000000' } }
+            }
+          };
+        }
 
-        examData.forEach((exam) => {
-          exam.questionAnalysis.forEach((question, index) => {
-            const questionTextClean = question.questionText.replace(/"/g, '""');
-            csvContent += `${exam.examId},"${exam.examTitle}",${index + 1},"${questionTextClean}","${question.correctAnswer}",${question.totalAnswers},${question.correctAnswers},${
-              question.correctPercentage
-            },"${question.difficultyLevel}","${question.difficultyDescription}",${question.answerDistribution.A},${question.answerDistribution.B},${question.answerDistribution.C},${
-              question.answerDistribution.D
-            },${question.answerDistribution.unanswered}\n`;
-          });
-        });
+        summaryWs['!cols'] = [
+          { width: 15 }, // ID Ujian
+          { width: 30 }, // Judul Ujian  
+          { width: 20 }, // Mata Pelajaran
+          { width: 15 }, // Total Peserta
+          { width: 18 }, // Rata-rata Nilai
+          { width: 20 }, // Tingkat Kelulusan
+          { width: 15 }, // Total Soal
+          { width: 15 }, // Soal Mudah
+          { width: 15 }, // Soal Sedang
+          { width: 15 }, // Soal Sulit
+          { width: 20 }  // Rata-rata Kesulitan
+        ];
+        
+        // Freeze header row
+        summaryWs['!freeze'] = { xSplit: 0, ySplit: 1 };
+        
+        XLSX.utils.book_append_sheet(wb, summaryWs, 'Ringkasan Ujian');
+
+        // Detailed analysis sheet
+        const detailHeaders = ['ID Ujian', 'Judul Ujian', 'No Soal', 'Pertanyaan', 'Jawaban Benar', 'Total Jawaban', 'Jawaban Benar Count', 'Persentase Benar (%)', 'Tingkat Kesulitan', 'Deskripsi Kesulitan', 'Distribusi A', 'Distribusi B', 'Distribusi C', 'Distribusi D', 'Tidak Dijawab'];
+        const detailData = [
+          detailHeaders,
+          ...examData.flatMap((exam) =>
+            exam.questionAnalysis.map((question, index) => [
+              exam.examId,
+              exam.examTitle,
+              index + 1,
+              question.questionText,
+              question.correctAnswer,
+              question.totalAnswers,
+              question.correctAnswers,
+              question.correctPercentage,
+              question.difficultyLevel,
+              question.difficultyDescription,
+              question.answerDistribution.A,
+              question.answerDistribution.B,
+              question.answerDistribution.C,
+              question.answerDistribution.D,
+              question.answerDistribution.unanswered
+            ])
+          )
+        ];
+
+        const detailWs = XLSX.utils.aoa_to_sheet(detailData);
+        
+        // Style detail header
+        const detailRange = XLSX.utils.decode_range(detailWs['!ref'] || 'A1:O1');
+        for (let col = detailRange.s.c; col <= detailRange.e.c; col++) {
+          const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+          if (!detailWs[cellRef]) detailWs[cellRef] = {};
+          if (!detailWs[cellRef].s) detailWs[cellRef].s = {};
+          detailWs[cellRef].s = {
+            fill: { 
+              patternType: 'solid',
+              fgColor: { rgb: 'F59E0B' },
+              bgColor: { rgb: 'F59E0B' }
+            },
+            font: { 
+              bold: true, 
+              color: { rgb: 'FFFFFF' },
+              size: 11
+            },
+            alignment: { 
+              horizontal: 'center', 
+              vertical: 'center',
+              wrapText: false
+            },
+            border: {
+              top: { style: 'thin', color: { rgb: '000000' } },
+              bottom: { style: 'thin', color: { rgb: '000000' } },
+              left: { style: 'thin', color: { rgb: '000000' } },
+              right: { style: 'thin', color: { rgb: '000000' } }
+            }
+          };
+        }
+
+        detailWs['!cols'] = [
+          { width: 12 }, // ID Ujian
+          { width: 30 }, // Judul Ujian
+          { width: 10 }, // No Soal
+          { width: 50 }, // Pertanyaan
+          { width: 15 }, // Jawaban Benar
+          { width: 15 }, // Total Jawaban
+          { width: 18 }, // Jawaban Benar Count
+          { width: 18 }, // Persentase Benar
+          { width: 18 }, // Tingkat Kesulitan
+          { width: 25 }, // Deskripsi Kesulitan
+          { width: 12 }, // Distribusi A
+          { width: 12 }, // Distribusi B
+          { width: 12 }, // Distribusi C
+          { width: 12 }, // Distribusi D
+          { width: 15 }  // Tidak Dijawab
+        ];
+        
+        // Freeze header row
+        detailWs['!freeze'] = { xSplit: 0, ySplit: 1 };
+        
+        XLSX.utils.book_append_sheet(wb, detailWs, 'Analisis Detail');
+
       } else {
-        // Fallback for basic data without question analysis
-        csvContent = 'ID Ujian,Judul Ujian,Mata Pelajaran,Total Peserta,Rata-rata Nilai,Tingkat Kelulusan (%)\n';
-        csvContent += examData.map((item) => `${item.examId},"${item.examTitle}","${item.subject}",${item.totalParticipants},${item.averageScore},${item.passRate}`).join('\n');
+        // Basic exam data
+        const headers = ['ID Ujian', 'Judul Ujian', 'Mata Pelajaran', 'Total Peserta', 'Rata-rata Nilai', 'Tingkat Kelulusan (%)'];
+        const wsData = [
+          headers,
+          ...examData.map((item) => [
+            item.examId,
+            item.examTitle,
+            item.subject,
+            item.totalParticipants,
+            item.averageScore,
+            item.passRate
+          ])
+        ];
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        
+        // Style header
+        const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:F1');
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+          if (!ws[cellRef]) ws[cellRef] = {};
+          if (!ws[cellRef].s) ws[cellRef].s = {};
+          ws[cellRef].s = {
+            fill: { 
+              patternType: 'solid',
+              fgColor: { rgb: 'F59E0B' },
+              bgColor: { rgb: 'F59E0B' }
+            },
+            font: { 
+              bold: true, 
+              color: { rgb: 'FFFFFF' },
+              size: 11
+            },
+            alignment: { 
+              horizontal: 'center', 
+              vertical: 'center',
+              wrapText: false
+            },
+            border: {
+              top: { style: 'thin', color: { rgb: '000000' } },
+              bottom: { style: 'thin', color: { rgb: '000000' } },
+              left: { style: 'thin', color: { rgb: '000000' } },
+              right: { style: 'thin', color: { rgb: '000000' } }
+            }
+          };
+        }
+
+        ws['!cols'] = [
+          { width: 15 }, // ID Ujian
+          { width: 30 }, // Judul Ujian
+          { width: 20 }, // Mata Pelajaran
+          { width: 15 }, // Total Peserta
+          { width: 18 }, // Rata-rata Nilai
+          { width: 20 }  // Tingkat Kelulusan
+        ];
+        
+        // Freeze header row
+        ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+        
+        XLSX.utils.book_append_sheet(wb, ws, 'Performa Ujian');
       }
+
     } else if (filename.includes('performa-peserta')) {
       const userData = data as UserPerformance[];
-      csvContent = 'ID Peserta,Nama Peserta,Email,Total Ujian,Rata-rata Nilai,Ujian Lulus,Tingkat Kelulusan (%),Ujian Terakhir\n';
-      csvContent += userData
-        .map((item) => `${item.userId},"${item.userName}","${item.email}",${item.totalExams},${item.averageScore},${item.passedExams},${item.passRate},"${formatDate(item.lastExamDate)}"`)
-        .join('\n');
+      const headers = ['ID Peserta', 'Nama Peserta', 'Email', 'Total Ujian', 'Rata-rata Nilai', 'Ujian Lulus', 'Tingkat Kelulusan (%)', 'Ujian Terakhir'];
+      const wsData = [
+        headers,
+        ...userData.map((item) => [
+          item.userId,
+          item.userName,
+          item.email,
+          item.totalExams,
+          item.averageScore,
+          item.passedExams,
+          item.passRate,
+          formatDate(item.lastExamDate)
+        ])
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Style header
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:H1');
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!ws[cellRef]) ws[cellRef] = {};
+        if (!ws[cellRef].s) ws[cellRef].s = {};
+        ws[cellRef].s = {
+          fill: { 
+            patternType: 'solid',
+            fgColor: { rgb: 'F59E0B' },
+            bgColor: { rgb: 'F59E0B' }
+          },
+          font: { 
+            bold: true, 
+            color: { rgb: 'FFFFFF' },
+            size: 11
+          },
+          alignment: { 
+            horizontal: 'center', 
+            vertical: 'center',
+            wrapText: false
+          },
+          border: {
+            top: { style: 'thin', color: { rgb: '000000' } },
+            bottom: { style: 'thin', color: { rgb: '000000' } },
+            left: { style: 'thin', color: { rgb: '000000' } },
+            right: { style: 'thin', color: { rgb: '000000' } }
+          }
+        };
+      }
+
+      ws['!cols'] = [
+        { width: 15 }, // ID Peserta
+        { width: 25 }, // Nama Peserta
+        { width: 30 }, // Email
+        { width: 15 }, // Total Ujian
+        { width: 18 }, // Rata-rata Nilai
+        { width: 15 }, // Ujian Lulus
+        { width: 20 }, // Tingkat Kelulusan
+        { width: 18 }  // Ujian Terakhir
+      ];
+      
+      // Freeze header row
+      ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+      
+      XLSX.utils.book_append_sheet(wb, ws, 'Performa Peserta');
+
     } else if (filename.includes('tren-waktu')) {
       const trendData = data as TimeTrend[];
-      csvContent = 'Tanggal,Jumlah Ujian,Rata-rata Nilai,Tanggal Format\n';
-      csvContent += trendData.map((item) => `"${item.date}",${item.count},${item.avgScore},"${item.formattedDate}"`).join('\n');
+      const headers = ['Tanggal', 'Jumlah Ujian', 'Rata-rata Nilai', 'Tanggal Format'];
+      const wsData = [
+        headers,
+        ...trendData.map((item) => [
+          item.date,
+          item.count,
+          item.avgScore,
+          item.formattedDate
+        ])
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Style header
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:D1');
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!ws[cellRef]) ws[cellRef] = {};
+        if (!ws[cellRef].s) ws[cellRef].s = {};
+        ws[cellRef].s = {
+          fill: { 
+            patternType: 'solid',
+            fgColor: { rgb: 'F59E0B' },
+            bgColor: { rgb: 'F59E0B' }
+          },
+          font: { 
+            bold: true, 
+            color: { rgb: 'FFFFFF' },
+            size: 11
+          },
+          alignment: { 
+            horizontal: 'center', 
+            vertical: 'center',
+            wrapText: false
+          },
+          border: {
+            top: { style: 'thin', color: { rgb: '000000' } },
+            bottom: { style: 'thin', color: { rgb: '000000' } },
+            left: { style: 'thin', color: { rgb: '000000' } },
+            right: { style: 'thin', color: { rgb: '000000' } }
+          }
+        };
+      }
+
+      ws['!cols'] = [
+        { width: 18 }, // Tanggal
+        { width: 18 }, // Jumlah Ujian
+        { width: 20 }, // Rata-rata Nilai
+        { width: 18 }  // Tanggal Format
+      ];
+      
+      // Freeze header row
+      ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+      
+      XLSX.utils.book_append_sheet(wb, ws, 'Tren Waktu');
+
     } else {
-      // Fallback to generic CSV export
+      // Fallback to generic Excel export
       const flattenData = (items: Record<string, unknown>[]) => {
         return items.map((item) => {
           const flattened: Record<string, unknown> = {};
@@ -278,24 +638,64 @@ export default function AdminLaporanPage() {
       };
 
       const flatData = flattenData(data as unknown as Record<string, unknown>[]);
-      const headers = Object.keys(flatData[0]).join(',');
-      const rows = flatData
-        .map((row) =>
-          Object.values(row)
-            .map((value) => (typeof value === 'string' && value.includes(',') ? `"${value}"` : value))
-            .join(',')
-        )
-        .join('\n');
-      csvContent = `${headers}\n${rows}`;
+      const headers = Object.keys(flatData[0]);
+      const wsData = [
+        headers,
+        ...flatData.map((row) => Object.values(row))
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Style header
+      const range = XLSX.utils.decode_range(ws['!ref'] || `A1:${String.fromCharCode(65 + headers.length - 1)}1`);
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+        if (!ws[cellRef]) ws[cellRef] = {};
+        if (!ws[cellRef].s) ws[cellRef].s = {};
+        ws[cellRef].s = {
+          fill: { 
+            patternType: 'solid',
+            fgColor: { rgb: 'F59E0B' },
+            bgColor: { rgb: 'F59E0B' }
+          },
+          font: { 
+            bold: true, 
+            color: { rgb: 'FFFFFF' },
+            size: 11
+          },
+          alignment: { 
+            horizontal: 'center', 
+            vertical: 'center',
+            wrapText: false
+          },
+          border: {
+            top: { style: 'thin', color: { rgb: '000000' } },
+            bottom: { style: 'thin', color: { rgb: '000000' } },
+            left: { style: 'thin', color: { rgb: '000000' } },
+            right: { style: 'thin', color: { rgb: '000000' } }
+          }
+        };
+      }
+
+      ws['!cols'] = headers.map(header => ({ width: 18 })); // Dynamic width based on content
+      
+      // Freeze header row
+      ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+      
+      XLSX.utils.book_append_sheet(wb, ws, 'Data');
     }
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Write Excel file
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${filename}-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `${filename}-${new Date().toISOString().split('T')[0]}.xlsx`;
     a.click();
     window.URL.revokeObjectURL(url);
+
+    toast.success('File Excel berhasil didownload!');
   };
 
   return (

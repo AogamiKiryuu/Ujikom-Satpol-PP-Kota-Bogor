@@ -105,16 +105,17 @@ function parseExcel(buffer: Buffer): PreviewQuestion[] {
     throw new Error('File Excel harus memiliki minimal 2 baris (header + 1 data)');
   }
 
-  const expectedHeaders = ['examTitle', 'examSubject', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer', 'points'];
-
-  // Convert to objects
+  // Get headers from first row
+  const headers = jsonData[0] as string[];
+  
+  // Convert rows to objects using actual headers
   const records = jsonData.slice(1).map((row: unknown[], index: number) => {
     const obj: Record<string, unknown> = {};
-    expectedHeaders.forEach((header, i) => {
+    headers.forEach((header, i) => {
       obj[header] = row[i] || '';
     });
     return validateQuestion(obj as unknown as CSVRow, index + 2);
-  });
+  }).filter(q => q.examTitle && q.questionText); // Filter out empty rows
 
   return records;
 }
