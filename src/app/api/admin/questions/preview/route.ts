@@ -30,7 +30,7 @@ interface PreviewQuestion {
 
 function validateQuestion(row: CSVRow, rowIndex: number): PreviewQuestion {
   const errors: string[] = [];
-  
+
   // Required field validation
   if (!row.examTitle?.trim()) {
     errors.push('Judul ujian tidak boleh kosong');
@@ -53,13 +53,13 @@ function validateQuestion(row: CSVRow, rowIndex: number): PreviewQuestion {
   if (!row.optionD?.trim()) {
     errors.push('Pilihan D tidak boleh kosong');
   }
-  
+
   // Correct answer validation
   const correctAnswer = row.correctAnswer?.trim().toUpperCase();
   if (!correctAnswer || !['A', 'B', 'C', 'D'].includes(correctAnswer)) {
     errors.push('Jawaban benar harus A, B, C, atau D');
   }
-  
+
   // Points validation
   const points = parseInt(row.points || '1');
   if (isNaN(points) || points < 1) {
@@ -89,8 +89,8 @@ function parseCSV(buffer: Buffer): PreviewQuestion[] {
     trim: true,
   });
 
-  return records.map((row: CSVRow, index: number) => 
-    validateQuestion(row, index + 2) // +2 because CSV starts from row 2 (after header)
+  return records.map(
+    (row: CSVRow, index: number) => validateQuestion(row, index + 2) // +2 because CSV starts from row 2 (after header)
   );
 }
 
@@ -98,18 +98,14 @@ function parseExcel(buffer: Buffer): PreviewQuestion[] {
   const workbook = XLSX.read(buffer, { type: 'buffer' });
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
-  
+
   const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
-  
+
   if (jsonData.length < 2) {
     throw new Error('File Excel harus memiliki minimal 2 baris (header + 1 data)');
   }
 
-  const expectedHeaders = [
-    'examTitle', 'examSubject', 'questionText', 
-    'optionA', 'optionB', 'optionC', 'optionD', 
-    'correctAnswer', 'points'
-  ];
+  const expectedHeaders = ['examTitle', 'examSubject', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer', 'points'];
 
   // Convert to objects
   const records = jsonData.slice(1).map((row: unknown[], index: number) => {
@@ -129,10 +125,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file uploaded' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -143,17 +136,11 @@ export async function POST(request: NextRequest) {
     } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
       questions = parseExcel(buffer);
     } else {
-      return NextResponse.json(
-        { error: 'Format file tidak didukung. Gunakan CSV atau Excel (.xlsx, .xls)' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Format file tidak didukung. Gunakan CSV atau Excel (.xlsx, .xls)' }, { status: 400 });
     }
 
     if (questions.length === 0) {
-      return NextResponse.json(
-        { error: 'File tidak mengandung data soal yang valid' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File tidak mengandung data soal yang valid' }, { status: 400 });
     }
 
     return NextResponse.json({
@@ -161,22 +148,18 @@ export async function POST(request: NextRequest) {
       questions,
       summary: {
         total: questions.length,
-        valid: questions.filter(q => !q.errors?.length).length,
-        invalid: questions.filter(q => q.errors?.length).length,
-      }
+        valid: questions.filter((q) => !q.errors?.length).length,
+        invalid: questions.filter((q) => q.errors?.length).length,
+      },
     });
-
   } catch (error) {
     console.error('Error in preview API:', error);
-    
+
     let errorMessage = 'Terjadi kesalahan saat memproses file';
     if (error instanceof Error) {
       errorMessage = error.message;
     }
 
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

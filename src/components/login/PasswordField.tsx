@@ -23,17 +23,18 @@ export default function PasswordField<T extends FieldValues>({ label, id, regist
           placeholder="Masukkan password"
           {...register(id)}
           className={`w-full px-4 py-3 pr-12 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm
-            ${error 
-              ? 'border-red-400 bg-red-50 dark:bg-red-900/20 focus:border-red-500 text-gray-900 dark:text-white' 
-              : 'border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/70 focus:border-blue-500 hover:border-gray-400 dark:hover:border-gray-500 text-gray-900 dark:text-white'
+            ${
+              error
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20 focus:border-red-500 text-gray-900 dark:text-white'
+                : 'border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/70 focus:border-blue-500 hover:border-gray-400 dark:hover:border-gray-500 text-gray-900 dark:text-white'
             }
             placeholder:text-gray-500 dark:placeholder:text-gray-400
             focus:bg-white dark:focus:bg-gray-800/90
           `}
         />
-        <button 
-          type="button" 
-          onClick={() => setShowPassword(!showPassword)} 
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
           className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/50 transition-colors"
         >
           {showPassword ? (

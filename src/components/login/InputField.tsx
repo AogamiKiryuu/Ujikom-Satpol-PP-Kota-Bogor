@@ -22,9 +22,10 @@ export default function InputField<T extends FieldValues>({ label, id, type, pla
           placeholder={placeholder}
           {...register(id)}
           className={`w-full px-4 py-3 rounded-xl border-2 outline-none transition-all duration-300 backdrop-blur-sm
-            ${error 
-              ? 'border-red-400 bg-red-50 dark:bg-red-900/20 focus:border-red-500 text-gray-900 dark:text-white' 
-              : 'border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/70 focus:border-blue-500 hover:border-gray-400 dark:hover:border-gray-500 text-gray-900 dark:text-white'
+            ${
+              error
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20 focus:border-red-500 text-gray-900 dark:text-white'
+                : 'border-gray-300 dark:border-gray-600 bg-white/80 dark:bg-gray-800/70 focus:border-blue-500 hover:border-gray-400 dark:hover:border-gray-500 text-gray-900 dark:text-white'
             }
             placeholder:text-gray-500 dark:placeholder:text-gray-400
             focus:bg-white dark:focus:bg-gray-800/90

@@ -10,10 +10,7 @@ export async function GET(request: NextRequest) {
 
     if (!token) {
       console.warn('No token found in cookies for /api/auth/me');
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     // Verify and decode the JWT token
@@ -22,10 +19,7 @@ export async function GET(request: NextRequest) {
 
     if (!userId) {
       console.warn('Invalid token payload for /api/auth/me. Payload:', payload);
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     // Fetch user information from database
@@ -42,10 +36,7 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       console.warn(`User not found for ID: ${userId}`);
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     console.log(`Successfully fetched user info for: ${user.email} (${user.role})`);
@@ -59,12 +50,8 @@ export async function GET(request: NextRequest) {
         createdAt: user.createdAt,
       },
     });
-
   } catch (error) {
     console.error('Error in /api/auth/me:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

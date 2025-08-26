@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, BarChart3, Download, Users, Award, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import * as XLSX from 'xlsx';
 
 interface OverviewStats {
   totalUsers: number;
@@ -188,7 +189,7 @@ export default function AdminLaporanPage() {
     return new Date(dateString).toLocaleString('id-ID');
   };
 
-  const exportToCSV = (data: RecentResult[] | ExamPerformance[] | UserPerformance[] | TimeTrend[], filename: string) => {
+  const exportToExcel = (data: RecentResult[] | ExamPerformance[] | UserPerformance[] | TimeTrend[], filename: string) => {
     if (data.length === 0) {
       toast.error('Tidak ada data untuk diekspor');
       return;
@@ -436,11 +437,11 @@ export default function AdminLaporanPage() {
                     <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white">Hasil Ujian Terbaru</h3>
                       <button
-                        onClick={() => exportToCSV(overviewData.recentResults, 'hasil-ujian-terbaru')}
+                        onClick={() => exportToExcel(overviewData.recentResults, 'hasil-ujian-terbaru')}
                         className="flex items-center px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
                       >
                         <Download className="w-4 h-4 mr-1" />
-                        Ekspor
+                        Ekspor Excel
                       </button>
                     </div>
                     <div className="overflow-x-auto">
@@ -494,11 +495,11 @@ export default function AdminLaporanPage() {
                             <p className="text-sm text-gray-600 dark:text-gray-400">{exam.subject}</p>
                           </div>
                           <button
-                            onClick={() => exportToCSV([exam], `performa-ujian-${exam.examTitle.replace(/\s+/g, '-')}`)}
+                            onClick={() => exportToExcel([exam], `performa-ujian-${exam.examTitle.replace(/\s+/g, '-')}`)}
                             className="flex items-center px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
                           >
                             <Download className="w-4 h-4 mr-1" />
-                            Ekspor
+                            Ekspor Excel
                           </button>
                         </div>
                       </div>
@@ -698,11 +699,11 @@ export default function AdminLaporanPage() {
                   <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">Performa Peserta</h3>
                     <button
-                      onClick={() => exportToCSV(userPerformanceData.userPerformance, 'performa-peserta')}
+                      onClick={() => exportToExcel(userPerformanceData.userPerformance, 'performa-peserta')}
                       className="flex items-center px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
                     >
                       <Download className="w-4 h-4 mr-1" />
-                      Ekspor
+                      Ekspor Excel
                     </button>
                   </div>
                   <div className="overflow-x-auto">
@@ -759,11 +760,11 @@ export default function AdminLaporanPage() {
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">Tren Waktu (30 Hari Terakhir)</h3>
                     <button
-                      onClick={() => exportToCSV(timeTrendsData.timeTrends, 'tren-waktu')}
+                      onClick={() => exportToExcel(timeTrendsData.timeTrends, 'tren-waktu')}
                       className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors"
                     >
                       <Download className="w-4 h-4 mr-2" />
-                      Ekspor CSV
+                      Ekspor Excel
                     </button>
                   </div>
 
