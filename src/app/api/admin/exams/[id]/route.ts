@@ -69,7 +69,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(examWithStats);
   } catch (error) {
     console.error('Get exam error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Terjadi kesalahan saat mengambil data ujian' }, { status: 500 });
   }
 }
 
@@ -83,13 +83,23 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    const { title, subject, description, startDate, endDate, duration } = body;
+    const { title, subject, description, startDate, endDate, duration, passingScore, isActive } = body;
 
     // Validate required fields
     if (!title || !subject || !startDate || !endDate || !duration) {
       return NextResponse.json(
         {
-          error: 'Title, subject, start date, end date, and duration are required',
+          error: 'Judul, mata pelajaran, tanggal mulai, tanggal selesai, dan durasi wajib diisi',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate passingScore
+    if (passingScore !== undefined && (passingScore < 0 || passingScore > 100)) {
+      return NextResponse.json(
+        {
+          error: 'Nilai kelulusan harus antara 0 dan 100',
         },
         { status: 400 }
       );
@@ -101,7 +111,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (start >= end) {
       return NextResponse.json(
         {
-          error: 'Start date must be before end date',
+          error: 'Tanggal mulai harus sebelum tanggal selesai',
         },
         { status: 400 }
       );
@@ -113,7 +123,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!existingExam) {
-      return NextResponse.json({ error: 'Exam not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Ujian tidak ditemukan' }, { status: 404 });
     }
 
     // Update exam
@@ -126,6 +136,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         startDate: start,
         endDate: end,
         duration: parseInt(duration),
+        ...(passingScore !== undefined && { passingScore: parseInt(passingScore) }),
+        ...(isActive !== undefined && { isActive: Boolean(isActive) }),
       },
       include: {
         questions: {
@@ -140,7 +152,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error('Update exam error:', error);
-    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+    return NextResponse.json({ error: 'Terjadi kesalahan saat memperbarui ujian' }, { status: 500 });
   }
 }
 
@@ -185,6 +197,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error('Delete exam error:', error);
-    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+    return NextResponse.json({ error: 'Terjadi kesalahan saat menghapus ujian' }, { status: 500 });
   }
 }

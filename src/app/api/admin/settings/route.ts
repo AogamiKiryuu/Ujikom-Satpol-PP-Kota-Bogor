@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyJWT } from '@/lib/middlewares/auth';
-
-// System settings model (you may want to add this to your Prisma schema)
 interface SystemSettings {
   siteName: string;
   siteDescription: string;

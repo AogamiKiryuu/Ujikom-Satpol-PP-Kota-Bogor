@@ -66,7 +66,7 @@ export default function AdminDashboard() {
           const statsData = await statsResponse.json();
           setStats(statsData);
         } else if (statsResponse.status === 401) {
-          toast.error('Session expired. Please login again.');
+          toast.error('Sesi telah berakhir. Silakan login kembali.');
           router.push('/login');
         } else {
           throw new Error('Failed to fetch dashboard data');
