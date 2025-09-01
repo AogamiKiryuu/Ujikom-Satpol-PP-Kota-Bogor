@@ -1,0 +1,120 @@
+<mxfile host="app.diagrams.net" modified="2025-08-28T00:00:00.000Z" agent="5.0" etag="system-arch" version="24.7.6" type="device">
+  <diagram name="System Architecture" id="system-arch">
+    <mxGraphModel dx="1422" dy="754" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Frontend Layer -->
+        <mxCell id="frontend-layer" value="Frontend Layer (Next.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="1000" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Admin Panel -->
+        <mxCell id="admin-panel" value="Admin Panel&#xa;• Dashboard&#xa;• Manajemen Ujian&#xa;• Manajemen Soal&#xa;• Manajemen Peserta&#xa;• Laporan" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="180" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Student Portal -->
+        <mxCell id="student-portal" value="Student Portal&#xa;• Dashboard Peserta&#xa;• Ujian Online&#xa;• Hasil Ujian&#xa;• Profil" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="360" y="180" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Auth System -->
+        <mxCell id="auth-system" value="Authentication&#xa;• JWT Token&#xa;• Login/Register&#xa;• Role-based Access&#xa;• Session Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="600" y="180" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Components -->
+        <mxCell id="components" value="Shared Components&#xa;• UI Components&#xa;• Forms&#xa;• Modals&#xa;• Charts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="840" y="180" width="200" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- API Layer -->
+        <mxCell id="api-layer" value="API Layer (Next.js API Routes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffd966;strokeColor=#d6b656;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="360" width="1000" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Admin APIs -->
+        <mxCell id="admin-apis" value="Admin APIs&#xa;• /api/admin/exams&#xa;• /api/admin/questions&#xa;• /api/admin/users&#xa;• /api/admin/reports" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="460" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Student APIs -->
+        <mxCell id="student-apis" value="Student APIs&#xa;• /api/peserta/exams&#xa;• /api/peserta/submit&#xa;• /api/peserta/results&#xa;• /api/peserta/stats" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="360" y="460" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Auth APIs -->
+        <mxCell id="auth-apis" value="Auth APIs&#xa;• /api/auth/login&#xa;• /api/auth/register&#xa;• /api/auth/logout&#xa;• /api/auth/verify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="600" y="460" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- File APIs -->
+        <mxCell id="file-apis" value="File APIs&#xa;• /api/admin/import&#xa;• /api/admin/export&#xa;• /api/admin/template&#xa;• File Upload" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="840" y="460" width="200" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Database Layer -->
+        <mxCell id="database-layer" value="Database Layer (PostgreSQL + Prisma ORM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2d7600;fontSize=14;fontStyle=1;fontColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="80" y="620" width="1000" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Database Tables -->
+        <mxCell id="db-tables" value="Database Tables&#xa;• User (Admin/Student)&#xa;• Exam&#xa;• Question (with Points)&#xa;• ExamTaken&#xa;• Answer&#xa;• Settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#60a917;strokeColor=#2d7600;fontColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="400" y="720" width="300" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Arrows -->
+        <mxCell id="arrow1" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="frontend-layer" target="api-layer">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="400" as="sourcePoint" />
+            <mxPoint x="610" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow2" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="api-layer" target="database-layer">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="500" as="sourcePoint" />
+            <mxPoint x="610" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Component connections -->
+        <mxCell id="conn1" value="" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeStyle=dashed;" edge="1" parent="1" source="admin-panel" target="admin-apis">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="400" as="sourcePoint" />
+            <mxPoint x="610" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="conn2" value="" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeStyle=dashed;" edge="1" parent="1" source="student-portal" target="student-apis">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="400" as="sourcePoint" />
+            <mxPoint x="610" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="conn3" value="" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeStyle=dashed;" edge="1" parent="1" source="auth-system" target="auth-apis">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="400" as="sourcePoint" />
+            <mxPoint x="610" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="conn4" value="" style="endArrow=none;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeStyle=dashed;" edge="1" parent="1" source="components" target="file-apis">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="400" as="sourcePoint" />
+            <mxPoint x="610" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Title -->
+        <mxCell id="title" value="CBT System Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="20" width="200" height="30" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

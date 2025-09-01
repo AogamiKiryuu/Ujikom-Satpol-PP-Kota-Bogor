@@ -5,18 +5,44 @@ import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
 import { BookOpen, Users, Trophy, Clock, Shield, CheckCircle, ArrowRight, Star, TrendingUp, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = document.cookie.includes('token=') || localStorage.getItem('authToken');
-    const role = localStorage.getItem('userRole');
+    let cancelled = false;
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me', {
+          credentials: 'include',
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' },
+        });
+        if (!cancelled && res.ok) {
+          const data = await res.json();
+          setIsLoggedIn(true);
+          setUserRole(data.user?.role ?? null);
+          return;
+        }
+      } catch {}
 
-    setIsLoggedIn(!!token);
-    setUserRole(role);
+      // Fallback to localStorage (legacy)
+      try {
+        const token = localStorage.getItem('authToken');
+        const role = localStorage.getItem('userRole');
+        if (!cancelled) {
+          setIsLoggedIn(!!token);
+          setUserRole(role);
+        }
+      } catch {}
+    };
+    checkAuth();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const getDashboardLink = () => {
@@ -74,16 +100,15 @@ export default function Home() {
                 <button
                   onClick={async () => {
                     try {
-                      const res = await fetch('/api/auth/logout', {
-                        method: 'POST',
-                        credentials: 'include',
-                      });
+                      const res = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
                       if (res.ok) {
-                        localStorage.removeItem('authToken');
-                        localStorage.removeItem('userRole');
+                        try {
+                          localStorage.removeItem('authToken');
+                          localStorage.removeItem('userRole');
+                        } catch {}
                         setIsLoggedIn(false);
                         setUserRole(null);
-                        window.location.reload();
+                        router.replace('/');
                       }
                     } catch (error) {
                       console.error('Logout error:', error);

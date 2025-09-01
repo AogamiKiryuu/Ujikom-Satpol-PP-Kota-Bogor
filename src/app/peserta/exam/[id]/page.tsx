@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Clock, AlertCircle, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -42,6 +42,8 @@ export default function ExamPage() {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const autoSubmittedRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchExamData = useCallback(async () => {
     try {
@@ -76,67 +78,86 @@ export default function ExamPage() {
     }
   }, [examId, router]);
 
-  const handleSubmitExam = useCallback(async () => {
-    if (submitting) return;
+  const handleSubmitExam = useCallback(
+    async (opts?: { force?: boolean }) => {
+      if (submitting) return;
 
-    const unansweredQuestions = examData?.questions.filter((q) => !answers[q.id]).length || 0;
+      const unansweredQuestions = examData?.questions.filter((q) => !answers[q.id]).length || 0;
 
-    if (unansweredQuestions > 0) {
-      const confirm = window.confirm(`Masih ada ${unansweredQuestions} soal yang belum dijawab. Yakin ingin menyelesaikan ujian?`);
-      if (!confirm) return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const response = await fetch(`/api/peserta/exam/${examId}/submit`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        toast.success(`Ujian selesai! Skor Anda: ${result.score}`);
-        // Redirect to result page instead of dashboard
-        setTimeout(() => {
-          router.push(`/peserta/exam/${examId}/result`);
-        }, 1500);
-      } else {
-        const error = await response.json();
-        toast.error(error.error || 'Gagal menyelesaikan ujian');
+      if (!opts?.force && unansweredQuestions > 0) {
+        const confirm = window.confirm(`Masih ada ${unansweredQuestions} soal yang belum dijawab. Yakin ingin menyelesaikan ujian?`);
+        if (!confirm) return;
       }
-    } catch (error) {
-      console.error('Error submitting exam:', error);
-      toast.error('Terjadi kesalahan saat menyelesaikan ujian');
-    } finally {
-      setSubmitting(false);
-    }
-  }, [submitting, examData?.questions, answers, examId, router]);
+
+      setSubmitting(true);
+
+      try {
+        const response = await fetch(`/api/peserta/exam/${examId}/submit`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          toast.success(`Ujian selesai! Skor Anda: ${result.score}`);
+          // Redirect to result page instead of dashboard
+          setTimeout(() => {
+            router.push(`/peserta/exam/${examId}/result`);
+          }, 1500);
+        } else {
+          const error = await response.json();
+          toast.error(error.error || 'Gagal menyelesaikan ujian');
+        }
+      } catch (error) {
+        console.error('Error submitting exam:', error);
+        toast.error('Terjadi kesalahan saat menyelesaikan ujian');
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [submitting, examData?.questions, answers, examId, router]
+  );
 
   const handleAutoSubmit = useCallback(async () => {
+    if (autoSubmittedRef.current) return;
+    autoSubmittedRef.current = true;
     toast.warning('Waktu ujian telah habis. Ujian akan diselesaikan otomatis.');
-    await handleSubmitExam();
+    await handleSubmitExam({ force: true });
   }, [handleSubmitExam]);
 
   useEffect(() => {
     fetchExamData();
   }, [fetchExamData]);
 
+  // Countdown timer: avoid side-effects inside setState updater
   useEffect(() => {
-    if (examData && timeRemaining > 0) {
-      const timer = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            handleAutoSubmit();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+    if (!examData) return;
+    if (timeRemaining <= 0) return;
 
-      return () => clearInterval(timer);
+    // Start/restart interval
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeRemaining((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [examData, timeRemaining]);
+
+  // Trigger auto submit once when time hits 0
+  useEffect(() => {
+    if (examData && timeRemaining === 0) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      handleAutoSubmit();
     }
-  }, [examData, timeRemaining, handleAutoSubmit]);
+  }, [timeRemaining, examData, handleAutoSubmit]);
 
   const saveAnswer = async (questionId: string, selectedOption: string) => {
     try {
@@ -331,7 +352,7 @@ export default function ExamPage() {
                 <div className="flex space-x-3">
                   {currentQuestionIndex === totalQuestions - 1 ? (
                     <button
-                      onClick={handleSubmitExam}
+                      onClick={() => handleSubmitExam()}
                       disabled={submitting}
                       className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >

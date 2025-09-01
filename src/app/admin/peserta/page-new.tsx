@@ -193,13 +193,13 @@ export default function AdminPesertaPage() {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Kelola data peserta ujian CBT</p>
         </div>
         <div className="mt-4 sm:mt-0 flex space-x-3">
-          <button className="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+          <button className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <Download className="w-4 h-4 mr-2" />
             Export
           </button>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg text-sm font-medium text-white hover:from-blue-700 hover:to-purple-700 transition-colors shadow"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4 mr-2" />
             Tambah Peserta
@@ -243,31 +243,31 @@ export default function AdminPesertaPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600">
-              <User className="w-6 h-6 text-white" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+              <User className="w-6 h-6 text-blue-600 dark:text-blue-300" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Peserta</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{pagination.total.toLocaleString('id-ID')}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{pagination.total}</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600">
-              <Calendar className="w-6 h-6 text-white" />
+            <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+              <Calendar className="w-6 h-6 text-green-600 dark:text-green-300" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Aktif Bulan Ini</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {peserta
-                  .filter((p) => {
+                {
+                  peserta.filter((p) => {
                     const created = new Date(p.createdAt);
                     const now = new Date();
                     return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
-                  })
-                  .length.toLocaleString('id-ID')}
+                  }).length
+                }
               </p>
             </div>
           </div>
@@ -275,24 +275,24 @@ export default function AdminPesertaPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-indigo-400 to-indigo-600">
-              <User className="w-6 h-6 text-white" />
+            <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+              <Mail className="w-6 h-6 text-purple-600 dark:text-purple-300" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Laki-laki</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{peserta.filter((p) => p.gender === 'LAKI_LAKI').length.toLocaleString('id-ID')}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{peserta.filter((p) => p.gender === 'LAKI_LAKI').length}</p>
             </div>
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-pink-400 to-pink-600">
-              <User className="w-6 h-6 text-white" />
+            <div className="p-3 bg-pink-100 dark:bg-pink-900 rounded-lg">
+              <User className="w-6 h-6 text-pink-600 dark:text-pink-300" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Perempuan</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{peserta.filter((p) => p.gender === 'PEREMPUAN').length.toLocaleString('id-ID')}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{peserta.filter((p) => p.gender === 'PEREMPUAN').length}</p>
             </div>
           </div>
         </div>
@@ -305,14 +305,9 @@ export default function AdminPesertaPage() {
         </div>
 
         {loading ? (
-          <div className="p-6">
-            <div className="space-y-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="h-12 w-full bg-gray-100 dark:bg-gray-700 rounded" />
-                </div>
-              ))}
-            </div>
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Memuat data...</p>
           </div>
         ) : peserta.length === 0 ? (
           <div className="p-8 text-center">
@@ -356,7 +351,7 @@ export default function AdminPesertaPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {person._count.examResults.toLocaleString('id-ID')} ujian
+                        {person._count.examResults} ujian
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

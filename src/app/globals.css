@@ -222,3 +222,50 @@
 .Toastify__toast--info {
   background: #3b82f6;
 }
+
+/* Global press/active feedback for buttons */
+button,
+[type='button'],
+[type='submit'],
+a[role='button'],
+.btn,
+.pressable {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  will-change: transform;
+}
+
+/* Apply to anchors that look like buttons (rounded + padded) */
+a[class*='rounded-'][class*='px-'],
+a[class*='rounded-'][class*='py-'] {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  will-change: transform;
+}
+
+button:active,
+[type='button']:active,
+[type='submit']:active,
+a[role='button']:active,
+.btn:active,
+.pressable:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: none !important;
+  filter: brightness(0.98);
+}
+
+/* Active state for anchors that look like buttons */
+a[class*='rounded-'][class*='px-']:active,
+a[class*='rounded-'][class*='py-']:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: none !important;
+  filter: brightness(0.98);
+}
+
+button:disabled,
+[type='button'][disabled],
+[type='submit'][disabled],
+[aria-disabled='true'],
+.btn:disabled,
+.pressable:disabled {
+  transform: none !important;
+  filter: none !important;
+}
