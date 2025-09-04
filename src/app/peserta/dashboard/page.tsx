@@ -2,7 +2,7 @@
 
 import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
-import { BookOpen, Clock, CheckCircle, AlertCircle, LogOut, Calendar, Trophy } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, AlertCircle, Calendar, Trophy } from 'lucide-react';
 
 interface PesertaStats {
   availableExams: number;
@@ -41,6 +41,7 @@ export default function PesertaDashboard() {
   const [exams, setExams] = useState<ExamItem[]>([]);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'available' | 'ongoing' | 'completed'>('all');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,33 +102,6 @@ export default function PesertaDashboard() {
 
     fetchData();
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      const res = await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (res.ok) {
-        // Clear localStorage as well if used
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userRole');
-
-        toast.success('Berhasil logout');
-
-        // Small delay to show toast, then redirect
-        setTimeout(() => {
-          window.location.replace('/'); // Hard redirect to clear all state
-        }, 1000);
-      } else {
-        toast.error('Gagal logout');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('Terjadi kesalahan saat logout');
-    }
-  };
 
   const handleStartExam = async (examId: string) => {
     const exam = exams.find((e) => e.id === examId);
@@ -199,57 +173,53 @@ export default function PesertaDashboard() {
   };
 
   const statCards = [
-    { title: 'Ujian Tersedia', value: stats.availableExams, icon: BookOpen, color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-50 dark:bg-green-900/20' },
-    { title: 'Ujian Selesai', value: stats.completedExams, icon: CheckCircle, color: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-50 dark:bg-blue-900/20' },
-    { title: 'Ujian Berlangsung', value: stats.ongoingExams, icon: Clock, color: 'text-orange-600 dark:text-orange-400', bgColor: 'bg-orange-50 dark:bg-orange-900/20' },
-    { title: 'Rata-rata Nilai', value: `${stats.averageScore}%`, icon: Trophy, color: 'text-purple-600 dark:text-purple-400', bgColor: 'bg-purple-50 dark:bg-purple-900/20' },
+    { title: 'Ujian Tersedia', value: stats.availableExams, icon: BookOpen, gradient: 'from-emerald-400 to-emerald-600' },
+    { title: 'Ujian Selesai', value: stats.completedExams, icon: CheckCircle, gradient: 'from-blue-400 to-blue-600' },
+    { title: 'Ujian Berlangsung', value: stats.ongoingExams, icon: Clock, gradient: 'from-orange-400 to-orange-600' },
+    { title: 'Rata-rata Nilai', value: `${stats.averageScore}%`, icon: Trophy, gradient: 'from-purple-400 to-purple-600' },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Dashboard Peserta</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 dark:text-gray-300">Selamat datang, {userInfo?.name || 'Peserta'}</span>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
+          {/* Welcome Banner */}
+          <div className="mb-6">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-sm border border-white/10 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg sm:text-xl font-semibold">Halo, {userInfo?.name || 'Peserta'}</h2>
+                <p className="text-sm text-blue-100">Selamat datang di Dashboard Peserta</p>
+              </div>
+              <div className="hidden sm:block">
+                <div className="w-10 h-10 rounded-lg border border-white/20 flex items-center justify-center">
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {statCards.map((stat, index) => (
-              <div key={index} className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                        <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                      </div>
+              <div key={index} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.gradient}`}>
+                      <stat.icon className="w-6 h-6 text-white" />
                     </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{stat.title}</dt>
-                        <dd className="text-2xl font-semibold text-gray-900 dark:text-white">{loading ? '...' : stat.value}</dd>
-                      </dl>
-                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{stat.title}</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                      {loading ? (
+                        <span className="inline-block w-16 h-8 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                      ) : typeof stat.value === 'number' ? (
+                        stat.value.toLocaleString('id-ID')
+                      ) : (
+                        stat.value
+                      )}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -257,72 +227,109 @@ export default function PesertaDashboard() {
           </div>
 
           {/* Exam List */}
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-6">Daftar Ujian</h3>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Daftar Ujian</h3>
+                <div className="flex items-center gap-2">
+                  {(['all', 'available', 'ongoing', 'completed'] as const).map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => setStatusFilter(key)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                        statusFilter === key
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {key === 'all' ? 'Semua' : key === 'available' ? 'Tersedia' : key === 'ongoing' ? 'Berlangsung' : 'Selesai'}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="space-y-4">
                 {loading ? (
-                  <div className="text-center py-8">
-                    <div className="text-gray-500 dark:text-gray-400">Memuat data...</div>
-                  </div>
-                ) : exams.length === 0 ? (
-                  <div className="text-center py-8">
-                    <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <div className="text-gray-500 dark:text-gray-400">Belum ada ujian tersedia</div>
-                  </div>
-                ) : (
-                  exams.map((exam) => (
-                    <div key={exam.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <h4 className="text-lg font-medium text-gray-900 dark:text-white">{exam.title}</h4>
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(exam.status)}`}>{getStatusText(exam.status)}</span>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
-                            <div className="flex items-center">
-                              <BookOpen className="w-4 h-4 mr-2" />
-                              {exam.subject}
-                            </div>
-                            <div className="flex items-center">
-                              <Clock className="w-4 h-4 mr-2" />
-                              {exam.duration} menit
-                            </div>
-                            <div className="flex items-center">
-                              <AlertCircle className="w-4 h-4 mr-2" />
-                              {exam.questions} soal
-                            </div>
-                            <div className="flex items-center">
-                              <Calendar className="w-4 h-4 mr-2" />
-                              Deadline: {new Date(exam.deadline).toLocaleDateString('id-ID')}
-                            </div>
-                          </div>
-                          {exam.score && (
-                            <div className="mt-2">
-                              <span className="text-sm font-medium text-green-600 dark:text-green-400">Nilai: {exam.score}/100</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="ml-4">
-                          {exam.status === 'available' && (
-                            <button onClick={() => handleStartExam(exam.id)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                              Mulai Ujian
-                            </button>
-                          )}
-                          {exam.status === 'ongoing' && (
-                            <button onClick={() => handleResumeExam(exam.id)} className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                              Lanjutkan
-                            </button>
-                          )}
-                          {exam.status === 'completed' && (
-                            <button onClick={() => handleViewResult(exam.id)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-                              Lihat Hasil
-                            </button>
-                          )}
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="animate-pulse border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                          {[...Array(4)].map((_, j) => (
+                            <div key={j} className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded" />
+                          ))}
                         </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
+                ) : exams.filter((e) => (statusFilter === 'all' ? true : e.status === statusFilter)).length === 0 ? (
+                  <div className="text-center py-8">
+                    <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <div className="text-gray-500 dark:text-gray-400">Tidak ada ujian untuk filter ini</div>
+                  </div>
+                ) : (
+                  exams
+                    .filter((e) => (statusFilter === 'all' ? true : e.status === statusFilter))
+                    .map((exam) => (
+                      <div key={exam.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <h4 className="text-lg font-medium text-gray-900 dark:text-white">{exam.title}</h4>
+                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(exam.status)}`}>{getStatusText(exam.status)}</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                              <div className="flex items-center">
+                                <BookOpen className="w-4 h-4 mr-2" />
+                                {exam.subject}
+                              </div>
+                              <div className="flex items-center">
+                                <Clock className="w-4 h-4 mr-2" />
+                                {exam.duration} menit
+                              </div>
+                              <div className="flex items-center">
+                                <AlertCircle className="w-4 h-4 mr-2" />
+                                {exam.questions} soal
+                              </div>
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                Deadline: {new Date(exam.deadline).toLocaleDateString('id-ID')}
+                              </div>
+                            </div>
+                            {typeof exam.score === 'number' && (
+                              <div className="mt-2">
+                                <span className="text-sm font-medium text-green-600 dark:text-green-400">Nilai: {exam.score}/100</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="ml-4">
+                            {exam.status === 'available' && (
+                              <button
+                                onClick={() => handleStartExam(exam.id)}
+                                className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
+                              >
+                                Mulai Ujian
+                              </button>
+                            )}
+                            {exam.status === 'ongoing' && (
+                              <button
+                                onClick={() => handleResumeExam(exam.id)}
+                                className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
+                              >
+                                Lanjutkan
+                              </button>
+                            )}
+                            {exam.status === 'completed' && (
+                              <button
+                                onClick={() => handleViewResult(exam.id)}
+                                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
+                              >
+                                Lihat Hasil
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
                 )}
               </div>
             </div>

@@ -13,7 +13,6 @@ interface ImportedQuestion {
   optionC: string;
   optionD: string;
   correctAnswer: string;
-  points: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -197,7 +196,6 @@ export async function POST(request: NextRequest) {
           optionC: question.optionC.trim(),
           optionD: question.optionD.trim(),
           correctAnswer: question.correctAnswer.toUpperCase(),
-          points: parseInt(question.points) || 1,
         });
       }
 

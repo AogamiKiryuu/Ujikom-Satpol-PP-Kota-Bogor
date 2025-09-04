@@ -11,9 +11,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   // Enable network access for development
-  experimental: {
-    serverComponentsExternalPackages: [],
-  },
+  serverExternalPackages: [],
   // Production server configuration
   async headers() {
     return [

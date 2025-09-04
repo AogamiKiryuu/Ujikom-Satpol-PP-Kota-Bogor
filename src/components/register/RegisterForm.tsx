@@ -108,7 +108,7 @@ export default function RegisterForm() {
 
       <p className="text-center text-sm text-gray-600 dark:text-gray-300 mt-4">
         Sudah punya akun?{' '}
-        <a href="/login" className="text-cyan-300 hover:underline">
+        <a href="/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm font-medium transition-colors">
           <u><b>Masuk di sini</b></u>
         </a>
       </p>

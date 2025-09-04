@@ -1,8 +1,8 @@
 # 📝 CBT Exam System - Satpol PP Kota Bogor
 
-**Computer-Based Test (CBT) System** untuk Ujian Kompetensi Satuan Polisi Pamong Praja Kota Bogor. Sistem ujian digital yang modern, aman, dan mudah digunakan dengan fitur import soal otomatis dan analisis mendalam.
+**Computer-Based Test (CBT) System** untuk Ujian Kompetensi Satuan Polisi Pamong Praja Kota Bogor. Sistem ujian digital yang modern, aman, dan mudah digunakan dengan fitur import soal otomatis, navigasi mobile-friendly, dan analisis mendalam.
 
-![Next.js](https://img.shields.io/badge/Next.js-15.4.5-black?style=flat-square&logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)
 ![Prisma](https://img.shields.io/badge/Prisma-6.13.0-2D3748?style=flat-square&logo=prisma)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?style=flat-square&logo=postgresql)
@@ -12,17 +12,27 @@
 ### 👥 **Multi-Role System**
 
 - **Admin**: Kelola ujian, soal, peserta, dan laporan komprehensif
-- **Peserta**: Ikuti ujian dengan interface yang user-friendly dan real-time timer
+- **Peserta**: Ikuti ujian dengan interface yang user-friendly dan navigasi mobile-optimized
 
 ### 🎯 **Advanced Exam Management**
 
 - ✅ CRUD ujian dengan pengaturan waktu fleksibel
 - ✅ Bank soal dengan multiple choice (A, B, C, D)
-- ✅ **Import Soal Massal** via CSV dengan template dinamis
-- ✅ **Drag & Drop Upload** untuk kemudahan import
+- ✅ **Import Soal Massal** via CSV/Excel dengan template dinamis
+- ✅ **Modal Import Responsif** untuk resolusi rendah (1366x768+)
+- ✅ **Equal Scoring System** - semua soal memiliki bobot nilai yang sama
 - ✅ Auto-grading system dengan skor real-time
 - ✅ Timer otomatis per ujian dengan auto-submit
 - ✅ Template download berdasarkan ujian terpilih
+
+### 📱 **Mobile-First User Experience**
+
+- ✅ **Railway Navigation** - navigasi soal horizontal dengan scroll smooth
+- ✅ **Touch-Optimized Interface** - button size 44px minimum untuk mobile
+- ✅ **Auto-scroll** ke soal aktif pada navigasi mobile
+- ✅ **Enhanced Clickable Feedback** - hover effects dan visual indicators
+- ✅ **Progress Bar Animated** dengan visual feedback
+- ✅ **Responsive Modal Design** untuk semua resolusi layar
 
 ### 📊 **Advanced Analytics & Comprehensive Reporting**
 
@@ -48,33 +58,34 @@
 - ✅ Password hashing dengan bcrypt
 - ✅ Session management yang aman
 - ✅ Input validation dan sanitization
-- ✅ Rate limiting untuk API endpoints
 
-### 🎨 **User Experience**
+### 🎨 **User Experience & Interface**
 
 - ✅ **Dark/Light Mode** dengan theme persistence
-- ✅ Responsive design untuk semua device
-- ✅ Real-time countdown timer
+- ✅ **Fully Responsive Design** untuk semua device
+- ✅ **Professional Icons** menggunakan Lucide React (tanpa emoji)
+- ✅ Real-time countdown timer dengan visual feedback
 - ✅ Progress tracking selama ujian
 - ✅ Toast notifications dalam Bahasa Indonesia
 - ✅ Loading states dan skeleton UI
+- ✅ **Consistent Hover Effects** pada semua clickable elements
+- ✅ **Scale Animations** dan smooth transitions
 
 ## 🛠️ Tech Stack
 
 ### **Frontend**
 
-- **Next.js 15.4.5** - React framework dengan App Router
-- **TypeScript** - Type-safe development
+- **Next.js 15.5.2** - React framework dengan App Router
+- **TypeScript** - Type-safe development  
 - **Tailwind CSS** - Modern styling dengan responsive design
-- **Framer Motion** - Smooth animations dan transitions
+- **Custom CSS Utilities** - Enhanced hover effects dan animations
 - **React Hook Form** - Advanced form management
-- **React Hot Toast** - Beautiful notifications
-- **Lucide React** - Modern icon library
+- **React Toastify** - Beautiful notifications
+- **Lucide React** - Professional icon library (no emojis)
 - **Next Themes** - Dark/Light mode support
 
 ### **Backend**
 
-- **Next.js API Routes** - Full-stack server-side endpoints
 - **Prisma ORM** - Type-safe database management
 - **PostgreSQL** - Robust primary database
 - **JWT (jose)** - Secure authentication tokens
@@ -176,16 +187,75 @@ pnpm dev
    - Edit ujian existing dengan validasi
    - Hapus ujian (jika belum ada peserta)
 4. **Manajemen Soal** di menu "Soal":
-   - **Import massal** via CSV dengan template dinamis
+   - **Import massal** via CSV/Excel dengan modal responsif
    - **Drag & drop** file upload untuk kemudahan
+   - Preview data sebelum import dengan validasi
    - CRUD soal individual dengan validasi
-   - Preview template sebelum download
 5. **Monitor Peserta** di menu "Peserta"
-6. **Analisis Tingkat Kesulitan** di menu "Laporan":
+6. **Analisis Comprehensive** di menu "Laporan":
    - Evaluasi kesulitan ujian secara keseluruhan
    - Analisis per soal dengan 6 level kesulitan
-   - Distribusi jawaban dan rekomendasi perbaikan
-   - Export data analisis dalam format CSV
+   - Export laporan dalam format CSV
+
+### **Student Experience**
+
+1. **Login** sebagai peserta dengan credentials yang valid
+2. **Dashboard Peserta** - lihat ujian yang tersedia dan riwayat
+3. **Mengikuti Ujian**:
+   - **Mobile-First Interface** dengan railway navigation
+   - **Touch-Optimized Controls** untuk semua device
+   - **Real-time Auto-save** untuk setiap jawaban
+   - **Visual Progress Indicator** dengan animated progress bar
+   - **Smart Navigation** dengan auto-scroll ke soal aktif
+4. **Hasil Ujian**:
+   - Tampilan hasil dengan **professional icons** (CheckCircle/XCircle)
+   - **Equal scoring system** - semua soal bernilai sama
+   - Detail jawaban dan analisis performance
+
+#### **2. Format CSV Template**
+
+Template CSV memiliki kolom berikut:
+- `examTitle` - Judul ujian (opsional, akan menggunakan ujian terpilih)
+- `examSubject` - Mata pelajaran (opsional)
+- `questionText` - Teks pertanyaan (required)
+- `optionA` - Pilihan A (required)
+- `optionB` - Pilihan B (required)  
+- `optionC` - Pilihan C (required)
+- `optionD` - Pilihan D (required)
+- `correctAnswer` - Jawaban benar: A/B/C/D (required)
+
+**Contoh Template:**
+```csv
+examTitle,examSubject,questionText,optionA,optionB,optionC,optionD,correctAnswer
+Matematika,Dasar,2 + 2 = ?,2,3,4,5,C
+Matematika,Dasar,5 × 3 = ?,13,15,18,20,B
+Matematika,Lanjut,Integral ∫x² dx = ?,x³ + C,x³/3 + C,2x + C,x + C,B
+```
+
+#### **3. Equal Scoring System**
+
+Sistem penilaian yang disederhanakan:
+- **Semua soal memiliki bobot yang sama** (1 poin per soal)
+- **Tidak ada weighted scoring** berdasarkan tingkat kesulitan
+- **Perhitungan mudah**: Skor = (Jawaban Benar / Total Soal) × 100%
+
+**Contoh Perhitungan:**
+```
+Ujian dengan 10 soal:
+- Jawaban benar: 8 soal
+- Skor Akhir: (8/10) × 100% = 80%
+```
+
+#### **4. Mobile-Responsive Features**
+
+- **Modal Import** yang adaptif untuk resolusi 1366x768+
+- **Railway Navigation** untuk navigasi soal di mobile
+- **Touch-friendly buttons** dengan minimum 44px touch target
+- **Auto-scroll** ke soal aktif saat navigasi
+- **Hover effects** yang konsisten pada semua clickable elements
+
+- Distribusi jawaban dan rekomendasi perbaikan
+- Export data analisis dalam format CSV
 
 ### **Import Soal (New Flow)**
 
@@ -203,8 +273,6 @@ pnpm dev
 4. **Auto-save** jawaban untuk mencegah kehilangan data
 5. **Submit Otomatis** saat waktu habis
 6. **Hasil Instan** dengan breakdown skor dan analisis
-
-## 🧪 API Endpoints
 
 ### **Authentication**
 
@@ -229,7 +297,6 @@ pnpm dev
 - `GET /api/admin/questions/[id]` - Get question details
 - `PUT /api/admin/questions/[id]` - Update question
 - `DELETE /api/admin/questions/[id]` - Delete question
-- `POST /api/admin/questions/import` - **Bulk import via CSV**
 
 ### **Admin API - Reports & Analytics**
 
@@ -246,10 +313,49 @@ pnpm dev
 - `GET /api/peserta/exam/[id]` - Get exam for taking
 - `POST /api/peserta/exam/[id]/start` - Start exam session
 - `POST /api/peserta/exam/[id]/answer` - Submit answer dengan auto-save
-- `POST /api/peserta/exam/[id]/submit` - **Final submit dengan scoring**
-- `GET /api/peserta/exam/[id]/result` - Get exam results
+- `POST /api/peserta/exam/[id]/submit` - **Final submit dengan equal scoring**
+- `GET /api/peserta/exam/[id]/result` - Get exam results dengan professional icons
 
-## 📝 License
+## 🎯 Key Features Overview
+
+### **⚖️ Equal Scoring System**
+
+```
+Scoring Formula: (Correct Answers / Total Questions) × 100%
+
+Example:
+- Total Questions: 10
+- Correct Answers: 8  
+- Final Score: (8/10) × 100% = 80%
+```
+
+### **� Mobile-First Design**
+
+- **Railway Navigation**: Horizontal scrolling dengan smooth animations
+- **Touch Optimization**: 44px minimum touch targets
+- **Responsive Modals**: Adaptif untuk resolusi 1366x768+
+- **Auto-scroll**: Smart navigation ke soal aktif
+- **Visual Feedback**: Hover effects dan scale animations
+
+### **📋 Import Template Format**
+
+```csv
+examTitle,examSubject,questionText,optionA,optionB,optionC,optionD,correctAnswer
+Matematika,Dasar,2+2=?,2,3,4,5,C
+Matematika,Lanjut,∫x²dx=?,x³+C,x³/3+C,2x+C,x+C,B
+```
+
+### **🎨 UI/UX Improvements**
+
+- ✅ **Professional Icons**: Lucide React icons menggantikan emoji
+- ✅ **Consistent Hover Effects**: Scale animations dan shadow depth
+- ✅ **Mobile Railway Navigation**: Horizontal scroll untuk mobile
+- ✅ **Responsive Design**: Support untuk semua resolusi layar
+- ✅ **Touch-Friendly Interface**: Optimized untuk mobile devices
+
+---
+
+## �📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -262,16 +368,29 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🎯 Key Achievements
 
 - ✅ **100% Functional** CRUD operations untuk ujian dan soal
-- ✅ **Advanced Analytics** dengan question-level analysis
-- ✅ **Bulk Import** system dengan validasi komprehensif
+- ✅ **Advanced Analytics** dengan question-level analysis  
 - ✅ **Real-time Performance** tracking dan reporting
-- ✅ **Mobile-Responsive** design untuk semua device
+- ✅ **Mobile-First Design** dengan railway navigation
+- ✅ **Equal Scoring System** yang mudah dipahami
+- ✅ **Responsive Modal Design** untuk semua resolusi (1366x768+)
+- ✅ **Professional UI** dengan Lucide React icons
+- ✅ **Enhanced UX** dengan hover effects dan animations
 - ✅ **Production-Ready** dengan security best practices
+- ✅ **Touch-Optimized** interface untuk mobile devices
+
+## 🚀 Recent Updates
+
+### **Version 2.0 - Mobile-First Improvements**
+- 🆕 **Railway Navigation** untuk mobile dengan horizontal scroll
+- 🆕 **Equal Scoring System** menggantikan weighted scoring  
+- 🆕 **Responsive Modal Import** untuk resolusi rendah
+- 🆕 **Enhanced Clickable Feedback** dengan hover effects
+- 🆕 **Professional Icons** menggantikan emoji
+- 🆕 **Auto-scroll Navigation** ke soal aktif
+- 🆕 **Touch-Friendly Interface** dengan 44px minimum targets
 
 <div align="center">
   <strong>Dibuat untuk memenuhi Ujian Kompetensi - Praktik Lapang UNPAK</strong>
   <br>
-  <sub>Computer-Based Test System v1.3.0 - Advanced Analytics Edition</sub>
-  <br><br>
-  <em>"Modern CBT Solution for Professional Assessment"</em>
+  <em>Sistem CBT Modern dengan Mobile-First Approach</em>
 </div>

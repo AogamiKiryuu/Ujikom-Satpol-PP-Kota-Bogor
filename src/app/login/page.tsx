@@ -38,7 +38,7 @@ export default function LoginPage() {
                 {/* Links */}
                 <div className="mt-6 text-center space-y-2">
                   <Link href="/register" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm font-medium transition-colors">
-                    Belum punya akun? Daftar disini
+                    Belum punya akun? Daftar di sini
                   </Link>
                   <br />
                   <Link href="/" className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs transition-colors">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Download, Upload, X, FileText, AlertCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
@@ -22,7 +22,6 @@ interface PreviewQuestion {
   optionC: string;
   optionD: string;
   correctAnswer: string;
-  points: number;
   rowIndex: number;
   errors?: string[];
 }
@@ -203,11 +202,12 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
     // Create worksheet data with headers
     const wsData = [
       // Headers
-      ['examTitle', 'examSubject', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer', 'points'],
+      ['examTitle', 'examSubject', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer'],
       // Example data with selected exam info
-      [selectedExam.title, selectedExam.subject, `Contoh pertanyaan untuk ${selectedExam.title}?`, 'Pilihan A', 'Pilihan B', 'Pilihan C', 'Pilihan D', 'A', 1],
-      [selectedExam.title, selectedExam.subject, `Pertanyaan kedua untuk ${selectedExam.title}?`, 'Opsi 1', 'Opsi 2', 'Opsi 3', 'Opsi 4', 'B', 1],
-      [selectedExam.title, selectedExam.subject, `Soal ketiga untuk ${selectedExam.title}?`, 'Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D', 'C', 1],
+      [selectedExam.title, selectedExam.subject, `Contoh pertanyaan untuk ${selectedExam.title}?`, 'Pilihan A', 'Pilihan B', 'Pilihan C', 'Pilihan D', 'A'],
+      [selectedExam.title, selectedExam.subject, `Pertanyaan kedua untuk ${selectedExam.title}?`, 'Opsi 1', 'Opsi 2', 'Opsi 3', 'Opsi 4', 'B'],
+      [selectedExam.title, selectedExam.subject, `Soal ketiga untuk ${selectedExam.title}?`, 'Jawaban A', 'Jawaban B', 'Jawaban C', 'Jawaban D', 'C'],
+      [selectedExam.title, selectedExam.subject, `Soal untuk latihan sistem CBT?`, 'Option A', 'Option B', 'Option C', 'Option D', 'D'],
     ];
 
     // Create worksheet
@@ -223,7 +223,6 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
       { wch: 20 }, // optionC
       { wch: 20 }, // optionD
       { wch: 15 }, // correctAnswer
-      { wch: 10 }, // points
     ];
 
     // Style headers (bold and background color)
@@ -364,74 +363,71 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
 
       {/* Preview Modal */}
       {showPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-hidden">
-            <div className="p-3 sm:p-6">
-              <div className="flex justify-between items-center mb-4 sm:mb-6">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Preview Import Soal ({previewData.length} soal)</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-[98vw] sm:max-w-4xl lg:max-w-5xl max-h-[98vh] flex flex-col">
+            {/* Header - Fixed */}
+            <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">Preview Import Soal ({previewData.length} soal)</h3>
                 <button onClick={handleCancelPreview} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
+            </div>
 
-              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+            {/* Content - Scrollable */}
+            <div className="flex-1 overflow-hidden p-3 sm:p-4">
+              <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
                 <div className="flex items-center space-x-2">
-                  <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <span className="text-sm text-blue-800 dark:text-blue-200">Preview data yang akan diimport. Periksa kembali sebelum melanjutkan.</span>
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
+                  <span className="text-xs sm:text-sm text-blue-800 dark:text-blue-200">Preview data yang akan diimport. Periksa kembali sebelum melanjutkan.</span>
                 </div>
               </div>
 
               {/* Preview Table */}
-              <div className="overflow-auto max-h-[50vh] sm:max-h-96 border border-gray-200 dark:border-gray-700 rounded-lg">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
+              <div className="overflow-auto border border-gray-200 dark:border-gray-700 rounded-lg" style={{ maxHeight: 'calc(60vh - 150px)' }}>
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs">
                   <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0">
                     <tr>
-                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">#</th>
-                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian</th>
-                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Pertanyaan</th>
-                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Pilihan</th>
-                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jawaban Benar</th>
-                      <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">#</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Pertanyaan</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Pilihan</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jawaban</th>
+                      <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {previewData.map((question, index) => (
                       <tr key={index} className={question.errors?.length ? 'bg-red-50 dark:bg-red-900/20' : ''}>
-                        <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 dark:text-gray-400">{question.rowIndex}</td>
-                        <td className="px-2 sm:px-4 py-2 sm:py-4 text-xs sm:text-sm text-gray-900 dark:text-white">
-                          <div>
-                            <div className="font-medium truncate">{question.examTitle}</div>
-                            <div className="text-gray-500 dark:text-gray-400 truncate">{question.examSubject}</div>
-                          </div>
+                        <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">{question.rowIndex}</td>
+                        <td className="px-2 py-2 text-xs text-gray-900 dark:text-white">
+                          <div className="max-w-[100px] truncate font-medium">{question.examTitle}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 max-w-[100px] truncate">{question.examSubject}</div>
                         </td>
-                        <td className="px-2 sm:px-4 py-2 sm:py-4 text-xs sm:text-sm text-gray-900 dark:text-white max-w-[150px] sm:max-w-xs">
-                          <div className="truncate" title={question.questionText}>
+                        <td className="px-2 py-2 text-xs text-gray-900 dark:text-white">
+                          <div className="max-w-[200px] sm:max-w-[300px] line-clamp-2" title={question.questionText}>
                             {question.questionText}
                           </div>
                         </td>
-                        <td className="px-2 sm:px-4 py-2 sm:py-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
-                          <div className="space-y-1">
-                            <div>A: {question.optionA}</div>
-                            <div>B: {question.optionB}</div>
-                            <div>C: {question.optionC}</div>
-                            <div>D: {question.optionD}</div>
+                        <td className="px-2 py-2 text-xs text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                          <div className="space-y-1 max-w-[150px]">
+                            <div className="truncate">A: {question.optionA}</div>
+                            <div className="truncate">B: {question.optionB}</div>
+                            <div className="truncate">C: {question.optionC}</div>
+                            <div className="truncate">D: {question.optionD}</div>
                           </div>
                         </td>
-                        <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
-                          <span className="font-medium text-green-600 dark:text-green-400">{question.correctAnswer}</span>
+                        <td className="px-2 py-2 whitespace-nowrap text-xs">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                            {question.correctAnswer}
+                          </span>
                         </td>
-                        <td className="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
+                        <td className="px-2 py-2 whitespace-nowrap text-xs">
                           {question.errors?.length ? (
-                            <div className="space-y-1">
-                              <span className="text-red-600 dark:text-red-400 font-medium">Error</span>
-                              {question.errors.map((error, idx) => (
-                                <div key={idx} className="text-xs text-red-500 dark:text-red-400">
-                                  {error}
-                                </div>
-                              ))}
-                            </div>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">Error</span>
                           ) : (
-                            <span className="text-green-600 dark:text-green-400 font-medium">Valid</span>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">Valid</span>
                           )}
                         </td>
                       </tr>
@@ -439,10 +435,13 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                   </tbody>
                 </table>
               </div>
+            </div>
 
+            {/* Footer - Fixed */}
+            <div className="flex-shrink-0 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 rounded-b-lg">
               {/* Summary */}
-              <div className="mt-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs sm:text-sm">
+              <div className="mb-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                   <div>
                     <span className="font-medium text-gray-900 dark:text-white">Total Soal: </span>
                     <span className="text-gray-600 dark:text-gray-400">{previewData.length}</span>
@@ -459,17 +458,17 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-600">
+              <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
                   onClick={handleCancelPreview}
-                  className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors text-sm"
+                  className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors text-sm"
                 >
                   Batal
                 </button>
                 <button
                   onClick={handleConfirmImport}
                   disabled={uploading || previewData.filter((q) => q.errors?.length).length > 0}
-                  className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm"
+                  className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium"
                 >
                   {uploading ? 'Importing...' : 'Konfirmasi Import'}
                 </button>

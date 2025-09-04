@@ -67,7 +67,6 @@ model Question {
   optionC     String
   optionD     String
   correctAnswer String // A, B, C, or D
-  points      Int      @default(1)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   

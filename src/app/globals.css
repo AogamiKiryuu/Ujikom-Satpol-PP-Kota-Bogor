@@ -40,6 +40,7 @@
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -53,6 +54,25 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(156, 163, 175, 0.7);
+}
+
+/* Horizontal scrollbar specifically for question navigation */
+.question-nav-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.question-nav-scroll::-webkit-scrollbar-track {
+  background: rgba(229, 231, 235, 0.2);
+  border-radius: 2px;
+}
+
+.question-nav-scroll::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 2px;
+}
+
+.question-nav-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
 }
 
 .input {
@@ -221,4 +241,174 @@
 
 .Toastify__toast--info {
   background: #3b82f6;
+}
+
+/* Global press/active feedback for buttons */
+button,
+[type='button'],
+[type='submit'],
+a[role='button'],
+.btn,
+.pressable {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  will-change: transform;
+}
+
+/* Apply to anchors that look like buttons (rounded + padded) */
+a[class*='rounded-'][class*='px-'],
+a[class*='rounded-'][class*='py-'] {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  will-change: transform;
+}
+
+button:active,
+[type='button']:active,
+[type='submit']:active,
+a[role='button']:active,
+.btn:active,
+.pressable:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: none !important;
+  filter: brightness(0.98);
+}
+
+/* Active state for anchors that look like buttons */
+a[class*='rounded-'][class*='px-']:active,
+a[class*='rounded-'][class*='py-']:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: none !important;
+  filter: brightness(0.98);
+}
+
+button:disabled,
+[type='button'][disabled],
+[type='submit'][disabled],
+[aria-disabled='true'],
+.btn:disabled,
+.pressable:disabled {
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Enhanced clickable element styles */
+button,
+[type='button'],
+[type='submit'],
+a[role='button'],
+.btn,
+.pressable,
+label[for],
+label.cursor-pointer,
+[data-clickable='true'] {
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Hover effects for clickable elements */
+button:hover:not(:disabled),
+[type='button']:hover:not(:disabled),
+[type='submit']:hover:not(:disabled),
+a[role='button']:hover,
+.btn:hover:not(:disabled),
+.pressable:hover:not(:disabled),
+label[for]:hover,
+label.cursor-pointer:hover,
+[data-clickable='true']:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus states for accessibility */
+button:focus-visible,
+[type='button']:focus-visible,
+[type='submit']:focus-visible,
+a[role='button']:focus-visible,
+.btn:focus-visible,
+.pressable:focus-visible,
+label[for]:focus-visible,
+label.cursor-pointer:focus-visible,
+[data-clickable='true']:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Disabled state cursor */
+button:disabled,
+[type='button']:disabled,
+[type='submit']:disabled,
+[aria-disabled='true'],
+.btn:disabled,
+.pressable:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Interactive elements with pointer cursor */
+input[type='radio'],
+input[type='checkbox'],
+select,
+textarea,
+[contenteditable='true'] {
+  cursor: pointer;
+}
+
+/* Navigation elements */
+.nav-item,
+.menu-item,
+.dropdown-item {
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.nav-item:hover,
+.menu-item:hover,
+.dropdown-item:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: translateX(2px);
+}
+
+/* Custom scrollbar for question navigation */
+.question-navigation::-webkit-scrollbar {
+  height: 6px;
+}
+
+.question-navigation::-webkit-scrollbar-track {
+  background: rgba(156, 163, 175, 0.1);
+  border-radius: 3px;
+}
+
+.question-navigation::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 3px;
+}
+
+.question-navigation::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+/* Smooth scrolling for mobile navigation */
+@media (max-width: 1024px) {
+  .question-navigation {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Touch-friendly button sizing */
+  .mobile-nav-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve touch targets for mobile */
+  .question-nav-item {
+    touch-action: manipulation;
+  }
+
+  /* Prevent text selection on navigation */
+  .nav-no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 }

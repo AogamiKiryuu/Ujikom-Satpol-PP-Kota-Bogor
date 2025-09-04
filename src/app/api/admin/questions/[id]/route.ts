@@ -51,7 +51,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const body = await request.json();
 
-    const { questionText, optionA, optionB, optionC, optionD, correctAnswer, points = 1 } = body;
+    const { questionText, optionA, optionB, optionC, optionD, correctAnswer } = body;
 
     // Validate input
     if (!questionText || !optionA || !optionB || !optionC || !optionD || !correctAnswer) {
@@ -81,7 +81,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         optionC,
         optionD,
         correctAnswer,
-        points: parseInt(points),
       },
       include: {
         exam: {

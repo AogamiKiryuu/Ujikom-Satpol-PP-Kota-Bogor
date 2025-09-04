@@ -11,7 +11,6 @@ interface CSVRow {
   optionC: string;
   optionD: string;
   correctAnswer: string;
-  points: string;
 }
 
 interface PreviewQuestion {
@@ -23,7 +22,6 @@ interface PreviewQuestion {
   optionC: string;
   optionD: string;
   correctAnswer: string;
-  points: number;
   rowIndex: number;
   errors?: string[];
 }
@@ -60,12 +58,6 @@ function validateQuestion(row: CSVRow, rowIndex: number): PreviewQuestion {
     errors.push('Jawaban benar harus A, B, C, atau D');
   }
 
-  // Points validation
-  const points = parseInt(row.points || '1');
-  if (isNaN(points) || points < 1) {
-    errors.push('Poin harus berupa angka positif');
-  }
-
   return {
     examTitle: row.examTitle?.trim() || '',
     examSubject: row.examSubject?.trim() || '',
@@ -75,7 +67,6 @@ function validateQuestion(row: CSVRow, rowIndex: number): PreviewQuestion {
     optionC: row.optionC?.trim() || '',
     optionD: row.optionD?.trim() || '',
     correctAnswer: correctAnswer || '',
-    points: points || 1,
     rowIndex,
     errors: errors.length > 0 ? errors : undefined,
   };

@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowLeft, Plus, Search, Edit, Trash2, Eye, User, Calendar, Mail } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, User, Calendar, Mail, Filter, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
@@ -117,7 +116,7 @@ export default function AdminPesertaPage() {
       email: peserta.email,
       password: '',
       gender: peserta.gender,
-      birthDate: peserta.birthDate.split('T')[0],
+      birthDate: peserta.birthDate,
       birthPlace: peserta.birthPlace,
     });
     setShowModal(true);
@@ -134,19 +133,15 @@ export default function AdminPesertaPage() {
 
     try {
       const url = modalType === 'create' ? '/api/admin/peserta' : `/api/admin/peserta/${selectedPeserta?.id}`;
-
       const method = modalType === 'create' ? 'POST' : 'PUT';
-
-      const submitData = { ...formData };
-      if (modalType === 'edit' && !formData.password?.trim()) {
-        delete submitData.password;
-      }
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
-        body: JSON.stringify(submitData),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -190,163 +185,253 @@ export default function AdminPesertaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/admin/dashboard" className="flex items-center text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mr-4">
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Kembali
-              </Link>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Manajemen Peserta</h1>
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Manajemen Peserta</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Kelola data peserta ujian CBT</p>
+        </div>
+        <div className="mt-4 sm:mt-0 flex space-x-3">
+          <button className="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </button>
+          <button
+            onClick={handleCreate}
+            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg text-sm font-medium text-white hover:from-blue-700 hover:to-purple-700 transition-colors shadow"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Tambah Peserta
+          </button>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Cari berdasarkan nama atau email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
-            <button onClick={handleCreate} className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah Peserta
+          </div>
+          <div className="flex space-x-2">
+            <button
+              type="button"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Filter
+            </button>
+            <button type="submit" className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+              Cari
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Peserta</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{pagination.total.toLocaleString('id-ID')}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600">
+              <Calendar className="w-6 h-6 text-white" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Aktif Bulan Ini</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {peserta
+                  .filter((p) => {
+                    const created = new Date(p.createdAt);
+                    const now = new Date();
+                    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+                  })
+                  .length.toLocaleString('id-ID')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-indigo-400 to-indigo-600">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Laki-laki</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{peserta.filter((p) => p.gender === 'LAKI_LAKI').length.toLocaleString('id-ID')}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-lg bg-gradient-to-r from-pink-400 to-pink-600">
+              <User className="w-6 h-6 text-white" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Perempuan</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{peserta.filter((p) => p.gender === 'PEREMPUAN').length.toLocaleString('id-ID')}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Daftar Peserta ({pagination.total})</h2>
+        </div>
+
+        {loading ? (
+          <div className="p-6">
+            <div className="space-y-3">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-12 w-full bg-gray-100 dark:bg-gray-700 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : peserta.length === 0 ? (
+          <div className="p-8 text-center">
+            <User className="mx-auto h-12 w-12 text-gray-400" />
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Tidak ada peserta ditemukan</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peserta</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Info Personal</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian Diikuti</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Bergabung</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {peserta.map((person) => (
+                  <tr key={person.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                          <span className="text-white font-medium text-sm">{person.name.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{person.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                            <Mail className="w-3 h-3 mr-1" />
+                            {person.email}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-white">{person.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {person.birthPlace}, {formatDate(person.birthDate)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        {person._count.examResults.toLocaleString('id-ID')} ujian
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {formatDate(person.createdAt)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleView(person)}
+                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          title="Lihat Detail"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleEdit(person)}
+                          className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                          title="Edit"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(person)}
+                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="Hapus"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Menampilkan {(currentPage - 1) * pagination.limit + 1} - {Math.min(currentPage * pagination.limit, pagination.total)} dari {pagination.total} peserta
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white transition-colors"
+            >
+              Sebelumnya
+            </button>
+            <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+              Halaman {currentPage} dari {pagination.totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
+              disabled={currentPage === pagination.totalPages}
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white transition-colors"
+            >
+              Selanjutnya
             </button>
           </div>
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Search Bar */}
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
-            <form onSubmit={handleSearch} className="flex gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Cari peserta berdasarkan nama atau email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-              <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Cari
-              </button>
-            </form>
-          </div>
-
-          {/* Peserta Table */}
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Daftar Peserta ({pagination.total})</h2>
-            </div>
-
-            {loading ? (
-              <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="mt-2 text-gray-600 dark:text-gray-400">Memuat data...</p>
-              </div>
-            ) : peserta.length === 0 ? (
-              <div className="p-8 text-center">
-                <User className="mx-auto h-12 w-12 text-gray-400" />
-                <p className="mt-2 text-gray-600 dark:text-gray-400">Tidak ada peserta ditemukan</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peserta</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Info Personal</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian Diikuti</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Bergabung</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {peserta.map((person) => (
-                      <tr key={person.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                              <span className="text-white font-medium">{person.name.charAt(0).toUpperCase()}</span>
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900 dark:text-white">{person.name}</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <Mail className="w-3 h-3 mr-1" />
-                                {person.email}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 dark:text-white">{person.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {person.birthPlace}, {formatDate(person.birthDate)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">{person._count.examResults} ujian</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                            <Calendar className="w-3 h-3 mr-1" />
-                            {formatDate(person.createdAt)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button onClick={() => handleView(person)} className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Lihat Detail">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => handleEdit(person)} className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" title="Edit">
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => handleDelete(person)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Hapus">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Pagination */}
-            {pagination.totalPages > 1 && (
-              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  Menampilkan {(currentPage - 1) * pagination.limit + 1} - {Math.min(currentPage * pagination.limit, pagination.total)} dari {pagination.total} peserta
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-white"
-                  >
-                    Sebelumnya
-                  </button>
-                  <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
-                    Halaman {currentPage} dari {pagination.totalPages}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
-                    disabled={currentPage === pagination.totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-white"
-                  >
-                    Selanjutnya
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
+      )}
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {modalType === 'create' && 'Tambah Peserta Baru'}
                 {modalType === 'edit' && 'Edit Peserta'}
                 {modalType === 'view' && 'Detail Peserta'}
@@ -391,7 +476,7 @@ export default function AdminPesertaPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
                 </div>
 
@@ -402,7 +487,7 @@ export default function AdminPesertaPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
                 </div>
 
@@ -413,7 +498,7 @@ export default function AdminPesertaPage() {
                     required={modalType === 'create'}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
                 </div>
 
@@ -423,7 +508,7 @@ export default function AdminPesertaPage() {
                     required
                     value={formData.gender}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'LAKI_LAKI' | 'PEREMPUAN' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   >
                     <option value="LAKI_LAKI">Laki-laki</option>
                     <option value="PEREMPUAN">Perempuan</option>
@@ -437,7 +522,7 @@ export default function AdminPesertaPage() {
                     required
                     value={formData.birthDate}
                     onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
                 </div>
 
@@ -448,21 +533,21 @@ export default function AdminPesertaPage() {
                     required
                     value={formData.birthPlace}
                     onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                   />
                 </div>
               </form>
             )}
 
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex justify-end space-x-3">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 {modalType === 'view' ? 'Tutup' : 'Batal'}
               </button>
               {modalType !== 'view' && (
-                <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                   {modalType === 'create' ? 'Tambah' : 'Simpan'}
                 </button>
               )}

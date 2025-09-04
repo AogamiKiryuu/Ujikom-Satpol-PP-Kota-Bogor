@@ -50,17 +50,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Sesi ujian tidak ditemukan' }, { status: 404 });
     }
 
-    // Calculate score and update answer correctness
+    // Calculate score with equal points for all questions
     let correctAnswers = 0;
     const totalQuestions = examResult.exam.questions.length;
 
-    // Update each answer with isCorrect flag
+    // Update each answer with isCorrect flag and calculate score
     for (const answer of examResult.answers) {
       const isCorrect = answer.selectedAnswer === answer.question.correctAnswer;
       if (isCorrect) {
         correctAnswers++;
       }
-      
+
       // Update the answer with isCorrect flag
       await prisma.answer.update({
         where: { id: answer.id },
@@ -68,6 +68,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       });
     }
 
+    // Calculate score as percentage (equal weight for all questions)
     const score = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
 
     // Update exam result

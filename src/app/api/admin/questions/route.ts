@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { examId, questionText, optionA, optionB, optionC, optionD, correctAnswer, points = 1 } = body;
+    const { examId, questionText, optionA, optionB, optionC, optionD, correctAnswer } = body;
 
     // Validate required fields
     if (!examId || !questionText || !optionA || !optionB || !optionC || !optionD || !correctAnswer) {
@@ -103,7 +103,6 @@ export async function POST(request: NextRequest) {
         optionC,
         optionD,
         correctAnswer,
-        points: parseInt(points),
       },
       include: {
         exam: {
