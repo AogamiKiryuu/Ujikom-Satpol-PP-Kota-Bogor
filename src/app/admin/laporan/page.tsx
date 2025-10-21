@@ -6,6 +6,28 @@ import { ArrowLeft, BarChart3, Download, Users, Award, Filter } from 'lucide-rea
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import * as XLSX from 'xlsx';
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+} from 'recharts';
 
 interface OverviewStats {
   totalUsers: number;
@@ -812,6 +834,70 @@ export default function AdminLaporanPage() {
                     </div>
                   </div>
 
+                  {/* Charts Section for Overview */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Pie Chart - Exam Status Distribution */}
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Distribusi Status Ujian</h3>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: 'Ujian Aktif', value: overviewData.overview.activeExams, color: '#10b981' },
+                              { name: 'Ujian Selesai', value: overviewData.overview.totalExams - overviewData.overview.activeExams, color: '#6b7280' },
+                            ]}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={true}
+                            label
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value"
+                            nameKey="name"
+                          >
+                            {[
+                              { name: 'Ujian Aktif', value: overviewData.overview.activeExams, color: '#10b981' },
+                              { name: 'Ujian Selesai', value: overviewData.overview.totalExams - overviewData.overview.activeExams, color: '#6b7280' },
+                            ].map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#1f2937',
+                              border: '1px solid #374151',
+                              borderRadius: '0.5rem',
+                              color: '#f9fafb',
+                            }}
+                          />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+
+                    {/* Bar Chart - Top Performers */}
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Top 5 Nilai Tertinggi</h3>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={overviewData.recentResults.slice(0, 5).sort((a, b) => b.score - a.score)}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                          <XAxis dataKey="userName" stroke="#9ca3af" angle={-15} textAnchor="end" height={80} />
+                          <YAxis stroke="#9ca3af" />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#1f2937',
+                              border: '1px solid #374151',
+                              borderRadius: '0.5rem',
+                              color: '#f9fafb',
+                            }}
+                          />
+                          <Legend />
+                          <Bar dataKey="score" fill="#f59e0b" name="Nilai" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
                   {/* Recent Results */}
                   <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
                     <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
@@ -901,6 +987,96 @@ export default function AdminLaporanPage() {
                           <div className="text-center">
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">{exam.questionAnalysis.length}</p>
                             <p className="text-sm text-gray-600 dark:text-gray-400">Total Soal</p>
+                          </div>
+                        </div>
+
+                        {/* Charts for Exam Performance */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                          {/* Bar Chart - Difficulty Distribution */}
+                          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Distribusi Tingkat Kesulitan Soal</h4>
+                            <ResponsiveContainer width="100%" height={250}>
+                              <BarChart
+                                data={(() => {
+                                  const difficultyLevels = exam.questionAnalysis.map((q) => q.difficultyLevel);
+                                  return [
+                                    { level: 'Sangat Mudah', count: difficultyLevels.filter((d) => d === 'Sangat Mudah').length, color: '#10b981' },
+                                    { level: 'Mudah', count: difficultyLevels.filter((d) => d === 'Mudah').length, color: '#34d399' },
+                                    { level: 'Sedang', count: difficultyLevels.filter((d) => d === 'Sedang').length, color: '#3b82f6' },
+                                    { level: 'Sulit', count: difficultyLevels.filter((d) => d === 'Sulit').length, color: '#f59e0b' },
+                                    { level: 'Sangat Sulit', count: difficultyLevels.filter((d) => d === 'Sangat Sulit').length, color: '#ef4444' },
+                                    { level: 'Ekstrem', count: difficultyLevels.filter((d) => d === 'Ekstrem Sulit').length, color: '#9333ea' },
+                                  ].filter((item) => item.count > 0);
+                                })()}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                <XAxis dataKey="level" stroke="#9ca3af" angle={-15} textAnchor="end" height={80} />
+                                <YAxis stroke="#9ca3af" />
+                                <Tooltip
+                                  contentStyle={{
+                                    backgroundColor: '#1f2937',
+                                    border: '1px solid #374151',
+                                    borderRadius: '0.5rem',
+                                    color: '#f9fafb',
+                                  }}
+                                />
+                                <Bar dataKey="count" name="Jumlah Soal">
+                                  {[
+                                    { level: 'Sangat Mudah', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sangat Mudah').length, color: '#10b981' },
+                                    { level: 'Mudah', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Mudah').length, color: '#34d399' },
+                                    { level: 'Sedang', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sedang').length, color: '#3b82f6' },
+                                    { level: 'Sulit', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sulit').length, color: '#f59e0b' },
+                                    { level: 'Sangat Sulit', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sangat Sulit').length, color: '#ef4444' },
+                                    { level: 'Ekstrem', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Ekstrem Sulit').length, color: '#9333ea' },
+                                  ]
+                                    .filter((item) => item.count > 0)
+                                    .map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+
+                          {/* Pie Chart - Answer Distribution for Most Difficult Question */}
+                          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Distribusi Jawaban (Soal Tersulit)</h4>
+                            {(() => {
+                              const mostDifficult = exam.questionAnalysis.reduce((prev, current) => (prev.correctPercentage < current.correctPercentage ? prev : current));
+                              const answerData = [
+                                { option: 'A', count: mostDifficult.answerDistribution.A },
+                                { option: 'B', count: mostDifficult.answerDistribution.B },
+                                { option: 'C', count: mostDifficult.answerDistribution.C },
+                                { option: 'D', count: mostDifficult.answerDistribution.D },
+                                { option: 'Tidak Dijawab', count: mostDifficult.answerDistribution.unanswered },
+                              ].filter((item) => item.count > 0);
+
+                              return (
+                                <>
+                                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                                    Soal #{exam.questionAnalysis.indexOf(mostDifficult) + 1} - {mostDifficult.correctPercentage}% benar
+                                  </p>
+                                  <ResponsiveContainer width="100%" height={220}>
+                                    <PieChart>
+                                      <Pie data={answerData} cx="50%" cy="50%" labelLine={true} label outerRadius={80} fill="#8884d8" dataKey="count" nameKey="option">
+                                        {answerData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={entry.option === mostDifficult.correctAnswer ? '#10b981' : index === 4 ? '#6b7280' : '#3b82f6'} />
+                                        ))}
+                                      </Pie>
+                                      <Tooltip
+                                        contentStyle={{
+                                          backgroundColor: '#1f2937',
+                                          border: '1px solid #374151',
+                                          borderRadius: '0.5rem',
+                                          color: '#f9fafb',
+                                        }}
+                                      />
+                                      <Legend />
+                                    </PieChart>
+                                  </ResponsiveContainer>
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
 
@@ -1075,104 +1251,204 @@ export default function AdminLaporanPage() {
 
               {/* User Performance Report */}
               {reportType === 'user-performance' && userPerformanceData && (
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
-                  <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Performa Peserta</h3>
-                    <button
-                      onClick={() => exportToExcel(userPerformanceData.userPerformance, 'performa-peserta')}
-                      className="flex items-center px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
-                    >
-                      <Download className="w-4 h-4 mr-1" />
-                      Ekspor Excel
-                    </button>
+                <div className="space-y-6">
+                  {/* Chart - Top 10 Performers */}
+                  <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Top 10 Peserta Terbaik</h3>
+                    <ResponsiveContainer width="100%" height={400}>
+                      <BarChart
+                        data={userPerformanceData.userPerformance
+                          .sort((a, b) => b.averageScore - a.averageScore)
+                          .slice(0, 10)
+                          .map((user) => ({
+                            name: user.userName.length > 20 ? user.userName.substring(0, 20) + '...' : user.userName,
+                            nilai: user.averageScore,
+                            lulus: user.passRate,
+                          }))}
+                        layout="vertical"
+                        margin={{ left: 100 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis type="number" stroke="#9ca3af" domain={[0, 100]} />
+                        <YAxis type="category" dataKey="name" stroke="#9ca3af" width={100} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#1f2937',
+                            border: '1px solid #374151',
+                            borderRadius: '0.5rem',
+                            color: '#f9fafb',
+                          }}
+                        />
+                        <Legend />
+                        <Bar dataKey="nilai" fill="#3b82f6" name="Rata-rata Nilai" />
+                        <Bar dataKey="lulus" fill="#10b981" name="Tingkat Kelulusan (%)" />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peserta</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Ujian</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rata-rata Nilai</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian Lulus</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tingkat Kelulusan</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian Terakhir</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {userPerformanceData.userPerformance.map((user) => (
-                          <tr key={user.userId}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900 dark:text-white">{user.userName}</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{user.totalExams}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  user.averageScore >= 70 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                }`}
-                              >
-                                {user.averageScore}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{user.passedExams}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                  user.passRate >= 70 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                }`}
-                              >
-                                {user.passRate}%
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{formatDate(user.lastExamDate)}</td>
+
+                  {/* Table */}
+                  <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">Performa Peserta</h3>
+                      <button
+                        onClick={() => exportToExcel(userPerformanceData.userPerformance, 'performa-peserta')}
+                        className="flex items-center px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Ekspor Excel
+                      </button>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peserta</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Ujian</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rata-rata Nilai</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian Lulus</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tingkat Kelulusan</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian Terakhir</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                          {userPerformanceData.userPerformance.map((user) => (
+                            <tr key={user.userId}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">{user.userName}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{user.totalExams}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    user.averageScore >= 70 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                  }`}
+                                >
+                                  {user.averageScore}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{user.passedExams}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    user.passRate >= 70 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                  }`}
+                                >
+                                  {user.passRate}%
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{formatDate(user.lastExamDate)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}
 
               {/* Time Trends Report */}
               {reportType === 'time-trends' && timeTrendsData && (
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Tren Waktu (30 Hari Terakhir)</h3>
-                    <button
-                      onClick={() => exportToExcel(timeTrendsData.timeTrends, 'tren-waktu')}
-                      className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Ekspor Excel
-                    </button>
+                <div className="space-y-6">
+                  {/* Header */}
+                  <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">Tren Waktu (30 Hari Terakhir)</h3>
+                      <button
+                        onClick={() => exportToExcel(timeTrendsData.timeTrends, 'tren-waktu')}
+                        className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Ekspor Excel
+                      </button>
+                    </div>
+
+                    {timeTrendsData.timeTrends.length > 0 ? (
+                      <>
+                        {/* Summary Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                          <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                            <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">{timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0)}</div>
+                            <div className="text-sm text-blue-600 dark:text-blue-300">Total Ujian Selesai</div>
+                          </div>
+                          <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                            <div className="text-2xl font-bold text-green-600 dark:text-green-300">
+                              {Math.round(
+                                timeTrendsData.timeTrends.filter((day) => day.count > 0).reduce((sum, day) => sum + day.avgScore, 0) / timeTrendsData.timeTrends.filter((day) => day.count > 0).length
+                              ) || 0}
+                            </div>
+                            <div className="text-sm text-green-600 dark:text-green-300">Rata-rata Nilai</div>
+                          </div>
+                          <div className="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">
+                              {Math.round((timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0) / 30) * 10) / 10}
+                            </div>
+                            <div className="text-sm text-yellow-600 dark:text-yellow-300">Rata-rata Harian</div>
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
                   </div>
 
-                  {timeTrendsData.timeTrends.length > 0 ? (
-                    <>
-                      {/* Summary Stats */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
-                          <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">{timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0)}</div>
-                          <div className="text-sm text-blue-600 dark:text-blue-300">Total Ujian Selesai</div>
-                        </div>
-                        <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
-                          <div className="text-2xl font-bold text-green-600 dark:text-green-300">
-                            {Math.round(
-                              timeTrendsData.timeTrends.filter((day) => day.count > 0).reduce((sum, day) => sum + day.avgScore, 0) / timeTrendsData.timeTrends.filter((day) => day.count > 0).length
-                            ) || 0}
-                          </div>
-                          <div className="text-sm text-green-600 dark:text-green-300">Rata-rata Nilai</div>
-                        </div>
-                        <div className="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
-                          <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">
-                            {Math.round((timeTrendsData.timeTrends.reduce((sum, day) => sum + day.count, 0) / 30) * 10) / 10}
-                          </div>
-                          <div className="text-sm text-yellow-600 dark:text-yellow-300">Rata-rata Harian</div>
-                        </div>
+                  {/* Charts Section */}
+                  {timeTrendsData.timeTrends.length > 0 && (
+                    <div className="grid grid-cols-1 gap-6">
+                      {/* Combined Chart - Exams Count and Average Score */}
+                      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Trend Jumlah Ujian & Nilai Rata-rata</h4>
+                        <ResponsiveContainer width="100%" height={350}>
+                          <LineChart data={timeTrendsData.timeTrends.filter((day) => day.count > 0)}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                            <XAxis dataKey="formattedDate" stroke="#9ca3af" angle={-15} textAnchor="end" height={80} />
+                            <YAxis yAxisId="left" stroke="#3b82f6" />
+                            <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: '#1f2937',
+                                border: '1px solid #374151',
+                                borderRadius: '0.5rem',
+                                color: '#f9fafb',
+                              }}
+                            />
+                            <Legend />
+                            <Line yAxisId="left" type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} name="Jumlah Ujian" dot={{ r: 4 }} />
+                            <Line yAxisId="right" type="monotone" dataKey="avgScore" stroke="#10b981" strokeWidth={2} name="Rata-rata Nilai" dot={{ r: 4 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
                       </div>
 
-                      {/* Trends Table */}
+                      {/* Area Chart - Average Score Trend */}
+                      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Trend Nilai (Area Chart)</h4>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <AreaChart data={timeTrendsData.timeTrends.filter((day) => day.count > 0)}>
+                            <defs>
+                              <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                            <XAxis dataKey="formattedDate" stroke="#9ca3af" angle={-15} textAnchor="end" height={80} />
+                            <YAxis stroke="#9ca3af" domain={[0, 100]} />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: '#1f2937',
+                                border: '1px solid #374151',
+                                borderRadius: '0.5rem',
+                                color: '#f9fafb',
+                              }}
+                            />
+                            <Area type="monotone" dataKey="avgScore" stroke="#10b981" fillOpacity={1} fill="url(#colorScore)" name="Rata-rata Nilai" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Trends Table */}
+                  {timeTrendsData.timeTrends.length > 0 && (
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                           <thead className="bg-gray-50 dark:bg-gray-700">
@@ -1224,10 +1500,6 @@ export default function AdminLaporanPage() {
                           </tbody>
                         </table>
                       </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="text-gray-500 dark:text-gray-400">Belum ada data ujian dalam 30 hari terakhir</div>
                     </div>
                   )}
                 </div>

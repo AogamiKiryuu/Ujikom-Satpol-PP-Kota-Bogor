@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Users, FileText, Clock, BarChart3, Calendar, RefreshCcw } from 'lucide-react';
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface DashboardStats {
   totalPeserta: number;
@@ -20,6 +21,11 @@ interface DashboardStats {
     score: number;
     completedAt: string;
   }>;
+  charts: {
+    scoreDistribution: Array<{ range: string; count: number }>;
+    examStatus: Array<{ status: string; count: number; color: string }>;
+    examsBySubject: Array<{ subject: string; count: number }>;
+  };
 }
 
 export default function AdminDashboard() {
@@ -32,6 +38,11 @@ export default function AdminDashboard() {
     todayRegistrations: 0,
     averageScore: 0,
     recentActivity: [],
+    charts: {
+      scoreDistribution: [],
+      examStatus: [],
+      examsBySubject: [],
+    },
   });
   // Initial page load state (controls skeletons)
   const [loading, setLoading] = useState(true);
@@ -103,6 +114,9 @@ export default function AdminDashboard() {
       }
     };
   }, [router]);
+
+  // Colors for pie chart
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
   // No quick actions here; left menu is in the sidebar
 
@@ -234,6 +248,105 @@ export default function AdminDashboard() {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            {/* Score Distribution Chart */}
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Distribusi Nilai Ujian</h3>
+                {loading ? (
+                  <div className="h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.charts.scoreDistribution}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis dataKey="range" stroke="#9ca3af" />
+                      <YAxis stroke="#9ca3af" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1f2937',
+                          border: '1px solid #374151',
+                          borderRadius: '0.5rem',
+                          color: '#f9fafb',
+                        }}
+                      />
+                      <Legend />
+                      <Bar dataKey="count" fill="#3b82f6" name="Jumlah Peserta" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+
+            {/* Exam Status Chart */}
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Status Ujian</h3>
+                {loading ? (
+                  <div className="h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                ) : stats.charts.examStatus.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie data={stats.charts.examStatus} cx="50%" cy="50%" labelLine={true} label outerRadius={100} fill="#8884d8" dataKey="count" nameKey="status">
+                        {stats.charts.examStatus.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1f2937',
+                          border: '1px solid #374151',
+                          borderRadius: '0.5rem',
+                          color: '#f9fafb',
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">Belum ada data ujian</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Exams by Subject Chart */}
+          <div className="mt-8">
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Ujian Berdasarkan Mata Pelajaran</h3>
+                {loading ? (
+                  <div className="h-80 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                ) : stats.charts.examsBySubject.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <PieChart>
+                      <Pie data={stats.charts.examsBySubject} cx="50%" cy="50%" labelLine={true} label outerRadius={120} fill="#8884d8" dataKey="count" nameKey="subject">
+                        {stats.charts.examsBySubject.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1f2937',
+                          border: '1px solid #374151',
+                          borderRadius: '0.5rem',
+                          color: '#f9fafb',
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">Belum ada data ujian</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

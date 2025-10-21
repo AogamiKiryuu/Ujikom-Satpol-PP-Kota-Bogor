@@ -19,6 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [mounted, setMounted] = useState(false);
   // Notifications removed (not used)
 
   const menuItems = [
@@ -30,13 +31,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { icon: Settings, label: 'Pengaturan Sistem', href: '/admin/settings' },
   ];
 
+  // Load sidebar state from localStorage on mount
   useEffect(() => {
-    // Restore collapsed state
+    setMounted(true);
     try {
       const saved = localStorage.getItem('adminSidebarCollapsed');
-      if (saved) setSidebarCollapsed(saved === 'true');
-    } catch {}
+      if (saved !== null) {
+        setSidebarCollapsed(saved === 'true');
+      }
+    } catch (error) {
+      console.error('Error loading sidebar state:', error);
+    }
+  }, []);
 
+  useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const response = await fetch('/api/auth/me', {
@@ -59,12 +67,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     fetchUserInfo();
   }, [router]);
 
-  // Persist collapsed state
+  // Persist collapsed state to localStorage whenever it changes
   useEffect(() => {
-    try {
-      localStorage.setItem('adminSidebarCollapsed', String(sidebarCollapsed));
-    } catch {}
-  }, [sidebarCollapsed]);
+    if (mounted) {
+      try {
+        localStorage.setItem('adminSidebarCollapsed', String(sidebarCollapsed));
+      } catch (error) {
+        console.error('Error saving sidebar state:', error);
+      }
+    }
+  }, [sidebarCollapsed, mounted]);
 
   const handleLogout = async () => {
     try {
@@ -100,29 +112,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div
         className={`fixed inset-y-0 left-0 z-50 bg-white dark:bg-gray-800 shadow-lg transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} w-64`}
+        } transition-all duration-300 ease-in-out lg:translate-x-0 ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} w-64`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center w-full' : 'space-x-3'}`}>
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">CBT</span>
             </div>
-            <span className={`text-lg font-bold text-gray-900 dark:text-white ${sidebarCollapsed ? 'hidden' : ''}`}>Admin Panel</span>
+            <span className={`text-lg font-bold text-gray-900 dark:text-white transition-opacity duration-200 ${sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>Admin Panel</span>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className={`lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${sidebarCollapsed ? 'hidden' : ''}`}
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* User Profile Section */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className={`p-4 border-b border-gray-200 dark:border-gray-700 transition-all duration-200 ${sidebarCollapsed ? 'px-2' : ''}`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'}`}>
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
               <User className="w-5 h-5 text-white" />
             </div>
             {!sidebarCollapsed && (
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 transition-opacity duration-200">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{userInfo?.name || 'Admin'}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{userInfo?.email || 'admin@cbt.com'}</p>
               </div>
@@ -156,6 +171,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               );
             })}
           </ul>
+
+          {/* Desktop Collapse Toggle in Sidebar */}
+          <div className="hidden lg:block mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setSidebarCollapsed((v) => !v)}
+              title={sidebarCollapsed ? 'Tampilkan Sidebar' : 'Sembunyikan Sidebar'}
+              className={`w-full flex items-center ${
+                sidebarCollapsed ? 'justify-center' : ''
+              } px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors`}
+            >
+              {sidebarCollapsed ? (
+                <PanelLeftOpen className="w-5 h-5" />
+              ) : (
+                <>
+                  <PanelLeftClose className="w-5 h-5 mr-3" />
+                  <span>Sembunyikan Menu</span>
+                </>
+              )}
+            </button>
+          </div>
         </nav>
 
         {/* Logout Button */}
@@ -177,7 +212,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* Main Content */}
-      <div className={`transition-[padding] duration-300 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
+      <div className={`transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
         {/* Top Header */}
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6">
@@ -186,15 +221,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Desktop collapse toggle */}
+            {/* Page Title for Desktop */}
             <div className="hidden lg:flex items-center">
-              <button
-                onClick={() => setSidebarCollapsed((v) => !v)}
-                title={sidebarCollapsed ? 'Tampilkan Sidebar' : 'Sembunyikan Sidebar'}
-                className="pressable p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                {sidebarCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
-              </button>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {pathname
+                  .split('/')
+                  .pop()
+                  ?.replace(/-/g, ' ')
+                  .replace(/\b\w/g, (l) => l.toUpperCase()) || 'Dashboard'}
+              </span>
             </div>
 
             {/* Quick Actions */}

@@ -15,15 +15,7 @@ export async function GET(request: NextRequest) {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     // Get dashboard statistics
-    const [
-      totalPeserta,
-      totalExams,
-      activeExams,
-      completedExams,
-      todayRegistrations,
-      recentResults,
-      averageScore
-    ] = await Promise.all([
+    const [totalPeserta, totalExams, activeExams, completedExams, todayRegistrations, recentResults, averageScore, scoreDistribution, scheduledExams, examsBySubject] = await Promise.all([
       // Total peserta (users with PESERTA role)
       prisma.user.count({
         where: { role: 'PESERTA' },
@@ -70,7 +62,59 @@ export async function GET(request: NextRequest) {
         where: { isCompleted: true },
         _avg: { score: true },
       }),
+
+      // Score distribution for bar chart
+      prisma.examResult.groupBy({
+        by: ['score'],
+        where: { isCompleted: true },
+        _count: { score: true },
+      }),
+
+      // Scheduled exams (future exams)
+      prisma.exam.count({
+        where: {
+          isActive: true,
+          startDate: { gt: now },
+        },
+      }),
+
+      // Exams by subject for pie chart
+      prisma.exam.groupBy({
+        by: ['subject'],
+        _count: { id: true },
+      }),
     ]);
+
+    // Process score distribution into ranges
+    const scoreRanges = [
+      { range: '0-20', count: 0 },
+      { range: '21-40', count: 0 },
+      { range: '41-60', count: 0 },
+      { range: '61-80', count: 0 },
+      { range: '81-100', count: 0 },
+    ];
+
+    scoreDistribution.forEach((item) => {
+      const score = item.score;
+      if (score <= 20) scoreRanges[0].count += item._count.score;
+      else if (score <= 40) scoreRanges[1].count += item._count.score;
+      else if (score <= 60) scoreRanges[2].count += item._count.score;
+      else if (score <= 80) scoreRanges[3].count += item._count.score;
+      else scoreRanges[4].count += item._count.score;
+    });
+
+    // Process exam status for pie chart
+    const examStatusData = [
+      { status: 'Aktif', count: activeExams, color: '#10b981' },
+      { status: 'Dijadwalkan', count: scheduledExams, color: '#f59e0b' },
+      { status: 'Selesai', count: totalExams - activeExams - scheduledExams, color: '#6b7280' },
+    ].filter((item) => item.count > 0); // Only show statuses with data
+
+    // Process exams by subject
+    const examsBySubjectData = examsBySubject.map((item) => ({
+      subject: item.subject,
+      count: item._count.id,
+    }));
 
     const stats = {
       totalPeserta,
@@ -87,6 +131,11 @@ export async function GET(request: NextRequest) {
         score: result.score,
         completedAt: result.endTime || result.createdAt,
       })),
+      charts: {
+        scoreDistribution: scoreRanges,
+        examStatus: examStatusData,
+        examsBySubject: examsBySubjectData,
+      },
     };
 
     return NextResponse.json(stats);
