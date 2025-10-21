@@ -6,6 +6,29 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+// Fungsi untuk shuffle array (Fisher-Yates shuffle)
+function shuffleArray<T>(array: T[], seed?: string): T[] {
+  const arr = [...array];
+  
+  // Jika ada seed, gunakan untuk consistent shuffle per user
+  let rngValue = 0;
+  if (seed) {
+    for (let i = 0; i < seed.length; i++) {
+      rngValue = ((rngValue << 5) - rngValue) + seed.charCodeAt(i);
+      rngValue = rngValue & rngValue; // Convert to 32-bit integer
+    }
+  }
+
+  for (let i = arr.length - 1; i > 0; i--) {
+    const random = seed 
+      ? ((Math.sin(rngValue + i) * 10000) % 1)
+      : Math.random();
+    const j = Math.floor(random * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: examId } = await params;
@@ -91,8 +114,31 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Calculate remaining time
     const remainingMinutes = exam.duration - elapsedMinutes;
 
+    // Shuffle questions if not yet shuffled
+    let shuffledQuestions = exam.questions;
+    const questionOrderData = (examResult as unknown as { questionOrder: string | null }).questionOrder;
+
+    if (!questionOrderData) {
+      // First time accessing exam - shuffle the questions
+      shuffledQuestions = shuffleArray(exam.questions, `${userId}-${examId}`);
+      const orderArray = shuffledQuestions.map((q) => q.id);
+      const questionOrder = JSON.stringify(orderArray);
+
+      // Save the shuffled order
+      await prisma.examResult.update({
+        where: { id: examResult.id },
+        data: { questionOrder },
+      });
+    } else {
+      // Use existing shuffled order
+      const orderArray = JSON.parse(questionOrderData);
+      shuffledQuestions = orderArray
+        .map((qId: string) => exam.questions.find((q) => q.id === qId))
+        .filter((q) => q !== undefined);
+    }
+
     // Transform questions and include user answers
-    const questionsWithAnswers = exam.questions.map((question) => {
+    const questionsWithAnswers = shuffledQuestions.map((question) => {
       const userAnswer = examResult.answers.find((answer) => answer.questionId === question.id);
       return {
         ...question,

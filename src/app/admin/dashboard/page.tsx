@@ -121,10 +121,10 @@ export default function AdminDashboard() {
   // No quick actions here; left menu is in the sidebar
 
   const statCards = [
-    { title: 'Total Peserta', value: stats.totalPeserta, icon: Users, gradient: 'from-blue-400 to-blue-600' },
-    { title: 'Total Ujian', value: stats.totalExams, icon: FileText, gradient: 'from-green-400 to-green-600' },
-    { title: 'Ujian Aktif', value: stats.activeExams, icon: Clock, gradient: 'from-orange-400 to-orange-600' },
-    { title: 'Ujian Selesai', value: stats.completedExams, icon: BarChart3, gradient: 'from-purple-400 to-purple-600' },
+    { title: 'Total Peserta', value: stats.totalPeserta, icon: Users, color: 'bg-blue-600' },
+    { title: 'Total Ujian', value: stats.totalExams, icon: FileText, color: 'bg-green-600' },
+    { title: 'Ujian Aktif', value: stats.activeExams, icon: Clock, color: 'bg-orange-600' },
+    { title: 'Ujian Selesai', value: stats.completedExams, icon: BarChart3, color: 'bg-purple-600' },
   ];
 
   const formatDate = (dateString: string) => {
@@ -160,10 +160,10 @@ export default function AdminDashboard() {
         <div className="px-4 py-6 sm:px-0">
           {/* Welcome Banner */}
           <div className="mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-sm border border-white/10 flex items-center justify-between">
+            <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-sm border border-indigo-700 flex items-center justify-between">
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold">Selamat Datang di Dashboard Admin</h2>
-                <p className="text-sm text-blue-100">Kelola sistem CBT dengan mudah dan efisien</p>
+                <p className="text-sm text-indigo-100">Kelola sistem CBT dengan mudah dan efisien</p>
               </div>
               <div className="hidden sm:block">
                 <div className="w-10 h-10 rounded-lg border border-white/20 flex items-center justify-center">
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
               <div key={index} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow duration-200">
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.gradient}`}>
+                    <div className={`p-3 rounded-lg ${stat.color}`}>
                       <stat.icon className="w-6 h-6 text-white" />
                     </div>
                   </div>

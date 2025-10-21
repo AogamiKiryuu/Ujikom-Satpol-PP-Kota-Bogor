@@ -81,11 +81,12 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-      <div className="absolute top-40 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-white dark:bg-gray-900 relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 opacity-5 dark:opacity-3">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-200 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-200 rounded-full blur-3xl"></div>
+      </div>
 
       {/* Header */}
       <header className="relative z-10 px-6 py-4">
@@ -126,7 +127,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                   Daftar
                 </Link>
@@ -140,7 +141,7 @@ export default function Home() {
       <section className="relative z-10 max-w-7xl mx-auto px-6 py-20">
         <div className="text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">CBT Exam System</h1>
+            <h1 className="text-5xl md:text-7xl font-bold text-indigo-600 dark:text-indigo-400 mb-6">CBT Exam System</h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4">Satuan Polisi Pamong Praja Kota Bogor</p>
             <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8">Platform ujian digital yang modern, aman, dan efisien untuk meningkatkan kualitas assessmen dan evaluasi</p>
           </motion.div>
@@ -153,14 +154,14 @@ export default function Home() {
           >
             <Link
               href="/register"
-              className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center space-x-2"
+              className="group bg-indigo-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-indigo-700 flex items-center space-x-2"
             >
               <span>Mulai Ujian Sekarang</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="/login"
-              className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-xl font-semibold text-lg hover:border-blue-500 hover:text-blue-600 transition-all duration-300"
+              className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-xl font-semibold text-lg hover:border-indigo-500 hover:text-indigo-600 transition-all duration-300"
             >
               Masuk ke Akun
             </Link>
@@ -227,9 +228,9 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 1.2 + index * 0.1 }}
-                className="group p-6 backdrop-blur-lg bg-white/70 dark:bg-gray-800/70 rounded-2xl border border-white/20 dark:border-gray-700/20 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:scale-105"
+                className="group p-6 backdrop-blur-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-xl hover:scale-105"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <IconComponent className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
@@ -246,7 +247,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.6 }}
-          className="text-center backdrop-blur-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-3xl border border-white/20 dark:border-gray-700/20 p-12"
+          className="text-center backdrop-blur-lg bg-indigo-50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-200 dark:border-indigo-800 p-12"
         >
           <Zap className="w-16 h-16 mx-auto mb-6 text-blue-600" />
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Siap Memulai Ujian?</h2>

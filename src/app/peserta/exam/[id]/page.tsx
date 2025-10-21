@@ -318,7 +318,7 @@ export default function ExamPage() {
               {/* Progress Bar */}
               <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                 <div
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out relative"
+                  className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out relative"
                   style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
                 >
                   <div className="absolute right-0 top-0 w-2 h-2.5 bg-blue-700 rounded-full transform translate-x-1"></div>
@@ -468,8 +468,8 @@ export default function ExamPage() {
                       {submitting ? 'Menyelesaikan...' : 'Selesaikan Ujian'}
                     </button>
                   ) : (
-                    <button 
-                      onClick={goToNextQuestion} 
+                    <button
+                      onClick={goToNextQuestion}
                       className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                     >
                       <span>Selanjutnya</span>

@@ -85,6 +85,7 @@ model ExamResult {
   startTime   DateTime
   endTime     DateTime?
   isCompleted Boolean  @default(false)
+  questionOrder String? // JSON array of question IDs in shuffled order
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   

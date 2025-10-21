@@ -261,8 +261,8 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
 
       {/* Import Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-2xl max-h-[95vh] overflow-auto">
+        <div className="modal-overlay dark:modal-overlay.dark">
+          <div className="modal-content dark:modal-content.dark modal-elevated w-full max-w-[95vw] sm:max-w-2xl">
             <div className="p-3 sm:p-6">
               <div className="flex justify-between items-center mb-4 sm:mb-6">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Import Soal dari File</h3>
@@ -363,8 +363,8 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
 
       {/* Preview Modal */}
       {showPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1 sm:p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-[98vw] sm:max-w-4xl lg:max-w-5xl max-h-[98vh] flex flex-col">
+        <div className="modal-overlay dark:modal-overlay.dark">
+          <div className="modal-content dark:modal-content.dark modal-elevated w-full max-w-[98vw] sm:max-w-4xl lg:max-w-5xl flex flex-col">
             {/* Header - Fixed */}
             <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600">
               <div className="flex justify-between items-center">

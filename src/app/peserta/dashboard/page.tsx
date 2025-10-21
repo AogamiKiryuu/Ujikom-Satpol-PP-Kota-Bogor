@@ -173,10 +173,10 @@ export default function PesertaDashboard() {
   };
 
   const statCards = [
-    { title: 'Ujian Tersedia', value: stats.availableExams, icon: BookOpen, gradient: 'from-emerald-400 to-emerald-600' },
-    { title: 'Ujian Selesai', value: stats.completedExams, icon: CheckCircle, gradient: 'from-blue-400 to-blue-600' },
-    { title: 'Ujian Berlangsung', value: stats.ongoingExams, icon: Clock, gradient: 'from-orange-400 to-orange-600' },
-    { title: 'Rata-rata Nilai', value: `${stats.averageScore}%`, icon: Trophy, gradient: 'from-purple-400 to-purple-600' },
+    { title: 'Ujian Tersedia', value: stats.availableExams, icon: BookOpen, bgColor: 'bg-emerald-600' },
+    { title: 'Ujian Selesai', value: stats.completedExams, icon: CheckCircle, bgColor: 'bg-blue-600' },
+    { title: 'Ujian Berlangsung', value: stats.ongoingExams, icon: Clock, bgColor: 'bg-orange-600' },
+    { title: 'Rata-rata Nilai', value: `${stats.averageScore}%`, icon: Trophy, bgColor: 'bg-purple-600' },
   ];
 
   return (
@@ -186,10 +186,10 @@ export default function PesertaDashboard() {
         <div className="px-4 py-6 sm:px-0">
           {/* Welcome Banner */}
           <div className="mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-sm border border-white/10 flex items-center justify-between">
+            <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-sm border border-indigo-700 flex items-center justify-between">
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold">Halo, {userInfo?.name || 'Peserta'}</h2>
-                <p className="text-sm text-blue-100">Selamat datang di Dashboard Peserta</p>
+                <p className="text-sm text-indigo-100">Selamat datang di Dashboard Peserta</p>
               </div>
               <div className="hidden sm:block">
                 <div className="w-10 h-10 rounded-lg border border-white/20 flex items-center justify-center">
@@ -205,7 +205,7 @@ export default function PesertaDashboard() {
               <div key={index} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow duration-200">
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.gradient}`}>
+                    <div className={`p-3 rounded-lg ${stat.bgColor}`}>
                       <stat.icon className="w-6 h-6 text-white" />
                     </div>
                   </div>
@@ -305,7 +305,7 @@ export default function PesertaDashboard() {
                             {exam.status === 'available' && (
                               <button
                                 onClick={() => handleStartExam(exam.id)}
-                                className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
                               >
                                 Mulai Ujian
                               </button>
@@ -313,7 +313,7 @@ export default function PesertaDashboard() {
                             {exam.status === 'ongoing' && (
                               <button
                                 onClick={() => handleResumeExam(exam.id)}
-                                className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
+                                className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
                               >
                                 Lanjutkan
                               </button>
@@ -321,7 +321,7 @@ export default function PesertaDashboard() {
                             {exam.status === 'completed' && (
                               <button
                                 onClick={() => handleViewResult(exam.id)}
-                                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
                               >
                                 Lihat Hasil
                               </button>

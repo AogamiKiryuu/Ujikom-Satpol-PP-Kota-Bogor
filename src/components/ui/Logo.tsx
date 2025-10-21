@@ -22,7 +22,7 @@ export default function Logo({ className = '', showText = true, size = 'md' }: L
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       {/* Logo Icon */}
-      <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg`}>
+      <div className={`${sizeClasses[size]} bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg`}>
         <svg 
           className="w-2/3 h-2/3 text-white" 
           fill="none" 
@@ -41,7 +41,7 @@ export default function Logo({ className = '', showText = true, size = 'md' }: L
       {/* Logo Text */}
       {showText && (
         <div className="flex flex-col">
-          <span className={`${textSizes[size]} font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}>
+          <span className={`${textSizes[size]} font-bold text-indigo-600 dark:text-indigo-400`}>
             CBT Exam
           </span>
           <span className="text-xs text-gray-500 -mt-1">

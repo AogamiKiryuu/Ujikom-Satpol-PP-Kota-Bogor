@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center w-full' : 'space-x-3'}`}>
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">CBT</span>
             </div>
             <span className={`text-lg font-bold text-gray-900 dark:text-white transition-opacity duration-200 ${sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>Admin Panel</span>
@@ -133,7 +133,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* User Profile Section */}
         <div className={`p-4 border-b border-gray-200 dark:border-gray-700 transition-all duration-200 ${sidebarCollapsed ? 'px-2' : ''}`}>
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'}`}>
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
               <User className="w-5 h-5 text-white" />
             </div>
             {!sidebarCollapsed && (
@@ -208,8 +208,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && <div className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+  {/* Mobile sidebar overlay */}
+  {sidebarOpen && <div className="modal-overlay dark:modal-overlay.dark z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* Main Content */}
       <div className={`transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
@@ -239,7 +239,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href="/admin/ujian"
                   prefetch
                   title="Buat Ujian"
-                  className="pressable inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-sm"
+                  className="pressable inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm"
                 >
                   <PlusCircle className="w-4 h-4" />
                   Buat Ujian

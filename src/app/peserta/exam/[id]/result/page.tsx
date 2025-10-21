@@ -140,11 +140,11 @@ export default function ExamResultPage() {
         </div>
 
         {/* Banner */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-sm border border-white/10 mb-6">
+        <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-sm border border-indigo-700 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-xl font-semibold">Hasil Ujian</h1>
-              <p className="text-blue-100">
+              <p className="text-indigo-100">
                 {exam.title} • {exam.subject}
               </p>
             </div>
@@ -191,7 +191,7 @@ export default function ExamResultPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/60 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-green-400 to-green-600">
+                  <div className="p-2 rounded-lg bg-green-600">
                     <CheckCircle className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -202,7 +202,7 @@ export default function ExamResultPage() {
               </div>
               <div className="bg-white/60 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-red-400 to-red-600">
+                  <div className="p-2 rounded-lg bg-red-600">
                     <XCircle className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -213,7 +213,7 @@ export default function ExamResultPage() {
               </div>
               <div className="bg-white/60 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-purple-400 to-purple-600">
+                  <div className="p-2 rounded-lg bg-purple-600">
                     <Clock className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -224,7 +224,7 @@ export default function ExamResultPage() {
               </div>
               <div className="bg-white/60 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600">
+                  <div className="p-2 rounded-lg bg-yellow-600">
                     <Trophy className="w-5 h-5 text-white" />
                   </div>
                 </div>
@@ -257,7 +257,7 @@ export default function ExamResultPage() {
         <div className="text-center mb-6">
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm"
           >
             <BookOpen className="w-5 h-5" />
             {showDetails ? 'Sembunyikan' : 'Tampilkan'} Detail Jawaban

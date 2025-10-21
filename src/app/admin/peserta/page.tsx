@@ -199,7 +199,7 @@ export default function AdminPesertaPage() {
           </button>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg text-sm font-medium text-white hover:from-blue-700 hover:to-purple-700 transition-colors shadow"
+            className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 transition-colors shadow"
           >
             <Plus className="w-4 h-4 mr-2" />
             Tambah Peserta
@@ -232,7 +232,7 @@ export default function AdminPesertaPage() {
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </button>
-            <button type="submit" className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+            <button type="submit" className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 transition-colors">
               Cari
             </button>
           </div>
@@ -243,7 +243,7 @@ export default function AdminPesertaPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600">
+            <div className="p-3 rounded-lg bg-blue-600">
               <User className="w-6 h-6 text-white" />
             </div>
             <div className="ml-4">
@@ -255,7 +255,7 @@ export default function AdminPesertaPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600">
+            <div className="p-3 rounded-lg bg-green-600">
               <Calendar className="w-6 h-6 text-white" />
             </div>
             <div className="ml-4">
@@ -275,7 +275,7 @@ export default function AdminPesertaPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-indigo-400 to-indigo-600">
+            <div className="p-3 rounded-lg bg-indigo-600">
               <User className="w-6 h-6 text-white" />
             </div>
             <div className="ml-4">
@@ -287,7 +287,7 @@ export default function AdminPesertaPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
           <div className="flex items-center">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-pink-400 to-pink-600">
+            <div className="p-3 rounded-lg bg-pink-600">
               <User className="w-6 h-6 text-white" />
             </div>
             <div className="ml-4">
@@ -336,7 +336,7 @@ export default function AdminPesertaPage() {
                   <tr key={person.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
                           <span className="text-white font-medium text-sm">{person.name.charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="ml-4">
@@ -428,8 +428,8 @@ export default function AdminPesertaPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="modal-overlay dark:modal-overlay.dark">
+          <div className="modal-content dark:modal-content.dark modal-elevated max-w-md w-full">
             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {modalType === 'create' && 'Tambah Peserta Baru'}

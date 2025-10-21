@@ -31,7 +31,7 @@ export function LoadingScreen() {
     <div className="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-50">
       <div className="text-center">
         <div className="animate-bounce-slow mb-4">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center mx-auto">
             <span className="text-white font-bold text-xl">CBT</span>
           </div>
         </div>

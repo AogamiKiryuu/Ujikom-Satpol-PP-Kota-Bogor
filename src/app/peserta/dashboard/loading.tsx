@@ -6,7 +6,7 @@ export default function Loading() {
       <div className="px-4 py-6 sm:px-0">
         {/* Banner skeleton */}
         <div className="mb-6">
-          <div className="h-20 rounded-2xl bg-gradient-to-r from-blue-500/40 to-purple-500/40 animate-pulse" />
+                    <div className="h-20 rounded-2xl bg-indigo-600/20 animate-pulse" />
         </div>
 
         {/* Stat cards skeleton */}
