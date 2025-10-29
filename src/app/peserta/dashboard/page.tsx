@@ -42,6 +42,8 @@ export default function PesertaDashboard() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'available' | 'ongoing' | 'completed'>('all');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -103,13 +105,21 @@ export default function PesertaDashboard() {
     fetchData();
   }, []);
 
-  const handleStartExam = async (examId: string) => {
-    const exam = exams.find((e) => e.id === examId);
+  const handleStartExam = (examId: string) => {
+    setSelectedExamId(examId);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmStartExam = async () => {
+    if (!selectedExamId) return;
+
+    const exam = exams.find((e) => e.id === selectedExamId);
     if (!exam) return;
 
     try {
+      setShowConfirmModal(false);
       // Start the exam session
-      const response = await fetch(`/api/peserta/exam/${examId}/start`, {
+      const response = await fetch(`/api/peserta/exam/${selectedExamId}/start`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -117,7 +127,7 @@ export default function PesertaDashboard() {
       if (response.ok) {
         toast.success(`Memulai ujian: ${exam.title}`);
         // Redirect to exam page
-        window.location.href = `/peserta/exam/${examId}`;
+        window.location.href = `/peserta/exam/${selectedExamId}`;
       } else {
         const error = await response.json();
         toast.error(error.error || 'Gagal memulai ujian');
@@ -319,10 +329,7 @@ export default function PesertaDashboard() {
                               </button>
                             )}
                             {exam.status === 'completed' && (
-                              <button
-                                onClick={() => handleViewResult(exam.id)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow"
-                              >
+                              <button onClick={() => handleViewResult(exam.id)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow">
                                 Lihat Hasil
                               </button>
                             )}
@@ -336,6 +343,57 @@ export default function PesertaDashboard() {
           </div>
         </div>
       </main>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && selectedExamId && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-md w-full mx-4 pointer-events-auto border border-gray-200 dark:border-gray-700">
+            <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Konfirmasi Mulai Ujian</h2>
+            </div>
+            <div className="px-6 py-5">
+              {exams.find((e) => e.id === selectedExamId) && (
+                <>
+                  <p className="text-gray-700 dark:text-gray-300 mb-4 text-sm">Anda akan memulai ujian:</p>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/20 rounded-lg p-4 mb-5 border border-blue-200 dark:border-blue-800/50">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3">{exams.find((e) => e.id === selectedExamId)?.title}</h3>
+                    <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="flex justify-between">
+                        <span>Mata Pelajaran:</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{exams.find((e) => e.id === selectedExamId)?.subject}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Jumlah Soal:</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{exams.find((e) => e.id === selectedExamId)?.questions} soal</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Durasi:</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{exams.find((e) => e.id === selectedExamId)?.duration} menit</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 mb-5 border border-amber-200 dark:border-amber-800/50">
+                    <p className="text-sm text-amber-900 dark:text-amber-200">
+                      <span className="font-semibold">⚠️ Perhatian:</span> Pastikan koneksi internet stabil. Waktu ujian akan terus berjalan meskipun Anda meninggalkan halaman.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex gap-3 justify-end rounded-b-xl">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+              >
+                Batal
+              </button>
+              <button onClick={handleConfirmStartExam} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg">
+                Mulai Ujian
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

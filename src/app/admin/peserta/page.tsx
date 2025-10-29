@@ -55,6 +55,8 @@ export default function AdminPesertaPage() {
     birthDate: '',
     birthPlace: '',
   });
+  const [filterGender, setFilterGender] = useState<'ALL' | 'LAKI_LAKI' | 'PEREMPUAN'>('ALL');
+  const [showFilter, setShowFilter] = useState(false);
 
   const fetchPeserta = async (page = 1, search = '') => {
     try {
@@ -184,6 +186,61 @@ export default function AdminPesertaPage() {
     return new Date(dateString).toLocaleDateString('id-ID');
   };
 
+  const handleExport = async () => {
+    try {
+      // Fetch all peserta data for export
+      const response = await fetch('/api/admin/peserta?page=1&limit=10000', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        toast.error('Gagal mengambil data untuk export');
+        return;
+      }
+
+      const data = await response.json();
+      const pesertaData = data.data;
+
+      // Prepare CSV content
+      const headers = ['No', 'Nama', 'Email', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Ujian Diikuti', 'Bergabung'];
+      const rows = pesertaData.map((p: Peserta, index: number) => [
+        index + 1,
+        p.name,
+        p.email,
+        p.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan',
+        p.birthPlace,
+        formatDate(p.birthDate),
+        p._count.examResults,
+        formatDate(p.createdAt),
+      ]);
+
+      // Create CSV content
+      const csvContent = [headers.join(','), ...rows.map((row: (string | number)[]) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))].join('\n');
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `peserta_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success('Data peserta berhasil diexport');
+    } catch (error) {
+      console.error('Error exporting peserta:', error);
+      toast.error('Terjadi kesalahan saat export');
+    }
+  };
+
+  const handleFilterChange = (gender: 'ALL' | 'LAKI_LAKI' | 'PEREMPUAN') => {
+    setFilterGender(gender);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -193,7 +250,10 @@ export default function AdminPesertaPage() {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Kelola data peserta ujian CBT</p>
         </div>
         <div className="mt-4 sm:mt-0 flex space-x-3">
-          <button className="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+          <button
+            onClick={handleExport}
+            className="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+          >
             <Download className="w-4 h-4 mr-2" />
             Export
           </button>
@@ -227,16 +287,63 @@ export default function AdminPesertaPage() {
           <div className="flex space-x-2">
             <button
               type="button"
+              onClick={() => setShowFilter(!showFilter)}
               className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </button>
-            <button type="submit" className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 transition-colors">
+            <button
+              type="submit"
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+            >
               Cari
             </button>
           </div>
         </form>
+
+        {/* Filter Dropdown */}
+        {showFilter && (
+          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filter Berdasarkan Jenis Kelamin</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleFilterChange('ALL')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filterGender === 'ALL'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Semua
+                  </button>
+                  <button
+                    onClick={() => handleFilterChange('LAKI_LAKI')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filterGender === 'LAKI_LAKI'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Laki-laki
+                  </button>
+                  <button
+                    onClick={() => handleFilterChange('PEREMPUAN')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      filterGender === 'PEREMPUAN'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    Perempuan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -332,66 +439,68 @@ export default function AdminPesertaPage() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {peserta.map((person) => (
-                  <tr key={person.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
-                          <span className="text-white font-medium text-sm">{person.name.charAt(0).toUpperCase()}</span>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{person.name}</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                            <Mail className="w-3 h-3 mr-1" />
-                            {person.email}
+                {peserta
+                  .filter((person) => filterGender === 'ALL' || person.gender === filterGender)
+                  .map((person) => (
+                    <tr key={person.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
+                            <span className="text-white font-medium text-sm">{person.name.charAt(0).toUpperCase()}</span>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">{person.name}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                              <Mail className="w-3 h-3 mr-1" />
+                              {person.email}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 dark:text-white">{person.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {person.birthPlace}, {formatDate(person.birthDate)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {person._count.examResults.toLocaleString('id-ID')} ujian
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {formatDate(person.createdAt)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleView(person)}
-                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                          title="Lihat Detail"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleEdit(person)}
-                          className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                          title="Edit"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(person)}
-                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                          title="Hapus"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-white">{person.gender === 'LAKI_LAKI' ? 'Laki-laki' : 'Perempuan'}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {person.birthPlace}, {formatDate(person.birthDate)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {person._count.examResults.toLocaleString('id-ID')} ujian
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {formatDate(person.createdAt)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handleView(person)}
+                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                            title="Lihat Detail"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(person)}
+                            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(person)}
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title="Hapus"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

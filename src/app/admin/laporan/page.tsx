@@ -297,7 +297,7 @@ export default function AdminLaporanPage() {
             const difficultyStats = {
               mudah: exam.questionAnalysis.filter((q) => ['Sangat Mudah', 'Mudah'].includes(q.difficultyLevel)).length,
               sedang: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sedang').length,
-              sulit: exam.questionAnalysis.filter((q) => ['Sulit', 'Sangat Sulit', 'Ekstrem Sulit'].includes(q.difficultyLevel)).length,
+              sulit: exam.questionAnalysis.filter((q) => ['Sulit', 'Sangat Sulit'].includes(q.difficultyLevel)).length,
             };
 
             const avgDifficulty = exam.questionAnalysis.length > 0 ? Math.round(exam.questionAnalysis.reduce((acc, q) => acc + q.correctPercentage, 0) / exam.questionAnalysis.length) : 0;
@@ -864,11 +864,17 @@ export default function AdminLaporanPage() {
                           </Pie>
                           <Tooltip
                             contentStyle={{
-                              backgroundColor: '#1f2937',
-                              border: '1px solid #374151',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e5e7eb',
                               borderRadius: '0.5rem',
-                              color: '#f9fafb',
+                              color: '#111827',
+                              pointerEvents: 'none',
+                              padding: '8px 12px',
                             }}
+                            wrapperStyle={{ pointerEvents: 'none' }}
+                            cursor={false}
+                            isAnimationActive={false}
+                            offset={10}
                           />
                           <Legend />
                         </PieChart>
@@ -885,11 +891,17 @@ export default function AdminLaporanPage() {
                           <YAxis stroke="#9ca3af" />
                           <Tooltip
                             contentStyle={{
-                              backgroundColor: '#1f2937',
-                              border: '1px solid #374151',
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e5e7eb',
                               borderRadius: '0.5rem',
-                              color: '#f9fafb',
+                              color: '#111827',
+                              pointerEvents: 'none',
+                              padding: '8px 12px',
                             }}
+                            wrapperStyle={{ pointerEvents: 'none' }}
+                            cursor={false}
+                            isAnimationActive={false}
+                            offset={10}
                           />
                           <Legend />
                           <Bar dataKey="score" fill="#f59e0b" name="Nilai" />
@@ -952,7 +964,9 @@ export default function AdminLaporanPage() {
               {/* Exam Performance Report */}
               {reportType === 'exam-performance' && examPerformanceData && (
                 <div className="space-y-6">
-                  {examPerformanceData.examPerformance.map((exam) => (
+                  {examPerformanceData.examPerformance
+                    .filter((exam) => !selectedExam || exam.examId === selectedExam)
+                    .map((exam) => (
                     <div key={exam.examId} className="bg-white dark:bg-gray-800 shadow rounded-lg">
                       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex justify-between items-center">
@@ -1005,7 +1019,6 @@ export default function AdminLaporanPage() {
                                     { level: 'Sedang', count: difficultyLevels.filter((d) => d === 'Sedang').length, color: '#3b82f6' },
                                     { level: 'Sulit', count: difficultyLevels.filter((d) => d === 'Sulit').length, color: '#f59e0b' },
                                     { level: 'Sangat Sulit', count: difficultyLevels.filter((d) => d === 'Sangat Sulit').length, color: '#ef4444' },
-                                    { level: 'Ekstrem', count: difficultyLevels.filter((d) => d === 'Ekstrem Sulit').length, color: '#9333ea' },
                                   ].filter((item) => item.count > 0);
                                 })()}
                               >
@@ -1014,11 +1027,17 @@ export default function AdminLaporanPage() {
                                 <YAxis stroke="#9ca3af" />
                                 <Tooltip
                                   contentStyle={{
-                                    backgroundColor: '#1f2937',
-                                    border: '1px solid #374151',
+                                    backgroundColor: '#ffffff',
+                                    border: '1px solid #e5e7eb',
                                     borderRadius: '0.5rem',
-                                    color: '#f9fafb',
+                                    color: '#111827',
+                                    pointerEvents: 'none',
+                                    padding: '8px 12px',
                                   }}
+                                  wrapperStyle={{ pointerEvents: 'none' }}
+                                  cursor={false}
+                                  isAnimationActive={false}
+                                  offset={10}
                                 />
                                 <Bar dataKey="count" name="Jumlah Soal">
                                   {[
@@ -1027,7 +1046,6 @@ export default function AdminLaporanPage() {
                                     { level: 'Sedang', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sedang').length, color: '#3b82f6' },
                                     { level: 'Sulit', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sulit').length, color: '#f59e0b' },
                                     { level: 'Sangat Sulit', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Sangat Sulit').length, color: '#ef4444' },
-                                    { level: 'Ekstrem', count: exam.questionAnalysis.filter((q) => q.difficultyLevel === 'Ekstrem Sulit').length, color: '#9333ea' },
                                   ]
                                     .filter((item) => item.count > 0)
                                     .map((entry, index) => (
@@ -1065,11 +1083,17 @@ export default function AdminLaporanPage() {
                                       </Pie>
                                       <Tooltip
                                         contentStyle={{
-                                          backgroundColor: '#1f2937',
-                                          border: '1px solid #374151',
+                                          backgroundColor: '#ffffff',
+                                          border: '1px solid #e5e7eb',
                                           borderRadius: '0.5rem',
-                                          color: '#f9fafb',
+                                          color: '#111827',
+                                          pointerEvents: 'none',
+                                          padding: '8px 12px',
                                         }}
+                                        wrapperStyle={{ pointerEvents: 'none' }}
+                                        cursor={false}
+                                        isAnimationActive={false}
+                                        offset={10}
                                       />
                                       <Legend />
                                     </PieChart>
@@ -1090,7 +1114,6 @@ export default function AdminLaporanPage() {
                               Sedang: difficultyLevels.filter((d) => d === 'Sedang').length,
                               Sulit: difficultyLevels.filter((d) => d === 'Sulit').length,
                               'Sangat Sulit': difficultyLevels.filter((d) => d === 'Sangat Sulit').length,
-                              'Ekstrem Sulit': difficultyLevels.filter((d) => d === 'Ekstrem Sulit').length,
                             };
                             const avgDifficulty = exam.questionAnalysis.reduce((acc, q) => acc + q.correctPercentage, 0) / exam.questionAnalysis.length;
 
@@ -1107,18 +1130,20 @@ export default function AdminLaporanPage() {
                                     <p className="text-xs text-gray-600 dark:text-gray-300">Soal Mudah</p>
                                   </div>
                                   <div className="text-center">
-                                    <p className="text-lg font-bold text-red-600 dark:text-red-300">{difficultyStats['Sulit'] + difficultyStats['Sangat Sulit'] + difficultyStats['Ekstrem Sulit']}</p>
+                                    <p className="text-lg font-bold text-red-600 dark:text-red-300">{difficultyStats['Sulit'] + difficultyStats['Sangat Sulit']}</p>
                                     <p className="text-xs text-gray-600 dark:text-gray-300">Soal Sulit</p>
                                   </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-xs">
-                                  {Object.entries(difficultyStats).map(([level, count]) => (
-                                    <div key={level} className="text-center p-2 bg-white dark:bg-slate-700 border dark:border-slate-600 rounded">
-                                      <div className="font-medium text-gray-900 dark:text-white">{count}</div>
-                                      <div className="text-gray-600 dark:text-gray-300">{level}</div>
-                                    </div>
-                                  ))}
+                                <div className="flex justify-center">
+                                  <div className="grid grid-cols-5 gap-2 text-xs">
+                                    {Object.entries(difficultyStats).map(([level, count]) => (
+                                      <div key={level} className="text-center p-2 bg-white dark:bg-slate-700 border dark:border-slate-600 rounded">
+                                        <div className="font-medium text-gray-900 dark:text-white">{count}</div>
+                                        <div className="text-gray-600 dark:text-gray-300">{level}</div>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
 
                                 <div className="mt-3 p-2 bg-white dark:bg-slate-700 border dark:border-slate-600 rounded text-xs">
@@ -1273,11 +1298,17 @@ export default function AdminLaporanPage() {
                         <YAxis type="category" dataKey="name" stroke="#9ca3af" width={100} />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: '#1f2937',
-                            border: '1px solid #374151',
+                            backgroundColor: '#ffffff',
+                            border: '1px solid #e5e7eb',
                             borderRadius: '0.5rem',
-                            color: '#f9fafb',
+                            color: '#111827',
+                            pointerEvents: 'none',
+                            padding: '8px 12px',
                           }}
+                          wrapperStyle={{ pointerEvents: 'none' }}
+                          cursor={false}
+                          isAnimationActive={false}
+                          offset={10}
                         />
                         <Legend />
                         <Bar dataKey="nilai" fill="#3b82f6" name="Rata-rata Nilai" />
@@ -1404,11 +1435,17 @@ export default function AdminLaporanPage() {
                             <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: '#1f2937',
-                                border: '1px solid #374151',
+                                backgroundColor: '#ffffff',
+                                border: '1px solid #e5e7eb',
                                 borderRadius: '0.5rem',
-                                color: '#f9fafb',
+                                color: '#111827',
+                                pointerEvents: 'none',
+                                padding: '8px 12px',
                               }}
+                              wrapperStyle={{ pointerEvents: 'none' }}
+                              cursor={false}
+                              isAnimationActive={false}
+                              offset={10}
                             />
                             <Legend />
                             <Line yAxisId="left" type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} name="Jumlah Ujian" dot={{ r: 4 }} />
@@ -1433,11 +1470,17 @@ export default function AdminLaporanPage() {
                             <YAxis stroke="#9ca3af" domain={[0, 100]} />
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: '#1f2937',
-                                border: '1px solid #374151',
+                                backgroundColor: '#ffffff',
+                                border: '1px solid #e5e7eb',
                                 borderRadius: '0.5rem',
-                                color: '#f9fafb',
+                                color: '#111827',
+                                pointerEvents: 'none',
+                                padding: '8px 12px',
                               }}
+                              wrapperStyle={{ pointerEvents: 'none' }}
+                              cursor={false}
+                              isAnimationActive={false}
+                              offset={10}
                             />
                             <Area type="monotone" dataKey="avgScore" stroke="#10b981" fillOpacity={1} fill="url(#colorScore)" name="Rata-rata Nilai" />
                           </AreaChart>

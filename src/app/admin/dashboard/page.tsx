@@ -268,11 +268,17 @@ export default function AdminDashboard() {
                       <YAxis stroke="#9ca3af" />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#1f2937',
-                          border: '1px solid #374151',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #e5e7eb',
                           borderRadius: '0.5rem',
-                          color: '#f9fafb',
+                          color: '#111827',
+                          pointerEvents: 'none',
+                          padding: '8px 12px',
                         }}
+                        wrapperStyle={{ pointerEvents: 'none' }}
+                        cursor={false}
+                        isAnimationActive={false}
+                        offset={10}
                       />
                       <Legend />
                       <Bar dataKey="count" fill="#3b82f6" name="Jumlah Peserta" />
@@ -298,11 +304,17 @@ export default function AdminDashboard() {
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#1f2937',
-                          border: '1px solid #374151',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #e5e7eb',
                           borderRadius: '0.5rem',
-                          color: '#f9fafb',
+                          color: '#111827',
+                          pointerEvents: 'none',
+                          padding: '8px 12px',
                         }}
+                        wrapperStyle={{ pointerEvents: 'none' }}
+                        cursor={false}
+                        isAnimationActive={false}
+                        offset={10}
                       />
                       <Legend />
                     </PieChart>
@@ -333,11 +345,17 @@ export default function AdminDashboard() {
                       </Pie>
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: '#1f2937',
-                          border: '1px solid #374151',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid #e5e7eb',
                           borderRadius: '0.5rem',
-                          color: '#f9fafb',
+                          color: '#111827',
+                          pointerEvents: 'none',
+                          padding: '8px 12px',
                         }}
+                        wrapperStyle={{ pointerEvents: 'none' }}
+                        cursor={false}
+                        isAnimationActive={false}
+                        offset={10}
                       />
                       <Legend />
                     </PieChart>

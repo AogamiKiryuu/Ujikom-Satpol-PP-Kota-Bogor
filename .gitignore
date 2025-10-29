@@ -40,8 +40,3 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-FIXES_APPLIED.md
-FIXES_COMPLETED.md
-LOGIN_SUCCESS.md
-LOGIN_FAILURE.md
-LOGIN_SYSTEM_CHANGES.md

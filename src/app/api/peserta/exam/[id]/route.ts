@@ -6,23 +6,37 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+interface Question {
+  id: string;
+  questionText: string;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+}
+
 // Fungsi untuk shuffle array (Fisher-Yates shuffle)
 function shuffleArray<T>(array: T[], seed?: string): T[] {
   const arr = [...array];
-  
+
   // Jika ada seed, gunakan untuk consistent shuffle per user
   let rngValue = 0;
   if (seed) {
     for (let i = 0; i < seed.length; i++) {
-      rngValue = ((rngValue << 5) - rngValue) + seed.charCodeAt(i);
+      rngValue = (rngValue << 5) - rngValue + seed.charCodeAt(i);
       rngValue = rngValue & rngValue; // Convert to 32-bit integer
     }
   }
 
   for (let i = arr.length - 1; i > 0; i--) {
-    const random = seed 
-      ? ((Math.sin(rngValue + i) * 10000) % 1)
-      : Math.random();
+    let random: number;
+    if (seed) {
+      // Ensure random value is always between 0 and 1 (positive)
+      const sinValue = Math.sin(rngValue + i) * 10000;
+      random = Math.abs(sinValue % 1);
+    } else {
+      random = Math.random();
+    }
     const j = Math.floor(random * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
@@ -71,6 +85,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 question: {
                   select: {
                     id: true,
+                    questionText: true,
+                    optionA: true,
+                    optionB: true,
+                    optionC: true,
+                    optionD: true,
                   },
                 },
               },
@@ -115,13 +134,19 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const remainingMinutes = exam.duration - elapsedMinutes;
 
     // Shuffle questions if not yet shuffled
-    let shuffledQuestions = exam.questions;
+    let shuffledQuestions: Question[] = exam.questions as Question[];
     const questionOrderData = (examResult as unknown as { questionOrder: string | null }).questionOrder;
+
+    console.log('DEBUG - Exam questions count:', exam.questions.length);
+    console.log('DEBUG - QuestionOrderData exists:', !!questionOrderData);
 
     if (!questionOrderData) {
       // First time accessing exam - shuffle the questions
-      shuffledQuestions = shuffleArray(exam.questions, `${userId}-${examId}`);
-      const orderArray = shuffledQuestions.map((q) => q.id);
+      console.log('DEBUG - First time shuffle, before shuffle:', exam.questions.length);
+      shuffledQuestions = shuffleArray(exam.questions as Question[], `${userId}-${examId}`);
+      console.log('DEBUG - After shuffle:', shuffledQuestions.length);
+      const orderArray = shuffledQuestions.filter((q) => q && q.id).map((q) => q.id);
+      console.log('DEBUG - After filter:', orderArray.length);
       const questionOrder = JSON.stringify(orderArray);
 
       // Save the shuffled order
@@ -132,19 +157,50 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     } else {
       // Use existing shuffled order
       const orderArray = JSON.parse(questionOrderData);
+
+      // Get all question data from answers (in case some questions were deleted)
+      const questionsFromAnswers = new Map<string, Question>();
+      for (const answer of examResult.answers) {
+        if (answer.question && answer.question.id) {
+          questionsFromAnswers.set(answer.question.id, {
+            id: answer.question.id,
+            questionText: answer.question.questionText,
+            optionA: answer.question.optionA,
+            optionB: answer.question.optionB,
+            optionC: answer.question.optionC,
+            optionD: answer.question.optionD,
+          } as Question);
+        }
+      }
+
+      // Map order to questions (prefer current DB, fallback to answer history)
       shuffledQuestions = orderArray
-        .map((qId: string) => exam.questions.find((q) => q.id === qId))
-        .filter((q) => q !== undefined);
+        .map((qId: string) => {
+          const currentQuestion = exam.questions.find((q) => q.id === qId);
+          if (currentQuestion) return currentQuestion;
+
+          // If question was deleted, try to get from answer history
+          const historicalQuestion = questionsFromAnswers.get(qId);
+          if (historicalQuestion) {
+            console.log(`Question ${qId} was deleted but found in answer history`);
+            return historicalQuestion;
+          }
+
+          return undefined;
+        })
+        .filter((q: Question | undefined): q is Question => q !== undefined);
     }
 
     // Transform questions and include user answers
-    const questionsWithAnswers = shuffledQuestions.map((question) => {
-      const userAnswer = examResult.answers.find((answer) => answer.questionId === question.id);
-      return {
-        ...question,
-        userAnswer: userAnswer?.selectedAnswer || null,
-      };
-    });
+    const questionsWithAnswers = shuffledQuestions
+      .filter((question) => question && question.id)
+      .map((question) => {
+        const userAnswer = examResult.answers.find((answer) => answer.questionId === question.id);
+        return {
+          ...question,
+          userAnswer: userAnswer?.selectedAnswer || null,
+        };
+      });
 
     return NextResponse.json({
       exam: {

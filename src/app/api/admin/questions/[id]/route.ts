@@ -118,11 +118,29 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       where: { id },
       include: {
         exam: true,
+        answers: {
+          include: {
+            examResult: true,
+          },
+        },
       },
     });
 
     if (!existingQuestion) {
       return NextResponse.json({ error: 'Soal tidak ditemukan' }, { status: 404 });
+    }
+
+    // Check if there are active exam results (ongoing or not yet completed)
+    const activeAnswers = existingQuestion.answers.filter((answer) => answer.examResult && !answer.examResult.isCompleted);
+
+    if (activeAnswers.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Tidak dapat menghapus soal karena masih ada peserta yang sedang mengerjakan ujian ini',
+          activeParticipants: activeAnswers.length,
+        },
+        { status: 400 }
+      );
     }
 
     // Delete question (this will also delete related answers due to cascade)
