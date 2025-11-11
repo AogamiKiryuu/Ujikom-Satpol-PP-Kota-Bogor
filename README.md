@@ -16,13 +16,16 @@
 
 ### 🎯 **Advanced Exam Management**
 
-- ✅ CRUD ujian dengan pengaturan waktu fleksibel
-- ✅ Bank soal dengan multiple choice (A, B, C, D)
+- ✅ **CRUD Ujian** dengan pengaturan waktu fleksibel (start date, end date, duration)
+- ✅ **Bank Soal** dengan multiple choice (A, B, C, D)
 - ✅ **Import Soal Massal** via CSV/Excel dengan template dinamis
 - ✅ **Modal Import Responsif** untuk resolusi rendah (1366x768+)
+- ✅ **Question Ordering** - urutan soal dapat diatur manual
 - ✅ **Equal Scoring System** - semua soal memiliki bobot nilai yang sama
-- ✅ Auto-grading system dengan skor real-time
-- ✅ Timer otomatis per ujian dengan auto-submit
+- ✅ **Auto-grading System** dengan skor real-time
+- ✅ **Timer Otomatis** per ujian dengan countdown dan auto-submit
+- ✅ **Passing Score Configuration** - atur nilai minimal kelulusan
+- ✅ **Exam Status Management** - Draft, Published, Expired
 - ✅ Template download berdasarkan ujian terpilih
 
 ### 📱 **Mobile-First User Experience**
@@ -31,25 +34,23 @@
 - ✅ **Touch-Optimized Interface** - button size 44px minimum untuk mobile
 - ✅ **Auto-scroll** ke soal aktif pada navigasi mobile
 - ✅ **Enhanced Clickable Feedback** - hover effects dan visual indicators
-- ✅ **Progress Bar Animated** dengan visual feedback
+- ✅ **Progress Bar Animated** dengan visual feedback real-time
 - ✅ **Responsive Modal Design** untuk semua resolusi layar
+- ✅ **Question Number Badges** - indikator visual untuk status jawaban
+- ✅ **Smooth Transitions** antar soal dengan animasi halus
+- ✅ **Mobile-First Forms** dengan validation dan error handling
 
 ### 📊 **Advanced Analytics & Comprehensive Reporting**
 
 - ✅ Dashboard admin dengan statistik lengkap dan real-time
-- ✅ **Analisis Tingkat Kesulitan Soal** dengan 6 level assessment
-  - 🟢 Sangat Mudah (≥80% benar)
-  - 🟢 Mudah (65-79% benar)
-  - 🔵 Sedang (50-64% benar)
-  - 🟠 Sulit (35-49% benar)
-  - 🔴 Sangat Sulit (20-34% benar)
-  - 🟣 Ekstrem Sulit (<20% benar)
-- ✅ **Evaluasi Ujian Keseluruhan** dengan rekomendasi perbaikan
-- ✅ **Distribusi Jawaban** per opsi untuk setiap soal
+- ✅ **Analisis Performa Ujian** dengan metrik komprehensif
 - ✅ **Question Analysis** - persentase jawaban benar per soal
-- ✅ **Visual Progress Bar** untuk tingkat kesulitan
-- ✅ Statistik peserta dan trend waktu
+- ✅ **Distribusi Jawaban** per opsi untuk setiap soal
+- ✅ **Visual Charts & Graphs** untuk analisis data
+- ✅ **Statistik Peserta** dengan tracking lengkap
+- ✅ **Time Trends Analysis** untuk monitoring performance
 - ✅ Export laporan dalam format CSV dengan data lengkap
+- ✅ **Real-time Dashboard** dengan auto-refresh statistics
 
 ### 🔐 **Security & Performance Features**
 
@@ -71,12 +72,71 @@
 - ✅ **Consistent Hover Effects** pada semua clickable elements
 - ✅ **Scale Animations** dan smooth transitions
 
-## 🛠️ Tech Stack
+**Command Line:**
+
+```bash
+# Install (requires Java)
+wget https://sourceforge.net/projects/plantuml/files/plantuml.jar/download -O plantuml.jar
+
+# Generate PNG
+java -jar plantuml.jar docs/ActivitiesDiagram_Sistem_CBT.puml
+
+# Generate SVG
+java -jar plantuml.jar -tsvg docs/*.puml
+```
+
+📖 **Panduan lengkap**: Lihat `docs/PlantUML_README.md` untuk dokumentasi komprehensif
+
+---
+
+## �️ Database Schema
+
+Sistem menggunakan 5 main entities dengan Prisma ORM:
+
+### **Core Entities:**
+
+1. **User** - Data pengguna (Admin & Peserta)
+
+   - Fields: id, nama, email, password (hashed), tempatLahir, tanggalLahir, jenisKelamin, role
+   - Relations: ✅ One-to-Many dengan Exam (as creator), ✅ One-to-Many dengan ExamResult
+
+2. **Exam** - Data ujian
+
+   - Fields: id, userId, title, subject, duration, passingScore, startDate, endDate, status
+   - Relations: ✅ Many-to-One dengan User, ✅ One-to-Many dengan Question, ✅ One-to-Many dengan ExamResult
+
+3. **Question** - Data soal ujian
+
+   - Fields: id, examId, questionText, optionA, optionB, optionC, optionD, correctAnswer, questionOrder
+   - Relations: ✅ Many-to-One dengan Exam, ✅ One-to-Many dengan Answer
+
+4. **ExamResult** - Data hasil ujian peserta
+
+   - Fields: id, examId, userId, score, startTime, endTime, status, isPassed
+   - Relations: ✅ Many-to-One dengan Exam, ✅ Many-to-One dengan User, ✅ One-to-Many dengan Answer
+
+5. **Answer** - Data jawaban peserta per soal
+   - Fields: id, examResultId, questionId, selectedAnswer, isCorrect
+   - Relations: ✅ Many-to-One dengan ExamResult, ✅ Many-to-One dengan Question
+
+### **Key Features:**
+
+- ✅ Cascade deletes untuk data integrity
+- ✅ Unique constraints untuk email dan combinasi data
+- ✅ Indexed fields untuk query performance
+- ✅ DateTime tracking (createdAt, updatedAt)
+- ✅ Enums untuk Gender dan Role
+
+📊 Lihat `docs/ERD_Sistem_CBT.puml` atau `docs/ERD_Sistem_CBT.drawio` untuk visualisasi lengkap
+
+---
+
+## �🛠️ Tech Stack
 
 ### **Frontend**
 
 - **Next.js 15.5.2** - React framework dengan App Router
-- **TypeScript** - Type-safe development  
+- **TypeScript** - Type-safe development
 - **Tailwind CSS** - Modern styling dengan responsive design
 - **Custom CSS Utilities** - Enhanced hover effects dan animations
 - **React Hook Form** - Advanced form management
@@ -86,12 +146,13 @@
 
 ### **Backend**
 
-- **Prisma ORM** - Type-safe database management
-- **PostgreSQL** - Robust primary database
-- **JWT (jose)** - Secure authentication tokens
-- **bcryptjs** - Advanced password hashing
-- **CSV Parser** - Bulk import functionality
-- **Middleware** - Request/response processing
+- **Prisma ORM 6.13.0** - Type-safe database management dengan migrations
+- **PostgreSQL** - Robust primary database dengan relational integrity
+- **JWT (jose)** - Secure authentication tokens dengan expiry
+- **bcryptjs** - Advanced password hashing dengan salt rounds
+- **CSV Parser (papaparse)** - Bulk import functionality untuk soal
+- **Middleware** - Request/response processing dan authentication guards
+- **Next.js API Routes** - RESTful API dengan type safety
 
 ### **DevOps & Tools**
 
@@ -159,9 +220,15 @@ SESSION_TIMEOUT=3600
 npx prisma generate
 
 # Create database and run migrations
+npx prisma migrate dev
+
+# Or use db push for development
 npx prisma db push
 
-# Optional: Seed with sample data
+# Optional: View database in Prisma Studio
+npx prisma studio
+
+# Optional: Seed with sample data (if seed script available)
 npx prisma db seed
 
 ### 5. Run Development Server
@@ -193,38 +260,47 @@ pnpm dev
    - CRUD soal individual dengan validasi
 5. **Monitor Peserta** di menu "Peserta"
 6. **Analisis Comprehensive** di menu "Laporan":
-   - Evaluasi kesulitan ujian secara keseluruhan
-   - Analisis per soal dengan 6 level kesulitan
+   - Evaluasi performa ujian secara keseluruhan
+   - Analisis per soal dengan persentase jawaban benar
+   - Distribusi jawaban untuk setiap opsi (A, B, C, D)
+   - Visual charts dan graphs untuk insight data
    - Export laporan dalam format CSV
 
 ### **Student Experience**
 
 1. **Login** sebagai peserta dengan credentials yang valid
-2. **Dashboard Peserta** - lihat ujian yang tersedia dan riwayat
+2. **Dashboard Peserta** - lihat ujian yang tersedia dan riwayat hasil
 3. **Mengikuti Ujian**:
    - **Mobile-First Interface** dengan railway navigation
    - **Touch-Optimized Controls** untuk semua device
    - **Real-time Auto-save** untuk setiap jawaban
    - **Visual Progress Indicator** dengan animated progress bar
    - **Smart Navigation** dengan auto-scroll ke soal aktif
+   - **Countdown Timer** dengan visual warning saat waktu hampir habis
+   - **Question Numbering** dengan status jawaban (answered/unanswered)
 4. **Hasil Ujian**:
    - Tampilan hasil dengan **professional icons** (CheckCircle/XCircle)
-   - **Equal scoring system** - semua soal bernilai sama
-   - Detail jawaban dan analisis performance
+   - **Equal scoring system** - semua soal bernilai sama (1 poin per soal)
+   - **Pass/Fail Indicator** berdasarkan passing score
+   - Detail jawaban dengan pembahasan (correct answer visible)
+   - **Score Percentage** dan total correct answers
+   - Waktu pengerjaan dan statistik performance
 
-#### **2. Format CSV Template**
+#### **2. Format CSV/Xlxs Template**
 
 Template CSV memiliki kolom berikut:
+
 - `examTitle` - Judul ujian (opsional, akan menggunakan ujian terpilih)
 - `examSubject` - Mata pelajaran (opsional)
 - `questionText` - Teks pertanyaan (required)
 - `optionA` - Pilihan A (required)
-- `optionB` - Pilihan B (required)  
+- `optionB` - Pilihan B (required)
 - `optionC` - Pilihan C (required)
 - `optionD` - Pilihan D (required)
 - `correctAnswer` - Jawaban benar: A/B/C/D (required)
 
 **Contoh Template:**
+
 ```csv
 examTitle,examSubject,questionText,optionA,optionB,optionC,optionD,correctAnswer
 Matematika,Dasar,2 + 2 = ?,2,3,4,5,C
@@ -235,11 +311,13 @@ Matematika,Lanjut,Integral ∫x² dx = ?,x³ + C,x³/3 + C,2x + C,x + C,B
 #### **3. Equal Scoring System**
 
 Sistem penilaian yang disederhanakan:
+
 - **Semua soal memiliki bobot yang sama** (1 poin per soal)
 - **Tidak ada weighted scoring** berdasarkan tingkat kesulitan
 - **Perhitungan mudah**: Skor = (Jawaban Benar / Total Soal) × 100%
 
 **Contoh Perhitungan:**
+
 ```
 Ujian dengan 10 soal:
 - Jawaban benar: 8 soal
@@ -274,77 +352,6 @@ Ujian dengan 10 soal:
 5. **Submit Otomatis** saat waktu habis
 6. **Hasil Instan** dengan breakdown skor dan analisis
 
-### **Authentication**
-
-- `POST /api/auth/login` - User login dengan JWT
-- `POST /api/auth/register` - User registration dengan validation
-- `POST /api/auth/logout` - Secure user logout
-- `GET /api/auth/verify` - Token verification middleware
-
-### **Admin API - Exams**
-
-- `GET /api/admin/exams` - List all exams dengan pagination
-- `POST /api/admin/exams` - Create new exam dengan validation
-- `GET /api/admin/exams/[id]` - Get detailed exam information
-- `PUT /api/admin/exams/[id]` - Update exam dengan business rules
-- `DELETE /api/admin/exams/[id]` - Delete exam (dengan safety checks)
-- `GET /api/admin/exams/list` - Simple exam list untuk dropdown
-
-### **Admin API - Questions**
-
-- `GET /api/admin/questions` - List questions dengan filtering
-- `POST /api/admin/questions` - Create individual question
-- `GET /api/admin/questions/[id]` - Get question details
-- `PUT /api/admin/questions/[id]` - Update question
-- `DELETE /api/admin/questions/[id]` - Delete question
-
-### **Admin API - Reports & Analytics**
-
-- `GET /api/admin/reports?type=overview` - Dashboard statistics
-- `GET /api/admin/reports?type=exam-performance` - **Question analysis**
-- `GET /api/admin/reports?type=user-performance` - Student performance
-- `GET /api/admin/reports?type=time-trends` - Trend analysis
-- `GET /api/admin/dashboard/stats` - Real-time dashboard data
-
-### **Student API**
-
-- `GET /api/peserta/stats` - Student dashboard statistics
-- `GET /api/exams` - Available exams for students
-- `GET /api/peserta/exam/[id]` - Get exam for taking
-- `POST /api/peserta/exam/[id]/start` - Start exam session
-- `POST /api/peserta/exam/[id]/answer` - Submit answer dengan auto-save
-- `POST /api/peserta/exam/[id]/submit` - **Final submit dengan equal scoring**
-- `GET /api/peserta/exam/[id]/result` - Get exam results dengan professional icons
-
-## 🎯 Key Features Overview
-
-### **⚖️ Equal Scoring System**
-
-```
-Scoring Formula: (Correct Answers / Total Questions) × 100%
-
-Example:
-- Total Questions: 10
-- Correct Answers: 8  
-- Final Score: (8/10) × 100% = 80%
-```
-
-### **� Mobile-First Design**
-
-- **Railway Navigation**: Horizontal scrolling dengan smooth animations
-- **Touch Optimization**: 44px minimum touch targets
-- **Responsive Modals**: Adaptif untuk resolusi 1366x768+
-- **Auto-scroll**: Smart navigation ke soal aktif
-- **Visual Feedback**: Hover effects dan scale animations
-
-### **📋 Import Template Format**
-
-```csv
-examTitle,examSubject,questionText,optionA,optionB,optionC,optionD,correctAnswer
-Matematika,Dasar,2+2=?,2,3,4,5,C
-Matematika,Lanjut,∫x²dx=?,x³+C,x³/3+C,2x+C,x+C,B
-```
-
 ### **🎨 UI/UX Improvements**
 
 - ✅ **Professional Icons**: Lucide React icons menggantikan emoji
@@ -368,26 +375,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🎯 Key Achievements
 
 - ✅ **100% Functional** CRUD operations untuk ujian dan soal
-- ✅ **Advanced Analytics** dengan question-level analysis  
+- ✅ **Advanced Analytics** dengan question-level analysis
 - ✅ **Real-time Performance** tracking dan reporting
 - ✅ **Mobile-First Design** dengan railway navigation
 - ✅ **Equal Scoring System** yang mudah dipahami
 - ✅ **Responsive Modal Design** untuk semua resolusi (1366x768+)
 - ✅ **Professional UI** dengan Lucide React icons
 - ✅ **Enhanced UX** dengan hover effects dan animations
+- ✅ **Complete UML Documentation** dalam 2 format (Draw.io & PlantUML)
+- ✅ **Git-Friendly Diagrams** dengan PlantUML text-based format
 - ✅ **Production-Ready** dengan security best practices
 - ✅ **Touch-Optimized** interface untuk mobile devices
-
-## 🚀 Recent Updates
-
-### **Version 2.0 - Mobile-First Improvements**
-- 🆕 **Railway Navigation** untuk mobile dengan horizontal scroll
-- 🆕 **Equal Scoring System** menggantikan weighted scoring  
-- 🆕 **Responsive Modal Import** untuk resolusi rendah
-- 🆕 **Enhanced Clickable Feedback** dengan hover effects
-- 🆕 **Professional Icons** menggantikan emoji
-- 🆕 **Auto-scroll Navigation** ke soal aktif
-- 🆕 **Touch-Friendly Interface** dengan 44px minimum targets
 
 <div align="center">
   <strong>Dibuat untuk memenuhi Ujian Kompetensi - Praktik Lapang UNPAK</strong>

@@ -1,0 +1,109 @@
+@startuml CBT_System_UseCase_Diagram
+!theme plain
+skinparam backgroundColor white
+skinparam defaultFontSize 11
+
+' Actor styling
+skinparam actor {
+  BackgroundColor #E3F2FD
+  BorderColor #1976D2
+}
+
+' Use case styling
+skinparam usecase {
+  BackgroundColor #BBDEFB
+  BorderColor #1976D2
+  FontSize 11
+}
+
+title Use Case Diagram - CBT System
+
+left to right direction
+
+' Actors
+actor "Admin" as admin #E3F2FD
+actor "Peserta" as peserta #E8F5E9
+
+' System boundary
+rectangle "CBT System" {
+  
+  ' Admin Use Cases (Blue theme)
+  usecase "Create Exam" as UC1 #BBDEFB
+  usecase "Add / Import\nQuestions" as UC2 #BBDEFB
+  usecase "Configure\nScoring" as UC3 #BBDEFB
+  usecase "Publish Exam" as UC4 #BBDEFB
+  usecase "View Performance\nReports" as UC5 #BBDEFB
+  usecase "Manage Peserta" as UC6 #BBDEFB
+  usecase "Configure\nSettings" as UC7 #BBDEFB
+  
+  ' Peserta Use Cases (Green theme)
+  usecase "Login" as UC8 #C8E6C9
+  usecase "View Available\nExams" as UC9 #C8E6C9
+  usecase "Answer\nQuestions" as UC10 #C8E6C9
+  usecase "Submit Exam" as UC11 #C8E6C9
+  usecase "View Results" as UC12 #C8E6C9
+  usecase "View My\nStatistics" as UC13 #C8E6C9
+  usecase "Manage Profile" as UC14 #C8E6C9
+  
+}
+
+' Admin associations
+admin --> UC1
+admin --> UC2
+admin --> UC3
+admin --> UC4
+admin --> UC5
+admin --> UC6
+admin --> UC7
+
+' Peserta associations
+peserta --> UC8
+peserta --> UC9
+peserta --> UC10
+peserta --> UC11
+peserta --> UC12
+peserta --> UC13
+peserta --> UC14
+
+' Include relationships (dependencies)
+UC1 .> UC2 : <<include>>
+UC1 .> UC3 : <<include>>
+UC9 ..> UC10 : <<precedes>>
+UC10 .> UC11 : <<include>>
+UC11 .> UC12 : <<include>>
+
+' Notes
+note right of admin
+  **Admin Responsibilities:**
+  - Create & manage exams
+  - Add/import questions
+  - Configure scoring rules
+  - Publish exams
+  - View reports & analytics
+  - Manage peserta accounts
+  - System configuration
+end note
+
+note left of peserta
+  **Peserta Responsibilities:**
+  - Login to system
+  - Browse available exams
+  - Take exams
+  - Answer questions
+  - Submit completed exams
+  - View results & scores
+  - Review performance stats
+  - Manage own profile
+end note
+
+note bottom of "CBT System"
+  **System Features:**
+  - Role-based access control (Admin, Peserta)
+  - Question shuffling (Fisher-Yates algorithm)
+  - Real-time answer validation
+  - Automated scoring & grading
+  - Comprehensive reporting & analytics
+  - Exam scheduling & time limits
+end note
+
+@enduml

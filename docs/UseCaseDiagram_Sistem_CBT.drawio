@@ -1,0 +1,208 @@
+<mxfile host="app.diagrams.net" modified="2025-11-06T10:05:00.000Z" agent="AgentVersion" version="24.0.0" type="device">
+  <diagram id="use-case-diagram" name="Use Case Diagram - CBT System">
+    <mxGraphModel dx="1400" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        
+        <!-- System Boundary -->
+        <mxCell id="system-boundary" value="CBT System" style="rectangle;html=1;rounded=0;whiteSpace=wrap;strokeWidth=2;strokeColor=#333333;fillColor=none;fontSize=14;fontStyle=bold;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="350" y="100" width="500" height="800" as="geometry"/>
+        </mxCell>
+        
+        <!-- ACTORS -->
+        <!-- Admin Actor -->
+        <mxCell id="admin-actor" value="Admin" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="80" y="250" width="60" height="120" as="geometry"/>
+        </mxCell>
+        
+        <!-- Peserta Actor -->
+        <mxCell id="peserta-actor" value="Peserta" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="250" width="60" height="120" as="geometry"/>
+        </mxCell>
+        
+        <!-- USE CASES FOR ADMIN -->
+        <!-- UC1: Create Exam -->
+        <mxCell id="uc-create-exam" value="Create Exam" style="ellipse;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="140" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC2: Add Questions -->
+        <mxCell id="uc-add-questions" value="Add / Import Questions" style="ellipse;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="240" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC3: Configure Scoring -->
+        <mxCell id="uc-config-scoring" value="Configure Scoring" style="ellipse;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="340" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC4: Publish Exam -->
+        <mxCell id="uc-publish-exam" value="Publish Exam" style="ellipse;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="440" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC5: View Reports -->
+        <mxCell id="uc-view-reports" value="View Performance Reports" style="ellipse;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="540" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC6: Manage Participants -->
+        <mxCell id="uc-manage-peserta" value="Manage Peserta" style="ellipse;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="640" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC7: System Settings -->
+        <mxCell id="uc-settings" value="Configure Settings" style="ellipse;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="390" y="740" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- USE CASES FOR PESERTA -->
+        <!-- UC8: Login -->
+        <mxCell id="uc-login" value="Login" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="680" y="140" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC9: View Available Exams -->
+        <mxCell id="uc-view-exams" value="View Available Exams" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="680" y="240" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC10: Answer Questions -->
+        <mxCell id="uc-answer" value="Answer Questions" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="680" y="340" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC11: Submit Exam -->
+        <mxCell id="uc-submit" value="Submit Exam" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="680" y="440" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC12: View Results -->
+        <mxCell id="uc-view-results" value="View Results" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="680" y="540" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC13: View Performance Stats -->
+        <mxCell id="uc-view-stats" value="View My Statistics" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="680" y="640" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- UC14: Manage Profile -->
+        <mxCell id="uc-profile" value="Manage Profile" style="ellipse;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;strokeWidth=2;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="680" y="740" width="110" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- ASSOCIATIONS / RELATIONSHIPS -->
+        <!-- Admin associations -->
+        <mxCell id="admin-create" edge="1" parent="1" source="admin-actor" target="uc-create-exam">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="admin-add" edge="1" parent="1" source="admin-actor" target="uc-add-questions">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="admin-config" edge="1" parent="1" source="admin-actor" target="uc-config-scoring">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="admin-publish" edge="1" parent="1" source="admin-actor" target="uc-publish-exam">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="admin-reports" edge="1" parent="1" source="admin-actor" target="uc-view-reports">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="admin-manage" edge="1" parent="1" source="admin-actor" target="uc-manage-peserta">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="admin-settings" edge="1" parent="1" source="admin-actor" target="uc-settings">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- Peserta associations -->
+        <mxCell id="peserta-login" edge="1" parent="1" source="peserta-actor" target="uc-login">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="peserta-view" edge="1" parent="1" source="peserta-actor" target="uc-view-exams">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="peserta-answer" edge="1" parent="1" source="peserta-actor" target="uc-answer">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="peserta-submit" edge="1" parent="1" source="peserta-actor" target="uc-submit">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="peserta-results" edge="1" parent="1" source="peserta-actor" target="uc-view-results">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="peserta-stats" edge="1" parent="1" source="peserta-actor" target="uc-view-stats">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="peserta-profile" edge="1" parent="1" source="peserta-actor" target="uc-profile">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- INCLUDE relationships (dependencies) -->
+        <!-- Answer Questions includes Submit Exam -->
+        <mxCell id="inc-answer-submit" edge="1" parent="1" source="uc-answer" target="uc-submit" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=1;entryY=0.5;dashed=1;dashPattern=5,5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="790" y="460" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Submit Exam includes View Results -->
+        <mxCell id="inc-submit-results" edge="1" parent="1" source="uc-submit" target="uc-view-results" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=1;entryY=0.5;dashed=1;dashPattern=5,5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="790" y="560" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Create Exam includes Add Questions -->
+        <mxCell id="inc-create-add" edge="1" parent="1" source="uc-create-exam" target="uc-add-questions" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=1;entryY=0.5;dashed=1;dashPattern=5,5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="500" y="260" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- View Exams precedes Answer Questions -->
+        <mxCell id="flow-view-answer" edge="1" parent="1" source="uc-view-exams" target="uc-answer" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=1;entryY=0.5;dashed=1;dashPattern=5,5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="790" y="360" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- LEGEND -->
+        <mxCell id="legend-title" value="LEGEND" style="text;html=1;fontSize=12;fontStyle=bold;align=left;" vertex="1" parent="1">
+          <mxGeometry x="50" y="900" width="100" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend-use" value="Use Case (Functional Requirement)" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="50" y="930" width="250" height="20" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend-actor" value="Actor (User Role)" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="300" y="930" width="150" height="20" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend-assoc" value="— Association (Actor uses Use Case)" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="450" y="930" width="280" height="20" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend-include" value="- - - Include (Functional dependency)" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="730" y="930" width="280" height="20" as="geometry"/>
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
