@@ -1,0 +1,58 @@
+@startuml CBT_UseCase_Admin
+left to right direction
+skinparam packageStyle rectangle
+
+title Use Case Diagram - Admin
+
+actor Admin
+
+rectangle "CBT Exam System" {
+  usecase "Manage Exams" as UC1
+  usecase "Manage Questions" as UC2
+  usecase "Import Questions" as UC3
+  usecase "View Dashboard" as UC4
+  usecase "View Reports" as UC5
+  usecase "Export Data" as UC6
+  usecase "Manage Users" as UC7
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+
+UC3 .> UC2 : <<include>>
+
+@enduml
+
+@startuml CBT_UseCase_Peserta
+left to right direction
+skinparam packageStyle rectangle
+
+title Use Case Diagram - Peserta
+
+actor Peserta
+
+rectangle "CBT Exam System" {
+  usecase "Register" as UC8
+  usecase "Login" as UC9
+  usecase "View Exams" as UC10
+  usecase "Take Exam" as UC11
+  usecase "Submit Exam" as UC12
+  usecase "View Results" as UC13
+}
+
+Peserta --> UC8
+Peserta --> UC9
+Peserta --> UC10
+Peserta --> UC11
+Peserta --> UC12
+Peserta --> UC13
+
+UC12 .> UC11 : <<include>>
+UC13 .> UC12 : <<include>>
+
+@enduml

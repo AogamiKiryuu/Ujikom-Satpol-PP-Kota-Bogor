@@ -1,0 +1,61 @@
+flowchart TD
+    subgraph Admin["Admin"]
+        A1([Start])
+        A2[Create Exam]
+        A3[Add Questions via Import CSV]
+        A4{Revisi Soal?}
+        
+        A1 --> A2
+        A2 --> A3
+        A4 -->|Ya| A2
+    end
+    
+    subgraph System["System"]
+        S1[Validate Exam Data]
+        S2[Parse and Save Questions to Database]
+        S3{Disetujui?}
+        S4[Activate Exam for Peserta]
+        S5{Valid?}
+        S6[Shuffle Questions per User]
+        S7[Start Timer]
+        S8[Auto-Save Answers]
+        S9[Calculate Score]
+        S10[Save Result to Database]
+        S11([End])
+        
+        A3 --> S1
+        S1 --> S2
+        S2 --> S3
+        S3 -->|Ditolak| A4
+        S3 -->|Disetujui| S4
+        S5 -->|Disetujui| S6
+        S8 --> S9
+        S9 --> S10
+        S10 --> S11
+    end
+    
+    subgraph Peserta["Peserta"]
+        P1[Login]
+        P2[View Available Exams]
+        P3[Select Exam]
+        P4[Read Questions]
+        P5[Answer Questions]
+        P6[Submit Exam]
+        P7[View Result]
+        
+        S4 --> P1
+        P1 --> P2
+        P2 --> P3
+        P3 --> S5
+        S5 -->|Ditolak| P2
+        S6 --> P4
+        S7 --> P4
+        P4 --> P5
+        P5 --> S8
+        P6 --> S9
+        P5 --> P6
+        S10 --> P7
+    end
+    
+    style A1 fill:#000,color:#fff
+    style S11 fill:#000,color:#fff

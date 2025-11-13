@@ -21,23 +21,32 @@ export default function Home() {
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache' },
         });
-        if (!cancelled && res.ok) {
-          const data = await res.json();
-          setIsLoggedIn(true);
-          setUserRole(data.user?.role ?? null);
-          return;
-        }
-      } catch {}
-
-      // Fallback to localStorage (legacy)
-      try {
-        const token = localStorage.getItem('authToken');
-        const role = localStorage.getItem('userRole');
         if (!cancelled) {
-          setIsLoggedIn(!!token);
-          setUserRole(role);
+          if (res.ok) {
+            const data = await res.json();
+            setIsLoggedIn(true);
+            setUserRole(data.user?.role ?? null);
+          } else {
+            // Not logged in - clear any stale data
+            setIsLoggedIn(false);
+            setUserRole(null);
+            try {
+              localStorage.removeItem('authToken');
+              localStorage.removeItem('userRole');
+            } catch {}
+          }
         }
-      } catch {}
+      } catch {
+        // Error fetching - assume not logged in
+        if (!cancelled) {
+          setIsLoggedIn(false);
+          setUserRole(null);
+          try {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userRole');
+          } catch {}
+        }
+      }
     };
     checkAuth();
     return () => {
@@ -121,17 +130,12 @@ export default function Home() {
                 </button>
               </>
             ) : (
-              <>
-                <Link href="/login" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
-                  Masuk
-                </Link>
-                <Link
-                  href="/register"
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  Daftar
-                </Link>
-              </>
+              <Link
+                href="/login"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                Masuk
+              </Link>
             )}
           </div>
         </nav>

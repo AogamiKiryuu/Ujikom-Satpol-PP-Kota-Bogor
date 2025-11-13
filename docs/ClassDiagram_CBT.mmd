@@ -1,0 +1,81 @@
+classDiagram
+    %% Enums
+    class Gender {
+        <<enumeration>>
+        LAKI_LAKI
+        PEREMPUAN
+    }
+    
+    class Role {
+        <<enumeration>>
+        ADMIN
+        PESERTA
+    }
+    
+    %% Core Models
+    class User {
+        +String id
+        +String name
+        +String email
+        +String password
+        +Gender gender
+        +Role role
+        +DateTime createdAt
+    }
+    
+    class Exam {
+        +String id
+        +String title
+        +String subject
+        +Int duration
+        +Int passingScore
+        +Boolean isActive
+        +DateTime startDate
+        +DateTime endDate
+    }
+    
+    class Question {
+        +String id
+        +String examId
+        +String questionText
+        +String optionA
+        +String optionB
+        +String optionC
+        +String optionD
+        +String correctAnswer
+    }
+    
+    class ExamResult {
+        +String id
+        +String userId
+        +String examId
+        +Int score
+        +Int correctAnswers
+        +DateTime startTime
+        +DateTime endTime
+        +Boolean isCompleted
+    }
+    
+    class Answer {
+        +String id
+        +String examResultId
+        +String questionId
+        +String selectedAnswer
+        +Boolean isCorrect
+    }
+    
+    %% Relationships
+    User "1" --> "*" ExamResult : takes
+    User ..> Gender : uses
+    User ..> Role : uses
+    
+    Exam "1" --> "*" Question : contains
+    Exam "1" --> "*" ExamResult : generates
+    
+    Question "1" --> "*" Answer : answered
+    
+    ExamResult "*" --> "1" User : by
+    ExamResult "*" --> "1" Exam : for
+    ExamResult "1" --> "*" Answer : has
+    
+    Answer "*" --> "1" Question : to

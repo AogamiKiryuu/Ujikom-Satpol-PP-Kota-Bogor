@@ -1,0 +1,86 @@
+graph TB
+    subgraph System["CBT Exam System"]
+        %% Admin Use Cases
+        UC1["Manage Exams<br/>(Create, Read, Update, Delete)"]
+        UC2["Manage Questions<br/>(CRUD & Import CSV)"]
+        UC3["View Reports<br/>(Analytics & Statistics)"]
+        UC4["Manage Users<br/>(View Peserta Data)"]
+        UC5["Monitor Exam Results<br/>(Track Performance)"]
+        UC6["Configure Exam Settings<br/>(Duration, Passing Score)"]
+        UC7["Export Data<br/>(CSV Reports)"]
+        
+        %% Peserta Use Cases
+        UC8["Register Account"]
+        UC9["Login to System"]
+        UC10["View Available Exams"]
+        UC11["Take Exam<br/>(Answer Questions)"]
+        UC12["Submit Exam"]
+        UC13["View Exam Results"]
+        UC14["View Result History"]
+        
+        %% System Use Cases (Auto)
+        UC15["Auto-Save Answers"]
+        UC16["Auto-Submit on Timeout"]
+        UC17["Calculate Score"]
+        UC18["Shuffle Questions"]
+    end
+    
+    %% Actors
+    Admin((Admin))
+    Peserta((Peserta))
+    System((System))
+    
+    %% Admin Relationships
+    Admin --> UC1
+    Admin --> UC2
+    Admin --> UC3
+    Admin --> UC4
+    Admin --> UC5
+    Admin --> UC6
+    Admin --> UC7
+    
+    %% Peserta Relationships
+    Peserta --> UC8
+    Peserta --> UC9
+    Peserta --> UC10
+    Peserta --> UC11
+    Peserta --> UC12
+    Peserta --> UC13
+    Peserta --> UC14
+    
+    %% System Auto Relationships
+    UC11 -.->|includes| UC15
+    UC11 -.->|includes| UC18
+    UC12 -.->|includes| UC17
+    System -.-> UC16
+    System -.-> UC15
+    System -.-> UC17
+    System -.-> UC18
+    
+    %% Dependencies
+    UC2 -.->|extends| UC1
+    UC5 -.->|extends| UC3
+    UC13 -.->|requires| UC12
+    UC11 -.->|requires| UC9
+    
+    style Admin fill:#e3f2fd
+    style Peserta fill:#e8f5e9
+    style System fill:#fff3e0
+    style UC1 fill:#bbdefb
+    style UC2 fill:#bbdefb
+    style UC3 fill:#bbdefb
+    style UC4 fill:#bbdefb
+    style UC5 fill:#bbdefb
+    style UC6 fill:#bbdefb
+    style UC7 fill:#bbdefb
+    style UC8 fill:#c8e6c9
+    style UC9 fill:#c8e6c9
+    style UC10 fill:#c8e6c9
+    style UC11 fill:#c8e6c9
+    style UC12 fill:#c8e6c9
+    style UC13 fill:#c8e6c9
+    style UC14 fill:#c8e6c9
+    style UC15 fill:#ffe0b2
+    style UC16 fill:#ffe0b2
+    style UC17 fill:#ffe0b2
+    style UC18 fill:#ffe0b2

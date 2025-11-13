@@ -1,0 +1,133 @@
+@startuml Activity_CreateExam
+title Activity Diagram - Create Exam & Import Questions
+
+|Admin|
+start
+:Create Exam;
+note right
+  Input: Title, Subject,
+  Duration, Passing Score,
+  Start Date, End Date
+end note
+
+|System|
+:Validate Exam Data;
+:Save Exam to Database;
+
+|Admin|
+:Import Questions (CSV);
+
+|System|
+:Parse CSV File;
+:Validate Questions;
+
+if (Valid Format?) then (Yes)
+  :Bulk Insert Questions
+  to Database;
+  |Admin|
+  :Preview Questions;
+else (No)
+  :Show Error Message;
+  stop
+endif
+
+|Admin|
+:Activate Exam;
+
+|System|
+:Update Exam Status
+to Active;
+
+stop
+
+@enduml
+
+@startuml Activity_TakeExam
+title Activity Diagram - Take Exam
+
+|Peserta|
+start
+:View Available Exams;
+
+|System|
+:Load Active Exams;
+
+|Peserta|
+:Select Exam;
+:Start Exam;
+
+|System|
+:Create Exam Result Record;
+:Shuffle Questions;
+:Start Timer;
+
+|Peserta|
+repeat
+  :View Question;
+  :Select Answer (A/B/C/D);
+  
+  |System|
+  :Auto-Save Answer;
+  :Check Timer;
+  
+  if (Timer Expired?) then (Yes)
+    :Auto-Submit Exam;
+    detach
+  else (No)
+  endif
+  
+  |Peserta|
+repeat while (More Questions?) is (Yes)
+-> No;
+
+:Submit Exam;
+
+|System|
+:Stop Timer;
+:Calculate Score;
+note right
+  Score = (Correct / Total) × 100%
+end note
+:Save Final Result;
+
+|Peserta|
+:View Result;
+:View Score & Status;
+
+stop
+
+@enduml
+
+@startuml Activity_ViewReports
+title Activity Diagram - View Reports & Analytics
+
+|Admin|
+start
+:Access Reports;
+:Select Exam/User;
+
+|System|
+:Load Exam Results Data;
+:Calculate Statistics;
+note right
+  - Total Participants
+  - Average Score
+  - Pass Rate
+  - Question Analysis
+  - Answer Distribution
+end note
+:Generate Report;
+
+|Admin|
+:View Report Dashboard;
+
+if (Export?) then (Yes)
+  |System|
+  :Generate CSV File;
+  :Download Report;
+else (No)
+endif
+
+stop
+
+@enduml
