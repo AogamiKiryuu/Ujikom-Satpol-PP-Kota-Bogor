@@ -257,9 +257,25 @@ export default function ExamPage() {
     );
   }
 
+  const totalQuestions = examData.questions.length;
+
+  // Safety check: ensure we have questions and valid index
+  if (totalQuestions === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Ujian ini belum memiliki soal</p>
+          <button onClick={() => router.push('/peserta/dashboard')} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Kembali ke Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const currentQuestion = examData.questions[currentQuestionIndex];
   const answeredQuestions = Object.keys(answers).length;
-  const totalQuestions = examData.questions.length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -317,10 +333,7 @@ export default function ExamPage() {
               </div>
               {/* Progress Bar */}
               <div className="mt-3 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                <div
-                  className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out relative"
-                  style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
-                >
+                <div className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-out relative" style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}>
                   <div className="absolute right-0 top-0 w-2 h-2.5 bg-blue-700 rounded-full transform translate-x-1"></div>
                 </div>
               </div>
@@ -359,126 +372,133 @@ export default function ExamPage() {
 
           {/* Question Content */}
           <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div className="p-6 border-b dark:border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Soal {currentQuestionIndex + 1} dari {totalQuestions}
-                  </h2>
-                </div>
-                <div className="text-gray-700 dark:text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: currentQuestion.questionText }} />
+            {!currentQuestion ? (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+                <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">Soal tidak ditemukan</p>
               </div>
+            ) : (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div className="p-6 border-b dark:border-gray-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Soal {currentQuestionIndex + 1} dari {totalQuestions}
+                    </h2>
+                  </div>
+                  <div className="text-gray-700 dark:text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: currentQuestion.questionText }} />
+                </div>
 
-              <div className="p-6">
-                <div className="space-y-3">
-                  {[
-                    { option: 'A', text: currentQuestion.optionA },
-                    { option: 'B', text: currentQuestion.optionB },
-                    { option: 'C', text: currentQuestion.optionC },
-                    { option: 'D', text: currentQuestion.optionD },
-                  ].map(({ option, text }) => (
-                    <label
-                      key={option}
-                      className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md ${
-                        answers[currentQuestion.id] === option
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-800'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10'
-                      }`}
+                <div className="p-6">
+                  <div className="space-y-3">
+                    {[
+                      { option: 'A', text: currentQuestion.optionA },
+                      { option: 'B', text: currentQuestion.optionB },
+                      { option: 'C', text: currentQuestion.optionC },
+                      { option: 'D', text: currentQuestion.optionD },
+                    ].map(({ option, text }) => (
+                      <label
+                        key={option}
+                        className={`flex items-start space-x-3 p-3 rounded-lg border cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-md ${
+                          answers[currentQuestion.id] === option
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400 ring-2 ring-blue-200 dark:ring-blue-800'
+                            : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name={`question-${currentQuestion.id}`}
+                          value={option}
+                          checked={answers[currentQuestion.id] === option}
+                          onChange={() => handleAnswerChange(currentQuestion.id, option)}
+                          className="mt-1 text-blue-600"
+                        />
+                        <div className="flex-1">
+                          <span className="font-medium text-gray-900 dark:text-white">{option}.</span>
+                          <span className="ml-2 text-gray-700 dark:text-gray-300">{text}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="px-4 sm:px-6 py-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+                  {/* Mobile Navigation */}
+                  <div className="sm:hidden flex justify-between items-center">
+                    <button
+                      onClick={goToPreviousQuestion}
+                      disabled={currentQuestionIndex === 0}
+                      className="mobile-nav-button nav-no-select flex items-center justify-center w-12 h-12 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-full hover:bg-gray-50 dark:hover:bg-gray-500 hover:shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
                     >
-                      <input
-                        type="radio"
-                        name={`question-${currentQuestion.id}`}
-                        value={option}
-                        checked={answers[currentQuestion.id] === option}
-                        onChange={() => handleAnswerChange(currentQuestion.id, option)}
-                        className="mt-1 text-blue-600"
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-gray-900 dark:text-white">{option}.</span>
-                        <span className="ml-2 text-gray-700 dark:text-gray-300">{text}</span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
 
-              {/* Navigation Buttons */}
-              <div className="px-4 sm:px-6 py-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-                {/* Mobile Navigation */}
-                <div className="sm:hidden flex justify-between items-center">
-                  <button
-                    onClick={goToPreviousQuestion}
-                    disabled={currentQuestionIndex === 0}
-                    className="mobile-nav-button nav-no-select flex items-center justify-center w-12 h-12 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-full hover:bg-gray-50 dark:hover:bg-gray-500 hover:shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </button>
+                    <div className="flex flex-col items-center space-y-2">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        {currentQuestionIndex + 1} dari {totalQuestions}
+                      </span>
+                      {currentQuestionIndex === totalQuestions - 1 ? (
+                        <button
+                          onClick={() => handleSubmitExam()}
+                          disabled={submitting}
+                          className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-full hover:bg-green-700 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
+                        >
+                          {submitting ? 'Menyelesaikan...' : 'Selesaikan'}
+                        </button>
+                      ) : (
+                        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1">
+                          <div className="bg-blue-600 h-1 rounded-full transition-all duration-300" style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}></div>
+                        </div>
+                      )}
+                    </div>
 
-                  <div className="flex flex-col items-center space-y-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {currentQuestionIndex + 1} dari {totalQuestions}
-                    </span>
+                    <button
+                      onClick={goToNextQuestion}
+                      disabled={currentQuestionIndex === totalQuestions - 1}
+                      className="mobile-nav-button nav-no-select flex items-center justify-center w-12 h-12 text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
+                    >
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Desktop Navigation */}
+                  <div className="hidden sm:flex justify-between">
+                    <button
+                      onClick={goToPreviousQuestion}
+                      disabled={currentQuestionIndex === 0}
+                      className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Sebelumnya</span>
+                    </button>
+
+                    <div className="flex space-x-3">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
+                        Soal {currentQuestionIndex + 1} dari {totalQuestions}
+                      </span>
+                    </div>
+
                     {currentQuestionIndex === totalQuestions - 1 ? (
                       <button
                         onClick={() => handleSubmitExam()}
                         disabled={submitting}
-                        className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-full hover:bg-green-700 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
+                        className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
                       >
-                        {submitting ? 'Menyelesaikan...' : 'Selesaikan'}
+                        {submitting ? 'Menyelesaikan...' : 'Selesaikan Ujian'}
                       </button>
                     ) : (
-                      <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1">
-                        <div className="bg-blue-600 h-1 rounded-full transition-all duration-300" style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}></div>
-                      </div>
+                      <button
+                        onClick={goToNextQuestion}
+                        className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
+                      >
+                        <span>Selanjutnya</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     )}
                   </div>
-
-                  <button
-                    onClick={goToNextQuestion}
-                    disabled={currentQuestionIndex === totalQuestions - 1}
-                    className="mobile-nav-button nav-no-select flex items-center justify-center w-12 h-12 text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
-                  >
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Desktop Navigation */}
-                <div className="hidden sm:flex justify-between">
-                  <button
-                    onClick={goToPreviousQuestion}
-                    disabled={currentQuestionIndex === 0}
-                    className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500 hover:shadow-md hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Sebelumnya</span>
-                  </button>
-
-                  <div className="flex space-x-3">
-                    <span className="text-sm text-gray-600 dark:text-gray-300">
-                      Soal {currentQuestionIndex + 1} dari {totalQuestions}
-                    </span>
-                  </div>
-
-                  {currentQuestionIndex === totalQuestions - 1 ? (
-                    <button
-                      onClick={() => handleSubmitExam()}
-                      disabled={submitting}
-                      className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
-                    >
-                      {submitting ? 'Menyelesaikan...' : 'Selesaikan Ujian'}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={goToNextQuestion}
-                      className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
-                    >
-                      <span>Selanjutnya</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

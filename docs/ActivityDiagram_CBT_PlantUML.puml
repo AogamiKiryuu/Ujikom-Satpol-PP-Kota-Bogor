@@ -4,39 +4,18 @@ title Activity Diagram - Create Exam & Import Questions
 |Admin|
 start
 :Create Exam;
-note right
-  Input: Title, Subject,
-  Duration, Passing Score,
-  Start Date, End Date
-end note
-
-|System|
-:Validate Exam Data;
-:Save Exam to Database;
-
-|Admin|
 :Import Questions (CSV);
 
 |System|
-:Parse CSV File;
-:Validate Questions;
-
-if (Valid Format?) then (Yes)
-  :Bulk Insert Questions
-  to Database;
-  |Admin|
-  :Preview Questions;
+if (Valid?) then (Yes)
+  :Save Exam & Questions;
 else (No)
-  :Show Error Message;
+  :Show Error;
   stop
 endif
 
 |Admin|
 :Activate Exam;
-
-|System|
-:Update Exam Status
-to Active;
 
 stop
 
@@ -47,59 +26,39 @@ title Activity Diagram - Take Exam
 
 |Peserta|
 start
-:View Available Exams;
-
-|System|
-:Load Active Exams;
-
-|Peserta|
 :Select Exam;
 :Start Exam;
 
 |System|
-:Create Exam Result Record;
 :Shuffle Questions;
 :Start Timer;
 
 |Peserta|
 repeat
-  :View Question;
-  :Select Answer (A/B/C/D);
-  
+  :Answer Question;
   |System|
-  :Auto-Save Answer;
-  :Check Timer;
-  
+  :Auto-Save;
   if (Timer Expired?) then (Yes)
-    :Auto-Submit Exam;
+    :Auto-Submit;
     detach
-  else (No)
   endif
-  
-  |Peserta|
-repeat while (More Questions?) is (Yes)
--> No;
+repeat while (More Questions?)
 
 :Submit Exam;
 
 |System|
-:Stop Timer;
 :Calculate Score;
-note right
-  Score = (Correct / Total) × 100%
-end note
-:Save Final Result;
+:Save Result;
 
 |Peserta|
 :View Result;
-:View Score & Status;
 
 stop
 
 @enduml
 
 @startuml Activity_ViewReports
-title Activity Diagram - View Reports & Analytics
+title Activity Diagram - View Reports
 
 |Admin|
 start
@@ -107,25 +66,13 @@ start
 :Select Exam/User;
 
 |System|
-:Load Exam Results Data;
-:Calculate Statistics;
-note right
-  - Total Participants
-  - Average Score
-  - Pass Rate
-  - Question Analysis
-  - Answer Distribution
-end note
-:Generate Report;
+:Generate Statistics;
+:Display Report;
 
 |Admin|
-:View Report Dashboard;
-
 if (Export?) then (Yes)
   |System|
-  :Generate CSV File;
-  :Download Report;
-else (No)
+  :Download CSV;
 endif
 
 stop
