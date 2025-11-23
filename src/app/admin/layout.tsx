@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X, Home, Users, BookOpen, FileText, BarChart3, Settings, LogOut, User, UserPlus, PlusCircle, Upload, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -117,8 +118,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center w-full' : 'space-x-3'}`}>
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-sm">CBT</span>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative">
+              <Image
+                src="/logo.png"
+                alt="CBT Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+                priority
+              />
             </div>
             <span className={`text-lg font-bold text-gray-900 dark:text-white transition-opacity duration-200 ${sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>Admin Panel</span>
           </div>

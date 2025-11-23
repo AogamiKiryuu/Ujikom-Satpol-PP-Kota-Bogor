@@ -14,7 +14,6 @@ interface Question {
   optionC: string;
   optionD: string;
   correctAnswer: string;
-  points: number;
   createdAt: string;
   exam: {
     id: string;
@@ -37,7 +36,6 @@ interface QuestionFormData {
   optionC: string;
   optionD: string;
   correctAnswer: string;
-  points: number;
 }
 
 export default function AdminSoalPage() {
@@ -64,7 +62,6 @@ export default function AdminSoalPage() {
     optionC: '',
     optionD: '',
     correctAnswer: 'A',
-    points: 1,
   });
 
   const fetchQuestions = async (page = 1, search = '', examId = '') => {
@@ -137,7 +134,6 @@ export default function AdminSoalPage() {
       optionC: '',
       optionD: '',
       correctAnswer: 'A',
-      points: 1,
     });
     setShowModal(true);
   };
@@ -153,7 +149,6 @@ export default function AdminSoalPage() {
       optionC: question.optionC,
       optionD: question.optionD,
       correctAnswer: question.correctAnswer,
-      points: question.points,
     });
     setShowModal(true);
   };
@@ -297,9 +292,6 @@ export default function AdminSoalPage() {
                           <div className="flex items-center space-x-3">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                               Soal #{(currentPage - 1) * pagination.limit + index + 1}
-                            </span>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                              {question.points} Poin
                             </span>
                           </div>
                           <div className="flex space-x-2">
@@ -483,19 +475,6 @@ export default function AdminSoalPage() {
                     <option value="C">C</option>
                     <option value="D">D</option>
                   </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Poin *</label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    max="10"
-                    value={formData.points}
-                    onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
                 </div>
               </div>
             </form>

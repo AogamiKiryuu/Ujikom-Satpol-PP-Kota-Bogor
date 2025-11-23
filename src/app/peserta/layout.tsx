@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
+import Image from 'next/image';
 import { GraduationCap } from 'lucide-react';
 
 export default function PesertaLayout({ children }: { children: ReactNode }) {
@@ -37,7 +38,17 @@ export default function PesertaLayout({ children }: { children: ReactNode }) {
       {!hideTopBar && (
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 relative">
+                <Image
+                  src="/logo.png"
+                  alt="CBT Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                  priority
+                />
+              </div>
               <Link
                 href="/peserta/dashboard"
                 className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/60 text-gray-900 dark:text-white text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

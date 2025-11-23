@@ -1,0 +1,4 @@
+1. Tambahkan toggle "Enable Weighted Scoring" di settings exam
+2. Jika enabled, baru muncul field point per soal
+3. Jika disabled, semua soal otomatis 1 poin
+4. Buat ujian berdasarkan kategori
