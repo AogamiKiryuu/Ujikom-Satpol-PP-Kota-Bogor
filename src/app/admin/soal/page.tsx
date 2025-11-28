@@ -84,11 +84,11 @@ export default function AdminSoalPage() {
         setQuestions(data.data);
         setPagination(data.pagination);
       } else {
-        toast.error('Gagal memuat data soal');
+        toast.error('Tidak dapat memuat daftar soal. Silakan refresh halaman');
       }
     } catch (error) {
       console.error('Error fetching questions:', error);
-      toast.error('Terjadi kesalahan saat memuat data');
+      toast.error('Tidak dapat memuat daftar soal. Silakan refresh halaman');
     } finally {
       setLoading(false);
     }
@@ -174,11 +174,11 @@ export default function AdminSoalPage() {
         fetchQuestions(currentPage, searchQuery, selectedExam);
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Terjadi kesalahan');
+        toast.error(error.error || 'Gagal menyimpan soal. Silakan coba lagi');
       }
     } catch (error) {
       console.error('Error saving question:', error);
-      toast.error('Terjadi kesalahan saat menyimpan');
+      toast.error('Gagal menyimpan soal. Silakan coba lagi');
     }
   };
 
@@ -196,11 +196,11 @@ export default function AdminSoalPage() {
         fetchQuestions(currentPage, searchQuery, selectedExam);
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Gagal menghapus soal');
+        toast.error(error.error || 'Gagal menghapus soal. Silakan coba lagi');
       }
     } catch (error) {
       console.error('Error deleting question:', error);
-      toast.error('Terjadi kesalahan saat menghapus');
+      toast.error('Gagal menghapus soal. Silakan coba lagi');
     }
   };
 

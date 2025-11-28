@@ -105,7 +105,9 @@ function parseExcel(buffer: Buffer): PreviewQuestion[] {
     .map((row: unknown[], index: number) => {
       const obj: Record<string, unknown> = {};
       headers.forEach((header, i) => {
-        obj[header] = row[i] || '';
+        // Convert to string to ensure .trim() works
+        const value = row[i];
+        obj[header] = value !== null && value !== undefined ? String(value) : '';
       });
       return validateQuestion(obj as unknown as CSVRow, index + 2);
     })
@@ -120,7 +122,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+      return NextResponse.json({ error: 'Tidak ada file yang diunggah' }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());

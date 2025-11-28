@@ -20,14 +20,14 @@ export async function POST(request: NextRequest) {
     // Verify JWT and check if user is admin
     const decodedToken = await verifyJWT(request);
     if (!decodedToken || decodedToken.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Anda tidak memiliki akses untuk melakukan import soal' }, { status: 401 });
     }
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+      return NextResponse.json({ error: 'Tidak ada file yang diunggah' }, { status: 400 });
     }
 
     // Check file type
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         if (parseResult.errors.length > 0) {
           return NextResponse.json(
             {
-              error: 'Error parsing CSV: ' + parseResult.errors[0].message,
+              error: 'Gagal membaca file CSV. Pastikan format file sudah benar',
             },
             { status: 400 }
           );
@@ -91,7 +91,9 @@ export async function POST(request: NextRequest) {
           .map((row: unknown[]) => {
             const obj: Record<string, unknown> = {};
             headers.forEach((header, i) => {
-              obj[header] = row[i] || '';
+              // Convert to string to ensure .trim() works
+              const value = row[i];
+              obj[header] = value !== null && value !== undefined ? String(value) : '';
             });
             return obj as unknown as ImportedQuestion;
           })
@@ -101,7 +103,7 @@ export async function POST(request: NextRequest) {
       console.error('Error parsing file:', error);
       return NextResponse.json(
         {
-          error: 'Error parsing file: ' + (error instanceof Error ? error.message : 'Unknown error'),
+          error: 'Gagal membaca file. Pastikan file sesuai dengan template yang disediakan',
         },
         { status: 400 }
       );
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
     if (questions.length === 0) {
       return NextResponse.json(
         {
-          error: 'File CSV kosong atau format tidak valid',
+          error: 'File tidak mengandung data soal atau format tidak sesuai',
         },
         { status: 400 }
       );
@@ -124,7 +126,7 @@ export async function POST(request: NextRequest) {
     if (missingColumns.length > 0) {
       return NextResponse.json(
         {
-          error: `Kolom yang hilang: ${missingColumns.join(', ')}`,
+          error: `Format file tidak sesuai template. Pastikan semua kolom ada dan tidak diubah`,
         },
         { status: 400 }
       );
@@ -205,7 +207,7 @@ export async function POST(request: NextRequest) {
     if (errors.length > 0) {
       return NextResponse.json(
         {
-          error: 'Validasi gagal',
+          error: 'Ada kesalahan dalam data soal',
           details: errors,
         },
         { status: 400 }
@@ -215,7 +217,7 @@ export async function POST(request: NextRequest) {
     if (validQuestions.length === 0) {
       return NextResponse.json(
         {
-          error: 'Tidak ada soal yang valid untuk diimport',
+          error: 'Tidak ada soal yang dapat diimport. Periksa kembali data Anda',
         },
         { status: 400 }
       );

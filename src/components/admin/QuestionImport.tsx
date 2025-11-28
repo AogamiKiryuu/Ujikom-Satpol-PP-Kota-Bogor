@@ -90,20 +90,20 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
         setPreviewData(result.questions || []);
         setPreviewFile(file);
         setShowPreview(true);
-        toast.success(`File berhasil diparsing! Ditemukan ${result.questions?.length || 0} soal untuk di-preview.`);
+        toast.success(`File berhasil dibaca! Ditemukan ${result.questions?.length || 0} soal untuk di-preview.`);
       } else {
         if (result.details) {
           // Show first few errors in detail
           const errorPreview = result.details.slice(0, 3).join('\n');
-          const remainingErrors = result.details.length > 3 ? `\n... dan ${result.details.length - 3} error lainnya` : '';
-          toast.error(`Parsing gagal:\n${errorPreview}${remainingErrors}`);
+          const remainingErrors = result.details.length > 3 ? `\n... dan ${result.details.length - 3} kesalahan lainnya` : '';
+          toast.error(`Gagal membaca file:\n${errorPreview}${remainingErrors}`);
         } else {
-          toast.error(result.error || 'Parsing file gagal');
+          toast.error(result.error || 'Gagal membaca file. Pastikan format sesuai template');
         }
       }
     } catch (error) {
       console.error('Error parsing file:', error);
-      toast.error('Terjadi kesalahan saat parsing file');
+      toast.error('Gagal memproses file. Silakan coba lagi');
     } finally {
       setUploading(false);
     }
@@ -127,7 +127,7 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
       const result = await response.json();
 
       if (response.ok) {
-        toast.success(`Import berhasil! ${result.imported} soal ditambahkan ke ${result.examsUpdated} ujian.`);
+        toast.success(`Import berhasil! ${result.imported} soal telah ditambahkan ke ${result.examsUpdated} ujian.`);
         onImportSuccess();
         setShowModal(false);
         setShowPreview(false);
@@ -136,15 +136,15 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
       } else {
         if (result.details) {
           const errorPreview = result.details.slice(0, 3).join('\n');
-          const remainingErrors = result.details.length > 3 ? `\n... dan ${result.details.length - 3} error lainnya` : '';
-          toast.error(`Import gagal:\n${errorPreview}${remainingErrors}`);
+          const remainingErrors = result.details.length > 3 ? `\n... dan ${result.details.length - 3} kesalahan lainnya` : '';
+          toast.error(`Gagal import soal:\n${errorPreview}${remainingErrors}`);
         } else {
-          toast.error(result.error || 'Import gagal');
+          toast.error(result.error || 'Gagal import soal. Silakan coba lagi');
         }
       }
     } catch (error) {
       console.error('Error importing file:', error);
-      toast.error('Terjadi kesalahan saat import file');
+      toast.error('Gagal mengimport soal. Silakan coba lagi');
     } finally {
       setUploading(false);
     }
@@ -185,7 +185,7 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
       if (file.type === 'text/csv' || file.name.endsWith('.csv') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
         await handleFileUpload(file);
       } else {
-        toast.error('File harus berformat CSV atau Excel (.csv, .xlsx, .xls)');
+        toast.error('Format file tidak sesuai. Gunakan file CSV atau Excel');
       }
     }
   };
@@ -343,7 +343,7 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                     }`}
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    {uploading ? 'Processing...' : 'Pilih File'}
+                    {uploading ? 'Memproses...' : 'Pilih File'}
                   </label>
                 </div>
               </div>
@@ -400,7 +400,7 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {previewData.map((question, index) => (
                       <tr key={index} className={question.errors?.length ? 'bg-red-50 dark:bg-red-900/20' : ''}>
-                        <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">{question.rowIndex}</td>
+                        <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">{index + 1}</td>
                         <td className="px-2 py-2 text-xs text-gray-900 dark:text-white">
                           <div className="max-w-[100px] truncate font-medium">{question.examTitle}</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 max-w-[100px] truncate">{question.examSubject}</div>
@@ -425,9 +425,9 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap text-xs">
                           {question.errors?.length ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">Error</span>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100">Bermasalah</span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">Valid</span>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">Sesuai</span>
                           )}
                         </td>
                       </tr>
@@ -447,11 +447,11 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                     <span className="text-gray-600 dark:text-gray-400">{previewData.length}</span>
                   </div>
                   <div>
-                    <span className="font-medium text-green-600 dark:text-green-400">Valid: </span>
+                    <span className="font-medium text-green-600 dark:text-green-400">Sesuai: </span>
                     <span className="text-gray-600 dark:text-gray-400">{previewData.filter((q) => !q.errors?.length).length}</span>
                   </div>
                   <div>
-                    <span className="font-medium text-red-600 dark:text-red-400">Error: </span>
+                    <span className="font-medium text-red-600 dark:text-red-400">Bermasalah: </span>
                     <span className="text-gray-600 dark:text-gray-400">{previewData.filter((q) => q.errors?.length).length}</span>
                   </div>
                 </div>
@@ -470,7 +470,7 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
                   disabled={uploading || previewData.filter((q) => q.errors?.length).length > 0}
                   className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium"
                 >
-                  {uploading ? 'Importing...' : 'Konfirmasi Import'}
+                  {uploading ? 'Mengimport...' : 'Konfirmasi Import'}
                 </button>
               </div>
             </div>
