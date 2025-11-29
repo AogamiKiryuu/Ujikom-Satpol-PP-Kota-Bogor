@@ -149,15 +149,19 @@ export default function ExamResultPage() {
               </p>
             </div>
             <div>
-              <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border border-white/20 ${result.passed ? 'bg-white/10' : 'bg-white/10'}`}>
+              <span
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold border-2 ${
+                  result.passed ? 'bg-green-500 text-white border-green-400' : 'bg-red-500 text-white border-red-400'
+                }`}
+              >
                 {result.passed ? (
                   <>
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-5 h-5" />
                     LULUS
                   </>
                 ) : (
                   <>
-                    <XCircle className="w-4 h-4" />
+                    <XCircle className="w-5 h-5" />
                     TIDAK LULUS
                   </>
                 )}
@@ -178,9 +182,9 @@ export default function ExamResultPage() {
                     background: `conic-gradient(${primaryColor} ${pct * 3.6}deg, #e5e7eb 0deg)`,
                   }}
                 />
-                <div className="absolute inset-3 rounded-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-center">
+                <div className="absolute inset-3 rounded-full bg-white dark:bg-gray-800 border-4 border-white dark:border-gray-800 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-gray-900 dark:text-white">{pct}%</div>
+                    <div className={`text-4xl font-bold ${result.passed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{pct}%</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">Skor Akhir</div>
                   </div>
                 </div>
@@ -189,25 +193,25 @@ export default function ExamResultPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/60 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg border-2 border-green-200 dark:border-green-800 p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-green-600">
                     <CheckCircle className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Jawaban Benar</div>
-                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{result.correctAnswers.toLocaleString('id-ID')}</div>
+                    <div className="text-sm text-green-700 dark:text-green-300 font-medium">Jawaban Benar</div>
+                    <div className="text-2xl font-bold text-green-700 dark:text-green-300">{result.correctAnswers.toLocaleString('id-ID')}</div>
                   </div>
                 </div>
               </div>
-              <div className="bg-white/60 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-700 p-4">
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg border-2 border-red-200 dark:border-red-800 p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-red-600">
                     <XCircle className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Jawaban Salah</div>
-                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{result.wrongAnswers.toLocaleString('id-ID')}</div>
+                    <div className="text-sm text-red-700 dark:text-red-300 font-medium">Jawaban Salah</div>
+                    <div className="text-2xl font-bold text-red-700 dark:text-red-300">{result.wrongAnswers.toLocaleString('id-ID')}</div>
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@
 import { Plus, Search, Edit, Trash2, Eye, User, Calendar, Mail, Filter, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Peserta {
   id: string;
@@ -47,6 +48,9 @@ export default function AdminPesertaPage() {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedPeserta, setSelectedPeserta] = useState<Peserta | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pesertaToDelete, setPesertaToDelete] = useState<Peserta | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState<PesertaFormData>({
     name: '',
     email: '',
@@ -160,17 +164,25 @@ export default function AdminPesertaPage() {
     }
   };
 
-  const handleDelete = async (peserta: Peserta) => {
-    if (!confirm(`Yakin ingin menghapus peserta ${peserta.name}?`)) return;
+  const handleDeleteClick = (peserta: Peserta) => {
+    setPesertaToDelete(peserta);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pesertaToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/peserta/${peserta.id}`, {
+      setIsDeleting(true);
+      const response = await fetch(`/api/admin/peserta/${pesertaToDelete.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
 
       if (response.ok) {
         toast.success('Peserta berhasil dihapus');
+        setShowDeleteModal(false);
+        setPesertaToDelete(null);
         fetchPeserta(currentPage, searchQuery);
       } else {
         const error = await response.json();
@@ -179,6 +191,8 @@ export default function AdminPesertaPage() {
     } catch (error) {
       console.error('Error deleting peserta:', error);
       toast.error('Terjadi kesalahan saat menghapus');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -491,7 +505,7 @@ export default function AdminPesertaPage() {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(person)}
+                            onClick={() => handleDeleteClick(person)}
                             className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Hapus"
                           >
@@ -664,6 +678,26 @@ export default function AdminPesertaPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setPesertaToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Konfirmasi Hapus Peserta"
+        message={
+          pesertaToDelete
+            ? `Apakah Anda yakin ingin menghapus peserta "${pesertaToDelete.name}"? Semua data ujian dan hasil peserta ini akan ikut terhapus dan tidak dapat dikembalikan.`
+            : ''
+        }
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

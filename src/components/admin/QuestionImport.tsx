@@ -261,8 +261,9 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
 
       {/* Import Modal */}
       {showModal && (
-        <div className="modal-overlay dark:modal-overlay.dark">
-          <div className="modal-content dark:modal-content.dark modal-elevated w-full max-w-[95vw] sm:max-w-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-2xl border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
             <div className="p-3 sm:p-6">
               <div className="flex justify-between items-center mb-4 sm:mb-6">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Import Soal dari File</h3>
@@ -363,8 +364,9 @@ export default function QuestionImport({ onImportSuccess }: QuestionImportProps)
 
       {/* Preview Modal */}
       {showPreview && (
-        <div className="modal-overlay dark:modal-overlay.dark">
-          <div className="modal-content dark:modal-content.dark modal-elevated w-full max-w-[98vw] sm:max-w-4xl lg:max-w-5xl flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={handleCancelPreview} />
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-[98vw] sm:max-w-4xl lg:max-w-5xl flex flex-col border border-gray-200 dark:border-gray-700 max-h-[90vh]">
             {/* Header - Fixed */}
             <div className="flex-shrink-0 p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600">
               <div className="flex justify-between items-center">

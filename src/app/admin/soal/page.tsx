@@ -5,6 +5,7 @@ import { ArrowLeft, Plus, Search, Edit, Trash2, BookOpen, FileText, Filter } fro
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import QuestionImport from '@/components/admin/QuestionImport';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Question {
   id: string;
@@ -54,6 +55,9 @@ export default function AdminSoalPage() {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'create' | 'edit'>('create');
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState<Question | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState<QuestionFormData>({
     examId: '',
     questionText: '',
@@ -182,17 +186,25 @@ export default function AdminSoalPage() {
     }
   };
 
-  const handleDelete = async (question: Question) => {
-    if (!confirm(`Yakin ingin menghapus soal ini?`)) return;
+  const handleDeleteClick = (question: Question) => {
+    setQuestionToDelete(question);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!questionToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/questions/${question.id}`, {
+      setIsDeleting(true);
+      const response = await fetch(`/api/admin/questions/${questionToDelete.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
 
       if (response.ok) {
         toast.success('Soal berhasil dihapus');
+        setShowDeleteModal(false);
+        setQuestionToDelete(null);
         fetchQuestions(currentPage, searchQuery, selectedExam);
       } else {
         const error = await response.json();
@@ -201,6 +213,8 @@ export default function AdminSoalPage() {
     } catch (error) {
       console.error('Error deleting question:', error);
       toast.error('Gagal menghapus soal. Silakan coba lagi');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -298,7 +312,7 @@ export default function AdminSoalPage() {
                             <button onClick={() => handleEdit(question)} className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" title="Edit">
                               <Edit className="w-4 h-4" />
                             </button>
-                            <button onClick={() => handleDelete(question)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Hapus">
+                            <button onClick={() => handleDeleteClick(question)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Hapus">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -379,8 +393,9 @@ export default function AdminSoalPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="modal-overlay dark:modal-overlay.dark">
-          <div className="modal-content dark:modal-content.dark modal-elevated max-w-2xl w-full">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-200 dark:border-gray-700">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">{modalType === 'create' ? 'Tambah Soal Baru' : 'Edit Soal'}</h3>
             </div>
@@ -493,6 +508,26 @@ export default function AdminSoalPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setQuestionToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Konfirmasi Hapus Soal"
+        message={
+          questionToDelete
+            ? `Apakah Anda yakin ingin menghapus soal ini? Soal yang dihapus dari ujian "${questionToDelete.exam.title}" tidak dapat dikembalikan.`
+            : ''
+        }
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

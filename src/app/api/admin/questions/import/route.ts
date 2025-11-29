@@ -15,6 +15,100 @@ interface ImportedQuestion {
   correctAnswer: string;
 }
 
+interface ValidationError {
+  row: number;
+  field?: string;
+  message: string;
+}
+
+function validateImportedQuestion(question: ImportedQuestion, rowIndex: number): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  // Convert to string and trim
+  const examTitle = String(question.examTitle || '').trim();
+  const examSubject = String(question.examSubject || '').trim();
+  const questionText = String(question.questionText || '').trim();
+  const optionA = String(question.optionA || '').trim();
+  const optionB = String(question.optionB || '').trim();
+  const optionC = String(question.optionC || '').trim();
+  const optionD = String(question.optionD || '').trim();
+  const correctAnswer = String(question.correctAnswer || '').trim().toUpperCase();
+
+  // Validate examTitle
+  if (!examTitle) {
+    errors.push({ row: rowIndex, field: 'examTitle', message: 'Judul ujian tidak boleh kosong' });
+  } else if (examTitle.length < 3) {
+    errors.push({ row: rowIndex, field: 'examTitle', message: 'Judul ujian minimal 3 karakter' });
+  } else if (examTitle.length > 200) {
+    errors.push({ row: rowIndex, field: 'examTitle', message: 'Judul ujian maksimal 200 karakter' });
+  }
+
+  // Validate examSubject if provided
+  if (examSubject && examSubject.length < 2) {
+    errors.push({ row: rowIndex, field: 'examSubject', message: 'Mata pelajaran minimal 2 karakter' });
+  } else if (examSubject && examSubject.length > 100) {
+    errors.push({ row: rowIndex, field: 'examSubject', message: 'Mata pelajaran maksimal 100 karakter' });
+  }
+
+  // Validate questionText
+  if (!questionText) {
+    errors.push({ row: rowIndex, field: 'questionText', message: 'Teks pertanyaan tidak boleh kosong' });
+  } else if (questionText.length < 5) {
+    errors.push({ row: rowIndex, field: 'questionText', message: 'Teks pertanyaan minimal 5 karakter' });
+  } else if (questionText.length > 1000) {
+    errors.push({ row: rowIndex, field: 'questionText', message: 'Teks pertanyaan maksimal 1000 karakter' });
+  }
+
+  // Validate options
+  if (!optionA) {
+    errors.push({ row: rowIndex, field: 'optionA', message: 'Pilihan A tidak boleh kosong' });
+  } else if (optionA.length > 500) {
+    errors.push({ row: rowIndex, field: 'optionA', message: 'Pilihan A maksimal 500 karakter' });
+  }
+
+  if (!optionB) {
+    errors.push({ row: rowIndex, field: 'optionB', message: 'Pilihan B tidak boleh kosong' });
+  } else if (optionB.length > 500) {
+    errors.push({ row: rowIndex, field: 'optionB', message: 'Pilihan B maksimal 500 karakter' });
+  }
+
+  if (!optionC) {
+    errors.push({ row: rowIndex, field: 'optionC', message: 'Pilihan C tidak boleh kosong' });
+  } else if (optionC.length > 500) {
+    errors.push({ row: rowIndex, field: 'optionC', message: 'Pilihan C maksimal 500 karakter' });
+  }
+
+  if (!optionD) {
+    errors.push({ row: rowIndex, field: 'optionD', message: 'Pilihan D tidak boleh kosong' });
+  } else if (optionD.length > 500) {
+    errors.push({ row: rowIndex, field: 'optionD', message: 'Pilihan D maksimal 500 karakter' });
+  }
+
+  // Validate correctAnswer
+  if (!correctAnswer) {
+    errors.push({ row: rowIndex, field: 'correctAnswer', message: 'Jawaban benar tidak boleh kosong' });
+  } else if (!['A', 'B', 'C', 'D'].includes(correctAnswer)) {
+    errors.push({ row: rowIndex, field: 'correctAnswer', message: `Jawaban benar harus A, B, C, atau D (ditemukan: "${correctAnswer}")` });
+  }
+
+  // Check for duplicate options
+  const options = [optionA, optionB, optionC, optionD].filter(Boolean);
+  const uniqueOptions = new Set(options);
+  if (options.length !== uniqueOptions.size) {
+    errors.push({ row: rowIndex, message: 'Tidak boleh ada pilihan jawaban yang sama' });
+  }
+
+  // Check if all options are identical
+  if (optionA && optionB && optionC && optionD) {
+    const allSame = optionA === optionB && optionB === optionC && optionC === optionD;
+    if (allSame) {
+      errors.push({ row: rowIndex, message: 'Semua pilihan jawaban tidak boleh sama persis' });
+    }
+  }
+
+  return errors;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Verify JWT and check if user is admin
@@ -63,6 +157,33 @@ export async function POST(request: NextRequest) {
         }
 
         questions = parseResult.data;
+
+        // Validate CSV headers
+        if (questions.length > 0) {
+          const requiredHeaders = ['examTitle', 'examSubject', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer'];
+          const actualHeaders = Object.keys(questions[0]);
+          const missingHeaders = requiredHeaders.filter((required) => !actualHeaders.includes(required));
+
+          if (missingHeaders.length > 0) {
+            return NextResponse.json(
+              {
+                error: `Kolom berikut tidak ditemukan: ${missingHeaders.join(', ')}. Pastikan header sesuai dengan template.`,
+              },
+              { status: 400 }
+            );
+          }
+
+          // Check for extra/unknown headers
+          const unknownHeaders = actualHeaders.filter((header) => header && !requiredHeaders.includes(header));
+          if (unknownHeaders.length > 0) {
+            return NextResponse.json(
+              {
+                error: `Kolom tidak dikenal ditemukan: ${unknownHeaders.join(', ')}. Gunakan template yang sesuai.`,
+              },
+              { status: 400 }
+            );
+          }
+        }
       } else {
         // Parse Excel
         const buffer = Buffer.from(await file.arrayBuffer());
@@ -84,6 +205,30 @@ export async function POST(request: NextRequest) {
 
         // Get headers from first row
         const headers = jsonData[0] as string[];
+
+        // Validate Excel headers
+        const requiredHeaders = ['examTitle', 'examSubject', 'questionText', 'optionA', 'optionB', 'optionC', 'optionD', 'correctAnswer'];
+        const missingHeaders = requiredHeaders.filter((required) => !headers.includes(required));
+
+        if (missingHeaders.length > 0) {
+          return NextResponse.json(
+            {
+              error: `Kolom berikut tidak ditemukan: ${missingHeaders.join(', ')}. Pastikan header sesuai dengan template.`,
+            },
+            { status: 400 }
+          );
+        }
+
+        // Check for extra/unknown headers
+        const unknownHeaders = headers.filter((header) => header && !requiredHeaders.includes(header));
+        if (unknownHeaders.length > 0) {
+          return NextResponse.json(
+            {
+              error: `Kolom tidak dikenal ditemukan: ${unknownHeaders.join(', ')}. Gunakan template yang sesuai.`,
+            },
+            { status: 400 }
+          );
+        }
 
         // Convert rows to objects
         questions = jsonData
@@ -143,6 +288,30 @@ export async function POST(request: NextRequest) {
         examGroups.set(examKey, []);
       }
       examGroups.get(examKey)!.push(question);
+    }
+
+    // Validate all questions first before processing
+    const allValidationErrors: string[] = [];
+    for (let i = 0; i < questions.length; i++) {
+      const questionErrors = validateImportedQuestion(questions[i], i + 2); // +2 for header row
+      if (questionErrors.length > 0) {
+        questionErrors.forEach((err) => {
+          const fieldText = err.field ? ` (${err.field})` : '';
+          allValidationErrors.push(`Baris ${err.row}${fieldText}: ${err.message}`);
+        });
+      }
+    }
+
+    // If there are validation errors, return them all
+    if (allValidationErrors.length > 0) {
+      return NextResponse.json(
+        {
+          error: 'Data tidak valid. Perbaiki kesalahan berikut:',
+          details: allValidationErrors.slice(0, 10), // Limit to first 10 errors
+          totalErrors: allValidationErrors.length,
+        },
+        { status: 400 }
+      );
     }
 
     // Validate and prepare data

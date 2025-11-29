@@ -107,7 +107,7 @@ export default function ConfirmModal({
           <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-3">{title}</h3>
 
           {/* Message */}
-          <p className="text-center text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">{message}</p>
+          <div className="text-center text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">{message}</div>
 
           {/* Actions */}
           <div className="flex flex-col-reverse sm:flex-row gap-3">

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { Users, RotateCcw, CheckCircle2, XCircle, Clock, Trash2 } from 'lucide-react';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Participant {
   id: string;
@@ -23,6 +24,9 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isResetting, setIsResetting] = useState(false);
   const [showResetAll, setShowResetAll] = useState(false);
+  const [showResetSelectedModal, setShowResetSelectedModal] = useState(false);
+  const [showResetAllModal, setShowResetAllModal] = useState(false);
+  const [showResetAllConfirmModal, setShowResetAllConfirmModal] = useState(false);
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -40,18 +44,15 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
     }
   };
 
-  const handleResetSelected = async () => {
+  const handleResetSelectedClick = () => {
     if (selectedIds.length === 0) {
       toast.error('Pilih minimal 1 peserta untuk direset');
       return;
     }
+    setShowResetSelectedModal(true);
+  };
 
-    const confirmed = confirm(
-      `Apakah Anda yakin ingin mereset ujian untuk ${selectedIds.length} peserta terpilih?\n\nHasil ujian mereka akan dihapus dan mereka dapat mengerjakan ujian kembali.`
-    );
-
-    if (!confirmed) return;
-
+  const handleConfirmResetSelected = async () => {
     setIsResetting(true);
     try {
       const response = await fetch(`/api/admin/exams/${examId}/reset`, {
@@ -68,6 +69,7 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
       }
 
       toast.success(data.message);
+      setShowResetSelectedModal(false);
       setSelectedIds([]);
       onRefresh();
     } catch (error) {
@@ -78,18 +80,16 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
     }
   };
 
-  const handleResetAll = async () => {
-    const confirmed = confirm(
-      `⚠️ PERINGATAN!\n\nApakah Anda yakin ingin mereset SEMUA hasil ujian?\n\nSemua peserta (${participants.length} orang) akan dapat mengerjakan ujian kembali.\n\nTindakan ini tidak dapat dibatalkan!`
-    );
+  const handleResetAllClick = () => {
+    setShowResetAllModal(true);
+  };
 
-    if (!confirmed) return;
+  const handleConfirmResetAll = () => {
+    setShowResetAllModal(false);
+    setShowResetAllConfirmModal(true);
+  };
 
-    // Konfirmasi kedua untuk keamanan
-    const doubleConfirm = confirm('Konfirmasi sekali lagi:\nYa, saya yakin ingin mereset SEMUA hasil ujian');
-
-    if (!doubleConfirm) return;
-
+  const handleFinalConfirmResetAll = async () => {
     setIsResetting(true);
     try {
       const response = await fetch(`/api/admin/exams/${examId}/reset`, {
@@ -104,6 +104,7 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
       }
 
       toast.success(data.message);
+      setShowResetAllConfirmModal(false);
       setSelectedIds([]);
       setShowResetAll(false);
       onRefresh();
@@ -134,7 +135,7 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
           <div className="flex items-center gap-2">
             {selectedIds.length > 0 && (
               <button
-                onClick={handleResetSelected}
+                onClick={handleResetSelectedClick}
                 disabled={isResetting}
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
               >
@@ -181,7 +182,7 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
                 </p>
                 <div className="flex gap-2">
                   <button
-                    onClick={handleResetAll}
+                    onClick={handleResetAllClick}
                     disabled={isResetting}
                     className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -282,6 +283,44 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
           <p className="text-gray-500 dark:text-gray-400">Belum ada peserta terdaftar</p>
         </div>
       )}
+
+      {/* Reset Selected Modal */}
+      <ConfirmModal
+        isOpen={showResetSelectedModal}
+        onClose={() => setShowResetSelectedModal(false)}
+        onConfirm={handleConfirmResetSelected}
+        title="Konfirmasi Reset Peserta Terpilih"
+        message={`Apakah Anda yakin ingin mereset ujian untuk ${selectedIds.length} peserta terpilih? Hasil ujian mereka akan dihapus dan mereka dapat mengerjakan ujian kembali.`}
+        confirmText="Ya, Reset"
+        cancelText="Batal"
+        type="warning"
+        isLoading={isResetting}
+      />
+
+      {/* Reset All First Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showResetAllModal}
+        onClose={() => setShowResetAllModal(false)}
+        onConfirm={handleConfirmResetAll}
+        title="⚠️ PERINGATAN: Reset Semua Hasil Ujian"
+        message={`Apakah Anda yakin ingin mereset SEMUA hasil ujian? Semua peserta (${participants.length} orang) akan dapat mengerjakan ujian kembali. Tindakan ini tidak dapat dibatalkan!`}
+        confirmText="Lanjutkan"
+        cancelText="Batal"
+        type="danger"
+      />
+
+      {/* Reset All Second Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showResetAllConfirmModal}
+        onClose={() => setShowResetAllConfirmModal(false)}
+        onConfirm={handleFinalConfirmResetAll}
+        title="Konfirmasi Terakhir"
+        message="Konfirmasi sekali lagi: Ya, saya yakin ingin mereset SEMUA hasil ujian"
+        confirmText="Ya, Saya Yakin"
+        cancelText="Batal"
+        type="danger"
+        isLoading={isResetting}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Search, Edit, Trash2, Eye, Clock, Users, CheckCircle, AlertCircle, Calendar } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Exam {
   id: string;
@@ -50,6 +51,9 @@ export default function AdminUjianPage() {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [examToDelete, setExamToDelete] = useState<Exam | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState<ExamFormData>({
     title: '',
     subject: '',
@@ -169,17 +173,25 @@ export default function AdminUjianPage() {
     }
   };
 
-  const handleDelete = async (exam: Exam) => {
-    if (!confirm(`Yakin ingin menghapus ujian "${exam.title}"?`)) return;
+  const handleDeleteClick = (exam: Exam) => {
+    setExamToDelete(exam);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!examToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/exams/${exam.id}`, {
+      setIsDeleting(true);
+      const response = await fetch(`/api/admin/exams/${examToDelete.id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
 
       if (response.ok) {
         toast.success('Ujian berhasil dihapus');
+        setShowDeleteModal(false);
+        setExamToDelete(null);
         fetchExams(currentPage, searchQuery, statusFilter);
       } else {
         const error = await response.json();
@@ -188,6 +200,8 @@ export default function AdminUjianPage() {
     } catch (error) {
       console.error('Error deleting exam:', error);
       toast.error('Terjadi kesalahan saat menghapus');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -350,7 +364,7 @@ export default function AdminUjianPage() {
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
                       </button>
-                      <button onClick={() => handleDelete(exam)} className="px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">
+                      <button onClick={() => handleDeleteClick(exam)} className="px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -494,8 +508,8 @@ export default function AdminUjianPage() {
                       required
                       min="1"
                       max="480"
-                      value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+                      value={formData.duration || ''}
+                      onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
@@ -507,8 +521,8 @@ export default function AdminUjianPage() {
                       required
                       min="0"
                       max="100"
-                      value={formData.passingScore}
-                      onChange={(e) => setFormData({ ...formData, passingScore: parseInt(e.target.value) })}
+                      value={formData.passingScore || ''}
+                      onChange={(e) => setFormData({ ...formData, passingScore: parseInt(e.target.value) || 0 })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </div>
@@ -569,6 +583,26 @@ export default function AdminUjianPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setExamToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Konfirmasi Hapus Ujian"
+        message={
+          examToDelete
+            ? `Apakah Anda yakin ingin menghapus ujian "${examToDelete.title}"? Semua data soal dan hasil ujian peserta akan ikut terhapus dan tidak dapat dikembalikan.`
+            : ''
+        }
+        confirmText="Ya, Hapus"
+        cancelText="Batal"
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

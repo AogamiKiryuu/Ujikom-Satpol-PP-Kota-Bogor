@@ -181,7 +181,8 @@ export default function AdminLaporanPage() {
             break;
         }
       } else {
-        toast.error('Gagal memuat data laporan');
+        const errorData = await response.json();
+        toast.error(errorData.error || 'Gagal memuat data laporan');
       }
     } catch (error) {
       console.error('Error fetching report data:', error);
@@ -740,7 +741,15 @@ export default function AdminLaporanPage() {
                 <input
                   type="date"
                   value={dateRange.startDate}
-                  onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
+                  max={dateRange.endDate || undefined}
+                  onChange={(e) => {
+                    const newStartDate = e.target.value;
+                    if (dateRange.endDate && newStartDate > dateRange.endDate) {
+                      toast.error('Tanggal mulai tidak boleh lebih besar dari tanggal selesai');
+                      return;
+                    }
+                    setDateRange({ ...dateRange, startDate: newStartDate });
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
@@ -750,7 +759,15 @@ export default function AdminLaporanPage() {
                 <input
                   type="date"
                   value={dateRange.endDate}
-                  onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
+                  min={dateRange.startDate || undefined}
+                  onChange={(e) => {
+                    const newEndDate = e.target.value;
+                    if (dateRange.startDate && newEndDate < dateRange.startDate) {
+                      toast.error('Tanggal selesai tidak boleh lebih kecil dari tanggal mulai');
+                      return;
+                    }
+                    setDateRange({ ...dateRange, endDate: newEndDate });
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
@@ -958,6 +975,17 @@ export default function AdminLaporanPage() {
                       </table>
                     </div>
                   </div>
+
+                  {/* Empty State for Recent Results */}
+                  {overviewData.recentResults.length === 0 && (
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <Award className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Belum Ada Hasil Ujian</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Hasil ujian terbaru akan muncul di sini</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1271,6 +1299,21 @@ export default function AdminLaporanPage() {
                       </div>
                     </div>
                   ))}
+
+                  {/* Empty State for Exam Performance */}
+                  {examPerformanceData.examPerformance.length === 0 && (
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <BarChart3 className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak Ada Data Performa Ujian</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {dateRange.startDate || dateRange.endDate
+                            ? 'Tidak ada data ujian untuk rentang waktu yang dipilih'
+                            : 'Belum ada ujian yang dilakukan oleh peserta'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1375,6 +1418,21 @@ export default function AdminLaporanPage() {
                       </table>
                     </div>
                   </div>
+
+                  {/* Empty State for User Performance */}
+                  {userPerformanceData.userPerformance.length === 0 && (
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <Users className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak Ada Data Performa Peserta</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {dateRange.startDate || dateRange.endDate
+                            ? 'Tidak ada data peserta untuk rentang waktu yang dipilih'
+                            : 'Belum ada peserta yang mengikuti ujian'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1542,6 +1600,21 @@ export default function AdminLaporanPage() {
                             ))}
                           </tbody>
                         </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Empty State for Time Trends */}
+                  {(timeTrendsData.timeTrends.length === 0 || timeTrendsData.timeTrends.every(day => day.count === 0)) && (
+                    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <BarChart3 className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tidak Ada Data Tren Waktu</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {dateRange.startDate || dateRange.endDate
+                            ? 'Tidak ada data untuk rentang waktu yang dipilih'
+                            : 'Belum ada aktivitas ujian dalam 30 hari terakhir'}
+                        </p>
                       </div>
                     </div>
                   )}

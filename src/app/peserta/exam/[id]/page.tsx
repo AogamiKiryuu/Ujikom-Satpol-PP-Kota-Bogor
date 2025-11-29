@@ -87,7 +87,7 @@ export default function ExamPage() {
   };
 
   const handleSubmitExam = useCallback(
-    async (opts?: { force?: boolean }) => {
+    async () => {
       if (submitting) return;
 
       setShowSubmitModal(false);
@@ -124,7 +124,7 @@ export default function ExamPage() {
     if (autoSubmittedRef.current) return;
     autoSubmittedRef.current = true;
     toast.warning('Waktu ujian telah habis. Ujian akan diselesaikan otomatis.');
-    await handleSubmitExam({ force: true });
+    await handleSubmitExam();
   }, [handleSubmitExam]);
 
   useEffect(() => {

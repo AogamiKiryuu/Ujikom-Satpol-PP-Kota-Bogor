@@ -63,6 +63,17 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
     const reportType = searchParams.get('type') || 'overview';
 
+    // Validate dates
+    if (startDate && isNaN(Date.parse(startDate))) {
+      return NextResponse.json({ error: 'Format tanggal mulai tidak valid' }, { status: 400 });
+    }
+    if (endDate && isNaN(Date.parse(endDate))) {
+      return NextResponse.json({ error: 'Format tanggal akhir tidak valid' }, { status: 400 });
+    }
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      return NextResponse.json({ error: 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir' }, { status: 400 });
+    }
+
     // Date filters
     const dateFilter: {
       createdAt?: {
@@ -73,8 +84,16 @@ export async function GET(request: NextRequest) {
 
     if (startDate || endDate) {
       dateFilter.createdAt = {};
-      if (startDate) dateFilter.createdAt.gte = new Date(startDate);
-      if (endDate) dateFilter.createdAt.lte = new Date(endDate);
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0); // Start of day
+        dateFilter.createdAt.gte = start;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999); // End of day
+        dateFilter.createdAt.lte = end;
+      }
     }
 
     switch (reportType) {
