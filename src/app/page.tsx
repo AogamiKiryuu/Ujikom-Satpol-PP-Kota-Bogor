@@ -98,8 +98,8 @@ export default function Home() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 px-6 py-4">
-        <nav className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="relative z-10 px-4 sm:px-6 lg:px-8 py-4">
+        <nav className="container mx-auto flex items-center justify-between">
           <Logo size="md" />
           <div className="flex items-center space-x-4">
             {isLoggedIn ? (
@@ -139,12 +139,12 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+      <section className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         <div className="text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            <h1 className="text-5xl md:text-7xl font-bold text-indigo-600 dark:text-indigo-400 mb-6">CBT Exam System</h1>
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-4">Satuan Polisi Pamong Praja Kota Bogor</p>
-            <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8">Platform ujian digital yang modern, aman, dan efisien untuk meningkatkan kualitas assessmen dan evaluasi</p>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-indigo-600 dark:text-indigo-400 mb-4 sm:mb-6">CBT Exam System</h1>
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-3 sm:mb-4">Satuan Polisi Pamong Praja Kota Bogor</p>
+            <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-6 sm:mb-8 px-4">Platform ujian digital yang modern, aman, dan efisien untuk meningkatkan kualitas assessmen dan evaluasi</p>
           </motion.div>
 
           <motion.div
@@ -192,8 +192,8 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.6 }} className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.6 }} className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {stats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
@@ -214,13 +214,13 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 1.0 }} className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Fitur Unggulan</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Sistem CBT yang dilengkapi dengan teknologi terdepan untuk pengalaman ujian yang optimal</p>
+      <section className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 1.0 }} className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">Fitur Unggulan</h2>
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-4">Sistem CBT yang dilengkapi dengan teknologi terdepan untuk pengalaman ujian yang optimal</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
@@ -243,16 +243,16 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+      <section className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.6 }}
-          className="text-center backdrop-blur-lg bg-indigo-50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-200 dark:border-indigo-800 p-12"
+          className="text-center backdrop-blur-lg bg-indigo-50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-200 dark:border-indigo-800 p-8 sm:p-12"
         >
-          <Zap className="w-16 h-16 mx-auto mb-6 text-blue-600" />
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Siap Memulai Ujian?</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">Bergabunglah dengan ribuan peserta lainnya dan rasakan pengalaman ujian digital yang modern</p>
+          <Zap className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6 text-blue-600" />
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Siap Memulai Ujian?</h2>
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">Bergabunglah dengan ribuan peserta lainnya dan rasakan pengalaman ujian digital yang modern</p>
           <Link
             href="/register"
             className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
@@ -264,11 +264,11 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-gray-200 dark:border-gray-700 mt-20">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+      <footer className="relative z-10 border-t border-gray-200 dark:border-gray-700 mt-12 sm:mt-16 lg:mt-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <Logo size="sm" />
-            <div className="mt-4 md:mt-0 text-sm text-gray-500 dark:text-gray-400">© 2025 Satuan Polisi Pamong Praja Kota Bogor. All rights reserved.</div>
+            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center md:text-right">© 2025 Satuan Polisi Pamong Praja Kota Bogor. All rights reserved.</div>
           </div>
         </div>
       </footer>

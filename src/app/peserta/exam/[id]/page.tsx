@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { Clock, AlertCircle, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface Question {
   id: string;
@@ -42,6 +43,8 @@ export default function ExamPage() {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showStartWarning, setShowStartWarning] = useState(true);
   const autoSubmittedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navScrollRef = useRef<HTMLDivElement>(null);
@@ -79,17 +82,15 @@ export default function ExamPage() {
     }
   }, [examId, router]);
 
+  const handleSubmitClick = () => {
+    setShowSubmitModal(true);
+  };
+
   const handleSubmitExam = useCallback(
     async (opts?: { force?: boolean }) => {
       if (submitting) return;
 
-      const unansweredQuestions = examData?.questions.filter((q) => !answers[q.id]).length || 0;
-
-      if (!opts?.force && unansweredQuestions > 0) {
-        const confirm = window.confirm(`Masih ada ${unansweredQuestions} soal yang belum dijawab. Yakin ingin menyelesaikan ujian?`);
-        if (!confirm) return;
-      }
-
+      setShowSubmitModal(false);
       setSubmitting(true);
 
       try {
@@ -116,7 +117,7 @@ export default function ExamPage() {
         setSubmitting(false);
       }
     },
-    [submitting, examData?.questions, answers, examId, router]
+    [submitting, examId, router]
   );
 
   const handleAutoSubmit = useCallback(async () => {
@@ -480,7 +481,7 @@ export default function ExamPage() {
 
                     {currentQuestionIndex === totalQuestions - 1 ? (
                       <button
-                        onClick={() => handleSubmitExam()}
+                        onClick={handleSubmitClick}
                         disabled={submitting}
                         className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200"
                       >
@@ -502,6 +503,45 @@ export default function ExamPage() {
           </div>
         </div>
       </div>
+
+      {/* Start Warning Modal */}
+      <ConfirmModal
+        isOpen={showStartWarning && !!examData}
+        onClose={() => setShowStartWarning(false)}
+        onConfirm={() => setShowStartWarning(false)}
+        title="Perhatian Sebelum Memulai Ujian"
+        message={`Anda akan memulai ujian "${examData?.exam.title}". Pastikan koneksi internet stabil dan jangan menutup atau refresh halaman ini selama ujian berlangsung. Waktu ujian: ${examData?.exam.duration} menit.`}
+        confirmText="Saya Mengerti, Mulai Ujian"
+        cancelText="Batal"
+        type="info"
+      />
+
+      {/* Submit Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showSubmitModal}
+        onClose={() => setShowSubmitModal(false)}
+        onConfirm={() => handleSubmitExam()}
+        title="Konfirmasi Selesaikan Ujian"
+        message={
+          (() => {
+            const unansweredCount = examData?.questions.filter((q) => !answers[q.id]).length || 0;
+            const totalQuestions = examData?.questions.length || 0;
+            const answeredCount = totalQuestions - unansweredCount;
+
+            if (unansweredCount === 0) {
+              return `Anda telah menjawab semua ${totalQuestions} soal. Yakin ingin menyelesaikan ujian sekarang?`;
+            } else if (timeRemaining > 0) {
+              return `Anda baru menjawab ${answeredCount} dari ${totalQuestions} soal. Masih ada ${unansweredCount} soal yang belum dijawab dan masih tersisa waktu ${Math.floor(timeRemaining / 60)} menit. Yakin ingin menyelesaikan ujian?`;
+            } else {
+              return `Anda baru menjawab ${answeredCount} dari ${totalQuestions} soal. Yakin ingin menyelesaikan ujian?`;
+            }
+          })()
+        }
+        confirmText="Ya, Selesaikan Ujian"
+        cancelText="Kembali Mengerjakan"
+        type="warning"
+        isLoading={submitting}
+      />
     </div>
   );
 }

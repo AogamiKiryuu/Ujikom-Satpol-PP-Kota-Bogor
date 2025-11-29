@@ -1,6 +1,7 @@
   'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Search, Edit, Trash2, Eye, Clock, Users, CheckCircle, AlertCircle, Calendar } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
@@ -34,6 +35,7 @@ interface ExamFormData {
 }
 
 export default function AdminUjianPage() {
+  const router = useRouter();
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -135,9 +137,7 @@ export default function AdminUjianPage() {
   };
 
   const handleView = (exam: Exam) => {
-    setModalType('view');
-    setSelectedExam(exam);
-    setShowModal(true);
+    router.push(`/admin/ujian/${exam.id}`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
