@@ -1087,48 +1087,54 @@ export default function AdminLaporanPage() {
                           {/* Pie Chart - Answer Distribution for Most Difficult Question */}
                           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                             <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Distribusi Jawaban (Soal Tersulit)</h4>
-                            {(() => {
-                              const mostDifficult = exam.questionAnalysis.reduce((prev, current) => (prev.correctPercentage < current.correctPercentage ? prev : current));
-                              const answerData = [
-                                { option: 'A', count: mostDifficult.answerDistribution.A },
-                                { option: 'B', count: mostDifficult.answerDistribution.B },
-                                { option: 'C', count: mostDifficult.answerDistribution.C },
-                                { option: 'D', count: mostDifficult.answerDistribution.D },
-                                { option: 'Tidak Dijawab', count: mostDifficult.answerDistribution.unanswered },
-                              ].filter((item) => item.count > 0);
+                            {exam.questionAnalysis.length > 0 ? (
+                              (() => {
+                                const mostDifficult = exam.questionAnalysis.reduce((prev, current) => (prev.correctPercentage < current.correctPercentage ? prev : current));
+                                const answerData = [
+                                  { option: 'A', count: mostDifficult.answerDistribution.A },
+                                  { option: 'B', count: mostDifficult.answerDistribution.B },
+                                  { option: 'C', count: mostDifficult.answerDistribution.C },
+                                  { option: 'D', count: mostDifficult.answerDistribution.D },
+                                  { option: 'Tidak Dijawab', count: mostDifficult.answerDistribution.unanswered },
+                                ].filter((item) => item.count > 0);
 
-                              return (
-                                <>
-                                  <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
-                                    Soal #{exam.questionAnalysis.indexOf(mostDifficult) + 1} - {mostDifficult.correctPercentage}% benar
-                                  </p>
-                                  <ResponsiveContainer width="100%" height={220}>
-                                    <PieChart>
-                                      <Pie data={answerData} cx="50%" cy="50%" labelLine={true} label outerRadius={80} fill="#8884d8" dataKey="count" nameKey="option">
-                                        {answerData.map((entry, index) => (
-                                          <Cell key={`cell-${index}`} fill={entry.option === mostDifficult.correctAnswer ? '#10b981' : index === 4 ? '#6b7280' : '#3b82f6'} />
-                                        ))}
-                                      </Pie>
-                                      <Tooltip
-                                        contentStyle={{
-                                          backgroundColor: '#ffffff',
-                                          border: '1px solid #e5e7eb',
-                                          borderRadius: '0.5rem',
-                                          color: '#111827',
-                                          pointerEvents: 'none',
-                                          padding: '8px 12px',
-                                        }}
-                                        wrapperStyle={{ pointerEvents: 'none' }}
-                                        cursor={false}
-                                        isAnimationActive={false}
-                                        offset={10}
-                                      />
-                                      <Legend />
-                                    </PieChart>
-                                  </ResponsiveContainer>
-                                </>
-                              );
-                            })()}
+                                return (
+                                  <>
+                                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                                      Soal #{exam.questionAnalysis.indexOf(mostDifficult) + 1} - {mostDifficult.correctPercentage}% benar
+                                    </p>
+                                    <ResponsiveContainer width="100%" height={220}>
+                                      <PieChart>
+                                        <Pie data={answerData} cx="50%" cy="50%" labelLine={true} label outerRadius={80} fill="#8884d8" dataKey="count" nameKey="option">
+                                          {answerData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.option === mostDifficult.correctAnswer ? '#10b981' : index === 4 ? '#6b7280' : '#3b82f6'} />
+                                          ))}
+                                        </Pie>
+                                        <Tooltip
+                                          contentStyle={{
+                                            backgroundColor: '#ffffff',
+                                            border: '1px solid #e5e7eb',
+                                            borderRadius: '0.5rem',
+                                            color: '#111827',
+                                            pointerEvents: 'none',
+                                            padding: '8px 12px',
+                                          }}
+                                          wrapperStyle={{ pointerEvents: 'none' }}
+                                          cursor={false}
+                                          isAnimationActive={false}
+                                          offset={10}
+                                        />
+                                        <Legend />
+                                      </PieChart>
+                                    </ResponsiveContainer>
+                                  </>
+                                );
+                              })()
+                            ) : (
+                              <div className="flex items-center justify-center h-[220px] text-gray-500 dark:text-gray-400 text-sm">
+                                Tidak ada data soal
+                              </div>
+                            )}
                           </div>
                         </div>
 

@@ -551,9 +551,9 @@ export default function AdminPesertaPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="modal-overlay dark:modal-overlay.dark">
-          <div className="modal-content dark:modal-content.dark modal-elevated max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {modalType === 'create' && 'Tambah Peserta Baru'}
                 {modalType === 'edit' && 'Edit Peserta'}
