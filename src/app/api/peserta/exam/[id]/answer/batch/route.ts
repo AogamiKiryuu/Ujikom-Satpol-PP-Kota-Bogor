@@ -9,11 +9,20 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+interface BatchAnswer {
+  questionId: string;
+  selectedOption: string;
+}
+
+/**
+ * Batch answer submission endpoint
+ * Accepts multiple answers at once to reduce API calls
+ */
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { id: examId } = await params;
     
-    // Verify user authentication first (lightweight check)
+    // Verify user authentication
     const token = request.cookies.get('token')?.value;
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -28,36 +37,47 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const userId = payload.id as string;
 
-    // Rate limiting check
-    const rateLimitKey = getRateLimitKey(userId, 'answer');
-    const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMIT_CONFIGS.answer);
+    // Rate limiting for batch (stricter)
+    const rateLimitKey = getRateLimitKey(userId, 'batchAnswer');
+    const rateLimit = checkRateLimit(rateLimitKey, RATE_LIMIT_CONFIGS.batchAnswer);
     
     if (!rateLimit.allowed) {
       return NextResponse.json(
         rateLimitResponse(rateLimit.resetIn),
         { 
           status: 429,
-          headers: getRateLimitHeaders(rateLimit.remaining, rateLimit.resetIn, RATE_LIMIT_CONFIGS.answer.maxRequests)
+          headers: getRateLimitHeaders(rateLimit.remaining, rateLimit.resetIn, RATE_LIMIT_CONFIGS.batchAnswer.maxRequests)
         }
       );
     }
 
     const body = await request.json();
-    const { questionId, selectedOption } = body;
+    const { answers } = body as { answers: BatchAnswer[] };
 
     // Validate input
-    if (!questionId || !selectedOption) {
-      return NextResponse.json({ error: 'Data tidak lengkap' }, { status: 400 });
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+      return NextResponse.json({ error: 'Data jawaban tidak valid' }, { status: 400 });
     }
 
-    if (!['A', 'B', 'C', 'D'].includes(selectedOption)) {
-      return NextResponse.json({ error: 'Pilihan jawaban tidak valid' }, { status: 400 });
+    // Limit batch size
+    if (answers.length > 20) {
+      return NextResponse.json({ error: 'Maksimal 20 jawaban per batch' }, { status: 400 });
     }
 
-    // Use queue for database operations to prevent overload
-    type QueueResult = { success: true } | { error: string; status: number };
-    const result = await withQueue<QueueResult>(answerQueue, async () => {
-      // Try to get exam result from cache first
+    // Validate each answer
+    for (const answer of answers) {
+      if (!answer.questionId || !answer.selectedOption) {
+        return NextResponse.json({ error: 'Data jawaban tidak lengkap' }, { status: 400 });
+      }
+      if (!['A', 'B', 'C', 'D'].includes(answer.selectedOption)) {
+        return NextResponse.json({ error: 'Pilihan jawaban tidak valid' }, { status: 400 });
+      }
+    }
+
+    // Use queue for database operations
+    type BatchQueueResult = { success: true; count: number } | { error: string; status: number };
+    const result = await withQueue<BatchQueueResult>(answerQueue, async () => {
+      // Get exam result (with caching)
       const cacheKey = CacheKeys.userExamResult(userId, examId);
       let examResult = examCache.get<{
         id: string;
@@ -66,7 +86,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }>(cacheKey);
 
       if (!examResult) {
-        // Cache miss - query database
         const dbResult = await prisma.examResult.findFirst({
           where: {
             examId,
@@ -89,11 +108,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         }
 
         examResult = dbResult;
-        // Cache for 5 minutes
         examCache.set(cacheKey, examResult, 300000);
       }
 
-      // Check if time has expired
+      // Check time
       const startTime = new Date(examResult.startTime);
       const currentTime = new Date();
       const elapsedMinutes = Math.floor((currentTime.getTime() - startTime.getTime()) / (1000 * 60));
@@ -102,39 +120,47 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         return { error: 'Waktu ujian telah habis', status: 400 };
       }
 
-      // Upsert answer (more efficient than find + update/create)
-      await prisma.answer.upsert({
-        where: {
-          examResultId_questionId: {
-            examResultId: examResult.id,
-            questionId,
+      // Batch upsert all answers in a transaction
+      const operations = answers.map(answer => 
+        prisma.answer.upsert({
+          where: {
+            examResultId_questionId: {
+              examResultId: examResult!.id,
+              questionId: answer.questionId,
+            },
           },
-        },
-        update: {
-          selectedAnswer: selectedOption,
-        },
-        create: {
-          examResultId: examResult.id,
-          questionId,
-          selectedAnswer: selectedOption,
-        },
-      });
+          update: {
+            selectedAnswer: answer.selectedOption,
+          },
+          create: {
+            examResultId: examResult!.id,
+            questionId: answer.questionId,
+            selectedAnswer: answer.selectedOption,
+          },
+        })
+      );
 
-      return { success: true as const };
+      await prisma.$transaction(operations);
+
+      return { success: true as const, count: answers.length };
     });
 
     if (result && 'error' in result) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
+    const successResult = result as { success: true; count: number };
     return NextResponse.json(
-      { message: 'Jawaban berhasil disimpan' },
       { 
-        headers: getRateLimitHeaders(rateLimit.remaining, rateLimit.resetIn, RATE_LIMIT_CONFIGS.answer.maxRequests)
+        message: 'Jawaban berhasil disimpan',
+        saved: successResult.count 
+      },
+      { 
+        headers: getRateLimitHeaders(rateLimit.remaining, rateLimit.resetIn, RATE_LIMIT_CONFIGS.batchAnswer.maxRequests)
       }
     );
   } catch (error) {
-    console.error('Error saving answer:', error);
+    console.error('Error saving batch answers:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

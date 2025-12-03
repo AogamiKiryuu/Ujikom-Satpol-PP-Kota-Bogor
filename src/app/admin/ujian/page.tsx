@@ -52,6 +52,7 @@ export default function AdminUjianPage() {
   const [modalType, setModalType] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSecondDeleteModal, setShowSecondDeleteModal] = useState(false);
   const [examToDelete, setExamToDelete] = useState<Exam | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState<ExamFormData>({
@@ -178,6 +179,17 @@ export default function AdminUjianPage() {
     setShowDeleteModal(true);
   };
 
+  const handleFirstConfirm = () => {
+    setShowDeleteModal(false);
+    setShowSecondDeleteModal(true);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setShowSecondDeleteModal(false);
+    setExamToDelete(null);
+  };
+
   const handleConfirmDelete = async () => {
     if (!examToDelete) return;
 
@@ -190,7 +202,7 @@ export default function AdminUjianPage() {
 
       if (response.ok) {
         toast.success('Ujian berhasil dihapus');
-        setShowDeleteModal(false);
+        setShowSecondDeleteModal(false);
         setExamToDelete(null);
         fetchExams(currentPage, searchQuery, statusFilter);
       } else {
@@ -406,8 +418,8 @@ export default function AdminUjianPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="modal-overlay dark:modal-overlay.dark">
-          <div className="modal-content dark:modal-content.dark modal-elevated max-w-2xl w-full">
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 {modalType === 'create' && 'Buat Ujian Baru'}
@@ -584,22 +596,41 @@ export default function AdminUjianPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* First Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setExamToDelete(null);
-        }}
-        onConfirm={handleConfirmDelete}
+        onClose={handleCancelDelete}
+        onConfirm={handleFirstConfirm}
         title="Konfirmasi Hapus Ujian"
         message={
           examToDelete
-            ? `Apakah Anda yakin ingin menghapus ujian "${examToDelete.title}"? Semua data soal dan hasil ujian peserta akan ikut terhapus dan tidak dapat dikembalikan.`
+            ? `Apakah Anda yakin ingin menghapus ujian "${examToDelete.title}"?`
             : ''
         }
-        confirmText="Ya, Hapus"
+        confirmText="Lanjutkan"
         cancelText="Batal"
+        type="danger"
+        isLoading={false}
+      />
+
+      {/* Second Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showSecondDeleteModal}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="⚠️ PERINGATAN TERAKHIR!"
+        message={
+          examToDelete
+            ? `Anda akan menghapus ujian "${examToDelete.title}" secara PERMANEN!\n\n` +
+              `Semua data berikut akan HILANG dan TIDAK DAPAT DIKEMBALIKAN:\n` +
+              `• Semua soal ujian (${examToDelete.totalQuestions} soal)\n` +
+              `• Hasil ujian dari ${examToDelete.participantsCount} peserta\n` +
+              `• Statistik dan laporan ujian\n\n` +
+              `Apakah Anda BENAR-BENAR yakin?`
+            : ''
+        }
+        confirmText="YA, HAPUS PERMANEN"
+        cancelText="Tidak, Batalkan"
         type="danger"
         isLoading={isDeleting}
       />

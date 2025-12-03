@@ -12,6 +12,7 @@ interface Participant {
   hasSubmitted: boolean;
   score: number | null;
   submittedAt: string | null;
+  isTooLate?: boolean;
 }
 
 interface ExamParticipantsProps {
@@ -248,6 +249,11 @@ export default function ExamParticipants({ examId, participants, onRefresh }: Ex
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Selesai
+                    </span>
+                  ) : participant.isTooLate ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                      <XCircle className="w-3.5 h-3.5" />
+                      Telat
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">

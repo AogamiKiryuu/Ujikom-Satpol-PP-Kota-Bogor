@@ -28,6 +28,7 @@ interface Participant {
   hasSubmitted: boolean;
   score: number | null;
   submittedAt: string | null;
+  isTooLate?: boolean;
 }
 
 interface ParticipantsData {

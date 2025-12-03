@@ -156,7 +156,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE - Delete exam
+// DELETE - Delete exam (including all results, questions, and answers)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
@@ -170,6 +170,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       where: { id },
       include: {
         examResults: true,
+        questions: true,
       },
     });
 
@@ -177,23 +178,35 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Ujian tidak ditemukan' }, { status: 404 });
     }
 
-    // Check if exam has results
-    if (exam.examResults.length > 0) {
-      return NextResponse.json(
-        {
-          error: 'Tidak dapat menghapus ujian yang sudah memiliki hasil',
+    // Use transaction to delete everything related to the exam
+    await prisma.$transaction(async (tx) => {
+      // Delete all answers for all questions in this exam
+      await tx.answer.deleteMany({
+        where: {
+          question: {
+            examId: id,
+          },
         },
-        { status: 400 }
-      );
-    }
+      });
 
-    // Delete exam (this will also remove question associations due to cascade)
-    await prisma.exam.delete({
-      where: { id },
+      // Delete all questions in this exam
+      await tx.question.deleteMany({
+        where: { examId: id },
+      });
+
+      // Delete all exam results
+      await tx.examResult.deleteMany({
+        where: { examId: id },
+      });
+
+      // Finally, delete the exam itself
+      await tx.exam.delete({
+        where: { id },
+      });
     });
 
     return NextResponse.json({
-      message: 'Ujian berhasil dihapus',
+      message: 'Ujian dan semua data terkait berhasil dihapus',
     });
   } catch (error) {
     console.error('Delete exam error:', error);

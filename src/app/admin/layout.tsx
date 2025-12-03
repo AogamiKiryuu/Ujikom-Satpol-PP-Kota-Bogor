@@ -217,7 +217,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
   {/* Mobile sidebar overlay */}
-  {sidebarOpen && <div className="modal-overlay dark:modal-overlay.dark z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+  {sidebarOpen && <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* Main Content */}
       <div className={`transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>

@@ -20,8 +20,18 @@ export async function GET(req: NextRequest) {
     const userId = payload.id as string;
     const currentDate = new Date();
 
+    // Get user's registration date
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { createdAt: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     // Get stats for the user
-    const [availableExams, completedResults, ongoingResults] = await Promise.all([
+    const [availableExams, completedResults, ongoingResults, lateExams] = await Promise.all([
       // Available exams (not taken and still active)
       prisma.exam.count({
         where: {
@@ -56,6 +66,17 @@ export async function GET(req: NextRequest) {
           userId,
           isCompleted: false
         }
+      }),
+
+      // Late exams (user registered after exam deadline, no result)
+      prisma.exam.count({
+        where: {
+          isActive: true,
+          endDate: { lt: user.createdAt }, // Exam ended before user registered
+          examResults: {
+            none: { userId }
+          }
+        }
       })
     ]);
 
@@ -68,6 +89,7 @@ export async function GET(req: NextRequest) {
       availableExams,
       completedExams,
       ongoingExams: ongoingResults,
+      lateExams,
       totalScore,
       averageScore,
     };

@@ -170,6 +170,8 @@ export async function GET(request: NextRequest) {
                 score: true,
                 correctAnswers: true,
                 totalQuestions: true,
+                startTime: true,
+                endTime: true,
                 user: { select: { name: true } },
               },
             },
@@ -204,6 +206,7 @@ export async function GET(request: NextRequest) {
               averageScore: 0,
               passRate: 0,
               questionAnalysis: [],
+              durationDistribution: [],
             };
           }
 
@@ -211,6 +214,36 @@ export async function GET(request: NextRequest) {
           const averageScore = Math.round(totalScore / totalParticipants);
           const passedCount = results.filter((result) => result.score >= exam.passingScore).length;
           const passRate = Math.round((passedCount / totalParticipants) * 100);
+
+          // Calculate duration distribution (in minutes)
+          const durationData = results
+            .map((result) => {
+              if (result.startTime && result.endTime) {
+                const duration = Math.round((new Date(result.endTime).getTime() - new Date(result.startTime).getTime()) / (1000 * 60));
+                return duration;
+              }
+              return null;
+            })
+            .filter((d): d is number => d !== null);
+
+          // Group durations into ranges
+          const durationRanges = [
+            { range: '0-10 menit', min: 0, max: 10, count: 0 },
+            { range: '11-20 menit', min: 11, max: 20, count: 0 },
+            { range: '21-30 menit', min: 21, max: 30, count: 0 },
+            { range: '31-45 menit', min: 31, max: 45, count: 0 },
+            { range: '46-60 menit', min: 46, max: 60, count: 0 },
+            { range: '> 60 menit', min: 61, max: 999999, count: 0 },
+          ];
+
+          durationData.forEach((duration) => {
+            const rangeIndex = durationRanges.findIndex((r) => duration >= r.min && duration <= r.max);
+            if (rangeIndex !== -1) {
+              durationRanges[rangeIndex].count++;
+            }
+          });
+
+          const durationDistribution = durationRanges.filter((r) => r.count > 0);
 
           // Question-wise analysis with difficulty assessment
           const questionAnalysis = exam.questions.map((question) => {
@@ -265,6 +298,7 @@ export async function GET(request: NextRequest) {
             averageScore,
             passRate,
             questionAnalysis,
+            durationDistribution,
           };
         });
 

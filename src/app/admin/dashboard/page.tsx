@@ -332,7 +332,7 @@ export default function AdminDashboard() {
           <div className="mt-8">
             <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Ujian Berdasarkan Mata Pelajaran</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Peserta Ujian per Mata Pelajaran</h3>
                 {loading ? (
                   <div className="h-80 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
                 ) : stats.charts.examsBySubject.length > 0 ? (
@@ -356,13 +356,14 @@ export default function AdminDashboard() {
                         cursor={false}
                         isAnimationActive={false}
                         offset={10}
+                        formatter={(value) => [`${value} peserta`, 'Jumlah Peserta']}
                       />
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-500 dark:text-gray-400">Belum ada data ujian</p>
+                    <p className="text-gray-500 dark:text-gray-400">Belum ada peserta yang mengerjakan ujian</p>
                   </div>
                 )}
               </div>

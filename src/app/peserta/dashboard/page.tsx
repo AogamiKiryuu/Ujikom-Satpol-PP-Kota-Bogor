@@ -2,13 +2,14 @@
 
 import { toast } from 'react-toastify';
 import { useState, useEffect, useMemo } from 'react';
-import { BookOpen, Clock, CheckCircle, AlertCircle, Calendar, Trophy } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, AlertCircle, Calendar, Trophy, XCircle } from 'lucide-react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface PesertaStats {
   availableExams: number;
   completedExams: number;
   ongoingExams: number;
+  lateExams: number;
   totalScore: number;
   averageScore: number;
 }
@@ -19,9 +20,11 @@ interface ExamItem {
   subject: string;
   duration: number;
   questions: number;
-  status: 'available' | 'ongoing' | 'completed';
+  status: 'available' | 'ongoing' | 'completed' | 'late';
   score?: number;
   deadline: string;
+  isExpired?: boolean;
+  isTooLate?: boolean;
 }
 
 interface UserInfo {
@@ -36,13 +39,14 @@ export default function PesertaDashboard() {
     availableExams: 0,
     completedExams: 0,
     ongoingExams: 0,
+    lateExams: 0,
     totalScore: 0,
     averageScore: 0,
   });
   const [exams, setExams] = useState<ExamItem[]>([]);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'available' | 'ongoing' | 'completed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'available' | 'ongoing' | 'completed' | 'late'>('all');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
 
@@ -200,6 +204,8 @@ export default function PesertaDashboard() {
         return 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/20';
       case 'completed':
         return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20';
+      case 'late':
+        return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20';
       default:
         return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700';
     }
@@ -213,6 +219,8 @@ export default function PesertaDashboard() {
         return 'Sedang Berlangsung';
       case 'completed':
         return 'Selesai';
+      case 'late':
+        return 'Telat';
       default:
         return 'Unknown';
     }
@@ -222,6 +230,7 @@ export default function PesertaDashboard() {
     { title: 'Ujian Tersedia', value: stats.availableExams, icon: BookOpen, bgColor: 'bg-emerald-600' },
     { title: 'Ujian Selesai', value: stats.completedExams, icon: CheckCircle, bgColor: 'bg-blue-600' },
     { title: 'Ujian Berlangsung', value: stats.ongoingExams, icon: Clock, bgColor: 'bg-orange-600' },
+    { title: 'Ujian Telat', value: stats.lateExams, icon: XCircle, bgColor: 'bg-red-600' },
     { title: 'Rata-rata Nilai', value: `${stats.averageScore}%`, icon: Trophy, bgColor: 'bg-purple-600' },
   ];
 
@@ -246,7 +255,7 @@ export default function PesertaDashboard() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
             {statCards.map((stat, index) => (
               <div key={index} className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow duration-200">
                 <div className="p-3 sm:p-4 lg:p-6">
@@ -278,17 +287,19 @@ export default function PesertaDashboard() {
               <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Daftar Ujian</h3>
                 <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1">
-                  {(['all', 'available', 'ongoing', 'completed'] as const).map((key) => (
+                  {(['all', 'available', 'ongoing', 'completed', 'late'] as const).map((key) => (
                     <button
                       key={key}
                       onClick={() => setStatusFilter(key)}
                       className={`px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium border transition-colors whitespace-nowrap ${
                         statusFilter === key
-                          ? 'bg-blue-600 text-white border-blue-600'
+                          ? key === 'late' 
+                            ? 'bg-red-600 text-white border-red-600'
+                            : 'bg-blue-600 text-white border-blue-600'
                           : 'text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
                       }`}
                     >
-                      {key === 'all' ? 'Semua' : key === 'available' ? 'Tersedia' : key === 'ongoing' ? 'Berlangsung' : 'Selesai'}
+                      {key === 'all' ? 'Semua' : key === 'available' ? 'Tersedia' : key === 'ongoing' ? 'Berlangsung' : key === 'completed' ? 'Selesai' : 'Telat'}
                     </button>
                   ))}
                 </div>
@@ -321,7 +332,9 @@ export default function PesertaDashboard() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 sm:space-x-3 mb-2 flex-wrap">
                               <h4 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">{exam.title}</h4>
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(exam.status)}`}>{getStatusText(exam.status)}</span>
+                              <span className={`px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${exam.isExpired ? 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20' : getStatusColor(exam.status)}`}>
+                                {exam.isExpired ? 'Expired' : getStatusText(exam.status)}
+                              </span>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                               <div className="flex items-center">
@@ -348,13 +361,23 @@ export default function PesertaDashboard() {
                             )}
                           </div>
                           <div className="sm:ml-4 flex sm:flex-col gap-2">
-                            {exam.status === 'available' && (
+                            {exam.status === 'available' && !exam.isExpired && (
                               <button
                                 onClick={() => handleStartExam(exam.id)}
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors shadow w-full sm:w-auto"
                               >
                                 Mulai Ujian
                               </button>
+                            )}
+                            {exam.status === 'available' && exam.isExpired && (
+                              <span className="bg-gray-500 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium shadow w-full sm:w-auto text-center">
+                                Expired
+                              </span>
+                            )}
+                            {exam.status === 'late' && (
+                              <span className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium shadow w-full sm:w-auto text-center">
+                                Telat
+                              </span>
                             )}
                             {exam.status === 'ongoing' && (
                               <button

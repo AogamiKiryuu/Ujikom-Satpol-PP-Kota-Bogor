@@ -4,7 +4,7 @@ Sistem ujian berbasis komputer (Computer-Based Test) untuk Ujian Kompetensi Satu
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)
-![Prisma](https://img.shields.io/badge/Prisma-6.13.0-2D3748?style=flat-square&logo=prisma)
+![Prisma](https://img.shields.io/badge/Prisma-6.15.0-2D3748?style=flat-square&logo=prisma)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?style=flat-square&logo=postgresql)
 
 ---
@@ -34,6 +34,23 @@ Sistem ujian berbasis komputer (Computer-Based Test) untuk Ujian Kompetensi Satu
 - Input validation dan sanitization
 - Session management yang aman
 
+### ⚡ Performance Optimizations
+
+Sistem telah dioptimasi untuk menangani **50+ peserta concurrent** dengan:
+
+- **Connection Pooling**: 20 concurrent database connections
+- **Database Indexes**: Optimized queries pada foreign keys
+- **Rate Limiting**: Sliding window algorithm (100 req/60s per user)
+- **Request Queue**: Max 50 concurrent dengan queue 500 requests
+- **Caching Layer**: In-memory cache untuk exam data (TTL 5-10 menit)
+- **Answer Batching**: Batch write untuk reduce database load
+
+**Benchmark Results:**
+- Throughput: **662 ops/second**
+- Average Latency: **3.22ms**
+- P95 Latency: **4ms**
+- Success Rate: **100%**
+
 ### 🎨 User Experience
 
 - Dark/Light mode dengan theme persistence
@@ -47,7 +64,7 @@ Sistem ujian berbasis komputer (Computer-Based Test) untuk Ujian Kompetensi Satu
 ## 🛠️ Tech Stack
 
 **Frontend**: Next.js 15.5.2, TypeScript, Tailwind CSS, React Hook Form, Lucide React  
-**Backend**: Prisma ORM 6.13.0, PostgreSQL, JWT (jose), bcryptjs, Papaparse  
+**Backend**: Prisma ORM 6.15.0, PostgreSQL, JWT (jose), bcryptjs, Papaparse  
 **DevOps**: ESLint, Prettier, Husky, Turbopack
 
 ---
@@ -78,11 +95,77 @@ cp .env.example .env
 npx prisma generate
 npx prisma migrate dev
 
-# 5. Run development server
+# 5. Create admin account
+npx tsx scripts/create-admin.ts
+
+# 6. Run development server
 npm run dev
 ```
 
 Aplikasi akan berjalan di `http://localhost:3000`
+
+### Default Admin Account
+
+```
+Email    : admin@cbt.com
+Password : admin#123
+```
+
+---
+
+## 🧪 Testing Scripts
+
+Tersedia berbagai script untuk testing dan development di folder `scripts/`:
+
+### 📋 Daftar Scripts
+
+| Script | Fungsi | Perintah |
+|--------|--------|----------|
+| `create-admin.ts` | Buat akun admin | `npx tsx scripts/create-admin.ts` |
+| `seed-peserta.ts` | Tambah peserta massal | `npx tsx scripts/seed-peserta.ts [jumlah] [password]` |
+| `create-exam.ts` | Buat ujian dengan soal | `npx tsx scripts/create-exam.ts` |
+| `generate-results.ts` | Generate hasil ujian | `npx tsx scripts/generate-results.ts [examId] [jumlah]` |
+| `simulation-optimized.ts` | Stress test performa | `npx tsx scripts/simulation-optimized.ts` |
+| `db-stats.ts` | Lihat statistik database | `npx tsx scripts/db-stats.ts` |
+| `reset-password.ts` | Reset password user | `npx tsx scripts/reset-password.ts <email> <password>` |
+| `cleanup.ts` | Bersihkan data test | `npx tsx scripts/cleanup.ts [opsi]` |
+
+### 📖 Contoh Penggunaan
+
+```bash
+# Tambah 50 peserta dengan password "test123"
+npx tsx scripts/seed-peserta.ts 50 test123
+
+# Buat ujian Matematika dengan 30 soal
+EXAM_SUBJECT=Matematika EXAM_QUESTIONS=30 npx tsx scripts/create-exam.ts
+
+# Generate hasil ujian untuk 20 peserta
+npx tsx scripts/generate-results.ts <exam-id> 20
+
+# Lihat statistik database
+npx tsx scripts/db-stats.ts
+
+# Reset password user
+npx tsx scripts/reset-password.ts admin@cbt.com newpass123
+
+# Preview data test yang akan dihapus
+npx tsx scripts/cleanup.ts --test-users --dry-run
+
+# Hapus data test
+npx tsx scripts/cleanup.ts --test-users --simulation
+```
+
+### 🎯 Environment Variables untuk create-exam.ts
+
+```bash
+EXAM_TITLE="Judul Ujian"      # default: "Ujian Test [tanggal]"
+EXAM_SUBJECT="Mata Pelajaran"  # default: "Umum"
+EXAM_QUESTIONS=20              # default: 20
+EXAM_DURATION=60               # default: 60 (menit)
+EXAM_PASSING=70                # default: 70 (%)
+```
+
+Mata pelajaran yang tersedia: `Umum`, `Matematika`, `Bahasa Indonesia`, `PKn`
 
 ---
 

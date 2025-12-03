@@ -37,6 +37,10 @@ model User {
   
   // Relations
   examResults ExamResult[]
+  
+  // Indexes for performance
+  @@index([role])
+  @@index([createdAt])
 }
 
 model Exam {
@@ -56,6 +60,11 @@ model Exam {
   // Relations
   questions   Question[]
   examResults ExamResult[]
+  
+  // Indexes for performance
+  @@index([isActive])
+  @@index([startDate, endDate])
+  @@index([subject])
 }
 
 model Question {
@@ -73,6 +82,9 @@ model Question {
   // Relations
   exam        Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
   answers     Answer[]
+  
+  // Index for performance
+  @@index([examId])
 }
 
 model ExamResult {
@@ -95,6 +107,12 @@ model ExamResult {
   answers     Answer[]
   
   @@unique([userId, examId])
+  
+  // Indexes for performance
+  @@index([userId])
+  @@index([examId])
+  @@index([isCompleted])
+  @@index([startTime])
 }
 
 model Answer {
@@ -110,4 +128,8 @@ model Answer {
   question      Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   
   @@unique([examResultId, questionId])
+  
+  // Indexes for performance
+  @@index([examResultId])
+  @@index([questionId])
 }

@@ -80,6 +80,10 @@ interface ExamPerformance {
       D: string;
     };
   }[];
+  durationDistribution: {
+    range: string;
+    count: number;
+  }[];
 }
 
 interface UserPerformance {
@@ -131,6 +135,10 @@ export default function AdminLaporanPage() {
     timeTrends: TimeTrend[];
   } | null>(null);
   const [exams, setExams] = useState<{ id: string; title: string; subject: string }[]>([]);
+  
+  // Pagination for question list
+  const [currentQuestionPage, setCurrentQuestionPage] = useState<{ [examId: string]: number }>({});
+  const questionsPerPage = 10;
 
   const fetchExams = async () => {
     try {
@@ -467,6 +475,67 @@ export default function AdminLaporanPage() {
         detailWs['!freeze'] = { xSplit: 0, ySplit: 1 };
 
         XLSX.utils.book_append_sheet(wb, detailWs, 'Analisis Detail');
+
+        // Duration distribution sheet
+        if (examData[0].durationDistribution && examData[0].durationDistribution.length > 0) {
+          const durationHeaders = ['ID Ujian', 'Judul Ujian', 'Rentang Waktu', 'Jumlah Peserta'];
+          const durationData = [
+            durationHeaders,
+            ...examData.flatMap((exam) =>
+              exam.durationDistribution.map((duration) => [
+                exam.examId,
+                exam.examTitle,
+                duration.range,
+                duration.count,
+              ])
+            ),
+          ];
+
+          const durationWs = XLSX.utils.aoa_to_sheet(durationData);
+
+          // Style duration header
+          const durationRange = XLSX.utils.decode_range(durationWs['!ref'] || 'A1:D1');
+          for (let col = durationRange.s.c; col <= durationRange.e.c; col++) {
+            const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (!durationWs[cellRef]) durationWs[cellRef] = {};
+            if (!durationWs[cellRef].s) durationWs[cellRef].s = {};
+            durationWs[cellRef].s = {
+              fill: {
+                patternType: 'solid',
+                fgColor: { rgb: 'F59E0B' },
+                bgColor: { rgb: 'F59E0B' },
+              },
+              font: {
+                bold: true,
+                color: { rgb: 'FFFFFF' },
+                size: 11,
+              },
+              alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+                wrapText: false,
+              },
+              border: {
+                top: { style: 'thin', color: { rgb: '000000' } },
+                bottom: { style: 'thin', color: { rgb: '000000' } },
+                left: { style: 'thin', color: { rgb: '000000' } },
+                right: { style: 'thin', color: { rgb: '000000' } },
+              },
+            };
+          }
+
+          durationWs['!cols'] = [
+            { width: 12 }, // ID Ujian
+            { width: 30 }, // Judul Ujian
+            { width: 20 }, // Rentang Waktu
+            { width: 18 }, // Jumlah Peserta
+          ];
+
+          // Freeze header row
+          durationWs['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+          XLSX.utils.book_append_sheet(wb, durationWs, 'Distribusi Waktu');
+        }
       } else {
         // Basic exam data
         const headers = ['ID Ujian', 'Judul Ujian', 'Mata Pelajaran', 'Total Peserta', 'Rata-rata Nilai', 'Tingkat Kelulusan (%)'];
@@ -574,7 +643,7 @@ export default function AdminLaporanPage() {
       XLSX.utils.book_append_sheet(wb, ws, 'Performa Peserta');
     } else if (filename.includes('tren-waktu')) {
       const trendData = data as TimeTrend[];
-      const headers = ['Tanggal', 'Jumlah Ujian', 'Rata-rata Nilai', 'Tanggal Format'];
+      const headers = ['Tanggal', 'Ujian Selesai', 'Rata-rata Nilai', 'Tanggal Format'];
       const wsData = [headers, ...trendData.map((item) => [item.date, item.count, item.avgScore, item.formattedDate])];
 
       const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -612,7 +681,7 @@ export default function AdminLaporanPage() {
 
       ws['!cols'] = [
         { width: 18 }, // Tanggal
-        { width: 18 }, // Jumlah Ujian
+        { width: 18 }, // Ujian Selesai
         { width: 20 }, // Rata-rata Nilai
         { width: 18 }, // Tanggal Format
       ];
@@ -1084,55 +1153,47 @@ export default function AdminLaporanPage() {
                             </ResponsiveContainer>
                           </div>
 
-                          {/* Pie Chart - Answer Distribution for Most Difficult Question */}
+                          {/* Bar Chart - Duration Distribution */}
                           <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                            <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Distribusi Jawaban (Soal Tersulit)</h4>
-                            {exam.questionAnalysis.length > 0 ? (
-                              (() => {
-                                const mostDifficult = exam.questionAnalysis.reduce((prev, current) => (prev.correctPercentage < current.correctPercentage ? prev : current));
-                                const answerData = [
-                                  { option: 'A', count: mostDifficult.answerDistribution.A },
-                                  { option: 'B', count: mostDifficult.answerDistribution.B },
-                                  { option: 'C', count: mostDifficult.answerDistribution.C },
-                                  { option: 'D', count: mostDifficult.answerDistribution.D },
-                                  { option: 'Tidak Dijawab', count: mostDifficult.answerDistribution.unanswered },
-                                ].filter((item) => item.count > 0);
-
-                                return (
-                                  <>
-                                    <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
-                                      Soal #{exam.questionAnalysis.indexOf(mostDifficult) + 1} - {mostDifficult.correctPercentage}% benar
-                                    </p>
-                                    <ResponsiveContainer width="100%" height={220}>
-                                      <PieChart>
-                                        <Pie data={answerData} cx="50%" cy="50%" labelLine={true} label outerRadius={80} fill="#8884d8" dataKey="count" nameKey="option">
-                                          {answerData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.option === mostDifficult.correctAnswer ? '#10b981' : index === 4 ? '#6b7280' : '#3b82f6'} />
-                                          ))}
-                                        </Pie>
-                                        <Tooltip
-                                          contentStyle={{
-                                            backgroundColor: '#ffffff',
-                                            border: '1px solid #e5e7eb',
-                                            borderRadius: '0.5rem',
-                                            color: '#111827',
-                                            pointerEvents: 'none',
-                                            padding: '8px 12px',
-                                          }}
-                                          wrapperStyle={{ pointerEvents: 'none' }}
-                                          cursor={false}
-                                          isAnimationActive={false}
-                                          offset={10}
-                                        />
-                                        <Legend />
-                                      </PieChart>
-                                    </ResponsiveContainer>
-                                  </>
-                                );
-                              })()
+                            <h4 className="text-md font-medium text-gray-900 dark:text-white mb-3">Distribusi Waktu Pengerjaan</h4>
+                            {exam.durationDistribution && exam.durationDistribution.length > 0 ? (
+                              <>
+                                <p className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                                  Berapa lama peserta mengerjakan ujian
+                                </p>
+                                <ResponsiveContainer width="100%" height={220}>
+                                  <BarChart data={exam.durationDistribution}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis 
+                                      dataKey="range" 
+                                      angle={-45}
+                                      textAnchor="end"
+                                      height={80}
+                                      tick={{ fontSize: 11 }}
+                                    />
+                                    <YAxis />
+                                    <Tooltip
+                                      contentStyle={{
+                                        backgroundColor: '#ffffff',
+                                        border: '1px solid #e5e7eb',
+                                        borderRadius: '0.5rem',
+                                        color: '#111827',
+                                        pointerEvents: 'none',
+                                        padding: '8px 12px',
+                                      }}
+                                      wrapperStyle={{ pointerEvents: 'none' }}
+                                      cursor={false}
+                                      isAnimationActive={false}
+                                      offset={10}
+                                      formatter={(value) => [`${value} peserta`, 'Jumlah']}
+                                    />
+                                    <Bar dataKey="count" fill="#3b82f6" name="Jumlah Peserta" />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              </>
                             ) : (
                               <div className="flex items-center justify-center h-[220px] text-gray-500 dark:text-gray-400 text-sm">
-                                Tidak ada data soal
+                                Tidak ada data waktu pengerjaan
                               </div>
                             )}
                           </div>
@@ -1198,11 +1259,19 @@ export default function AdminLaporanPage() {
                           <div>
                             <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Analisis Soal & Tingkat Kesulitan</h4>
                             <div className="space-y-4">
-                              {exam.questionAnalysis.slice(0, 10).map((question, index) => (
+                              {(() => {
+                                const currentPage = currentQuestionPage[exam.examId] || 1;
+                                const startIndex = (currentPage - 1) * questionsPerPage;
+                                const endIndex = startIndex + questionsPerPage;
+                                const paginatedQuestions = exam.questionAnalysis.slice(startIndex, endIndex);
+                                
+                                return paginatedQuestions.map((question, index) => {
+                                  const questionNumber = startIndex + index + 1;
+                                  return (
                                 <div key={question.questionId} className="bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-4">
                                   {/* Question Header */}
                                   <div className="flex justify-between items-start mb-3">
-                                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white">Soal #{index + 1}</h5>
+                                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white">Soal #{questionNumber}</h5>
                                     <div className="flex gap-2">
                                       <span
                                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border
@@ -1292,13 +1361,44 @@ export default function AdminLaporanPage() {
                                     </div>
                                   </div>
                                 </div>
-                              ))}
+                              );
+                              });
+                              })()}
 
-                              {exam.questionAnalysis.length > 10 && (
-                                <div className="text-center">
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">Menampilkan 10 dari {exam.questionAnalysis.length} soal</p>
-                                </div>
-                              )}
+                              {/* Pagination Controls */}
+                              {exam.questionAnalysis.length > questionsPerPage && (() => {
+                                const currentPage = currentQuestionPage[exam.examId] || 1;
+                                const totalPages = Math.ceil(exam.questionAnalysis.length / questionsPerPage);
+                                const startIndex = (currentPage - 1) * questionsPerPage + 1;
+                                const endIndex = Math.min(currentPage * questionsPerPage, exam.questionAnalysis.length);
+
+                                return (
+                                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t dark:border-gray-700">
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                      Menampilkan {startIndex} - {endIndex} dari {exam.questionAnalysis.length} soal
+                                    </p>
+                                    <div className="flex gap-2">
+                                      <button
+                                        onClick={() => setCurrentQuestionPage(prev => ({ ...prev, [exam.examId]: currentPage - 1 }))}
+                                        disabled={currentPage === 1}
+                                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        ← Sebelumnya
+                                      </button>
+                                      <div className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg">
+                                        Hal {currentPage} dari {totalPages}
+                                      </div>
+                                      <button
+                                        onClick={() => setCurrentQuestionPage(prev => ({ ...prev, [exam.examId]: currentPage + 1 }))}
+                                        disabled={currentPage === totalPages}
+                                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                      >
+                                        Selanjutnya →
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           </div>
                         )}
@@ -1490,7 +1590,7 @@ export default function AdminLaporanPage() {
                     <div className="grid grid-cols-1 gap-6">
                       {/* Combined Chart - Exams Count and Average Score */}
                       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Trend Jumlah Ujian & Nilai Rata-rata</h4>
+                        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Trend Ujian Selesai & Nilai Rata-rata</h4>
                         <ResponsiveContainer width="100%" height={350}>
                           <LineChart data={timeTrendsData.timeTrends.filter((day) => day.count > 0)}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -1512,7 +1612,7 @@ export default function AdminLaporanPage() {
                               offset={10}
                             />
                             <Legend />
-                            <Line yAxisId="left" type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} name="Jumlah Ujian" dot={{ r: 4 }} />
+                            <Line yAxisId="left" type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} name="Ujian Selesai" dot={{ r: 4 }} />
                             <Line yAxisId="right" type="monotone" dataKey="avgScore" stroke="#10b981" strokeWidth={2} name="Rata-rata Nilai" dot={{ r: 4 }} />
                           </LineChart>
                         </ResponsiveContainer>
@@ -1561,7 +1661,7 @@ export default function AdminLaporanPage() {
                           <thead className="bg-gray-50 dark:bg-gray-700">
                             <tr>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jumlah Ujian</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ujian Selesai</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rata-rata Nilai</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                             </tr>

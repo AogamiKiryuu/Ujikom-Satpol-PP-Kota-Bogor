@@ -78,10 +78,15 @@ export async function GET(request: NextRequest) {
         },
       }),
 
-      // Exams by subject for pie chart
-      prisma.exam.groupBy({
-        by: ['subject'],
-        _count: { id: true },
+      // Get all exams with their exam results count
+      prisma.exam.findMany({
+        select: {
+          subject: true,
+          examResults: {
+            where: { isCompleted: true },
+            select: { id: true },
+          },
+        },
       }),
     ]);
 
@@ -110,11 +115,22 @@ export async function GET(request: NextRequest) {
       { status: 'Selesai', count: totalExams - activeExams - scheduledExams, color: '#6b7280' },
     ].filter((item) => item.count > 0); // Only show statuses with data
 
-    // Process exams by subject
-    const examsBySubjectData = examsBySubject.map((item) => ({
-      subject: item.subject,
-      count: item._count.id,
-    }));
+    // Process exams by subject - count participants per subject
+    const subjectMap = new Map<string, number>();
+    
+    examsBySubject.forEach((exam) => {
+      const participantCount = exam.examResults.length;
+      const currentCount = subjectMap.get(exam.subject) || 0;
+      subjectMap.set(exam.subject, currentCount + participantCount);
+    });
+    
+    const examsBySubjectData = Array.from(subjectMap.entries())
+      .map(([subject, count]) => ({
+        subject,
+        count,
+      }))
+      .filter((item) => item.count > 0) // Only show subjects with participants
+      .sort((a, b) => b.count - a.count); // Sort by participant count descending
 
     const stats = {
       totalPeserta,
